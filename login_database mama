@@ -1,0 +1,943 @@
+import streamlit as st
+import streamlit.components.v1 as components
+import base64
+import os
+import re
+from supabase import create_client, Client
+
+
+# ==========================================
+# PAGE SETTINGS
+# ==========================================
+
+st.set_page_config(
+    page_title="Computer Monitoring and Management System",
+    layout="centered"
+)
+
+
+# ==========================================
+# SUPABASE CONNECTION
+# ==========================================
+
+supabase_url = "https://tulzhwumlzaidknodnob.supabase.co"
+supabase_key = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR1bHpod3VtbHphaWRrbm9kbm9iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk3MzQ3ODIsImV4cCI6MjEwNTMxMDc4Mn0.RSvksN-9ZpPGO4R42Snr-5xkChJZA_v-YQjezXLegOQ"
+
+supabase: Client = create_client(
+    supabase_url,
+    supabase_key
+)
+
+
+# ==========================================
+# MESSAGE FUNCTIONS
+# ==========================================
+
+def show_success(message):
+    st.markdown(
+        f"""
+        <div style="
+            background-color:#d4edda;
+            color:#155724;
+            padding:12px 16px;
+            border-radius:6px;
+            border:1px solid #28a745;
+            margin-bottom:10px;
+            font-size:14px;
+            font-weight:500;
+        ">
+            ✅ {message}
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+
+def show_error(message):
+    st.markdown(
+        f"""
+        <div style="
+            background-color:#f8d7da;
+            color:#721c24;
+            padding:12px 16px;
+            border-radius:6px;
+            border:1px solid #dc3545;
+            margin-bottom:10px;
+            font-size:14px;
+            font-weight:500;
+        ">
+            ❌ {message}
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+
+def show_warning(message):
+    st.markdown(
+        f"""
+        <div style="
+            background-color:#fff3cd;
+            color:#7a5b00;
+            padding:12px 16px;
+            border-radius:6px;
+            border:1px solid #ffc107;
+            margin-bottom:10px;
+            font-size:14px;
+            font-weight:500;
+        ">
+            ⚠️ {message}
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+
+def show_info(message):
+    st.markdown(
+        f"""
+        <div style="
+            background-color:#d1ecf1;
+            color:#0c5460;
+            padding:12px 16px;
+            border-radius:6px;
+            border:1px solid #17a2b8;
+            margin-bottom:10px;
+            font-size:14px;
+            font-weight:500;
+        ">
+            ℹ️ {message}
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+
+# ==========================================
+# DISABLE BROWSER AUTOFILL
+# ==========================================
+
+components.html(
+    """
+    <script>
+    function disableAutofill() {
+        try {
+            const inputs = window.parent.document.querySelectorAll('input');
+
+            inputs.forEach((input) => {
+                input.setAttribute('autocomplete', 'off');
+                input.setAttribute('autocorrect', 'off');
+                input.setAttribute('autocapitalize', 'off');
+                input.setAttribute('spellcheck', 'false');
+            });
+        } catch (e) {}
+    }
+
+    disableAutofill();
+    setInterval(disableAutofill, 500);
+    </script>
+    """,
+    height=0,
+)
+
+
+# ==========================================
+# BACKGROUND IMAGE
+# ==========================================
+
+def set_background(image_file):
+
+    with open(image_file, "rb") as file:
+        encoded_image = base64.b64encode(
+            file.read()
+        ).decode()
+
+    st.markdown(
+        f"""
+        <style>
+
+        /* ==========================================
+           BACKGROUND IMAGE
+        ========================================== */
+
+        .stApp {{
+            background-image:
+                linear-gradient(
+                    rgba(0, 0, 0, 0.35),
+                    rgba(0, 0, 0, 0.35)
+                ),
+                url("data:image/jpeg;base64,{encoded_image}");
+
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }}
+
+
+        /* ==========================================
+           PAGE CONTAINER
+        ========================================== */
+
+        .block-container {{
+            padding-top: 4rem;
+        }}
+
+
+        /* ==========================================
+           LOGIN / SIGNUP CARD
+        ========================================== */
+
+        .st-key-login_card {{
+            background-color: white;
+            padding: 40px 42px 45px 42px;
+            border-radius: 20px;
+            width: 420px;
+            margin: 40px auto;
+            box-shadow: 0px 8px 30px rgba(0, 0, 0, 0.30);
+        }}
+
+
+        /* ==========================================
+           INPUT LABEL
+        ========================================== */
+
+        .st-key-login_card label {{
+            color: #333333 !important;
+            font-size: 13px !important;
+            font-weight: 600 !important;
+        }}
+
+
+        /* ==========================================
+           INPUT BOX
+        ========================================== */
+
+        .st-key-login_card input {{
+            height: 45px !important;
+            background-color: white !important;
+            border: 1px solid #cccccc !important;
+            border-radius: 6px !important;
+            color: #333333 !important;
+            padding-left: 12px !important;
+        }}
+
+
+        /* ==========================================
+           INPUT FOCUS
+        ========================================== */
+
+        .st-key-login_card input:focus {{
+            border-color: #244966 !important;
+            box-shadow: 0 0 0 1px #244966 !important;
+        }}
+
+
+        /* ==========================================
+           BUTTON
+        ========================================== */
+
+        .st-key-login_card .stButton > button {{
+            width: 100% !important;
+            height: 45px !important;
+            background-color: #244966 !important;
+            color: white !important;
+            border: none !important;
+            border-radius: 8px !important;
+            font-size: 14px !important;
+            font-weight: 600 !important;
+            margin-top: 12px !important;
+        }}
+
+
+        .st-key-login_card .stButton > button:hover {{
+            background-color: #18384f !important;
+        }}
+
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+
+
+# ==========================================
+# GET BACKGROUND IMAGE
+# ==========================================
+
+image_path = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)),
+    "isu.jpg"
+)
+
+if os.path.exists(image_path):
+    set_background(image_path)
+else:
+    st.warning(
+        "Background image 'isu.jpg' was not found."
+    )
+
+
+# ==========================================
+# PAGE STATE
+# ==========================================
+
+if "page" not in st.session_state:
+    st.session_state.page = "login"
+
+
+# ============================================================
+# LOGIN PAGE
+# ============================================================
+
+if st.session_state.page == "login":
+
+    with st.container(key="login_card"):
+
+        # ==========================================
+        # TITLE
+        # ==========================================
+
+        st.markdown(
+            """
+            <h3 style="
+                text-align:center;
+                color:#243447;
+                margin-bottom:1px;
+                font-size:22px;
+            ">
+                College of Computing Studies,
+                Information and Communication Technology
+            </h3>
+
+            <p style="
+                text-align:center;
+                color:#777777;
+                font-size:17px;
+                margin-bottom:10px;
+                margin-top:1px;
+            ">
+                Computer Monitoring and Management System
+            </p>
+            """,
+            unsafe_allow_html=True
+        )
+
+
+        # ==========================================
+        # EMAIL
+        # ==========================================
+
+        login_email = st.text_input(
+            "Email Address",
+            placeholder="you@example.com",
+            key="login_email"
+        )
+
+
+        # ==========================================
+        # PASSWORD
+        # ==========================================
+
+        login_password = st.text_input(
+            "Password",
+            type="password",
+            placeholder="Enter your password",
+            key="login_password"
+        )
+
+
+        # ==========================================
+        # REMEMBER ME / FORGOT PASSWORD
+        # ==========================================
+
+        col1, col2 = st.columns([1, 1])
+
+        with col1:
+
+            remember_me = st.checkbox(
+                "Remember Me",
+                key="remember_me"
+            )
+
+        with col2:
+
+            st.markdown(
+                """
+                <div style="
+                    text-align:right;
+                    margin-top:5px;
+                ">
+                    <span style="color:#3974a8;">
+                        Forgot password?
+                    </span>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
+
+        # ==========================================
+        # SIGN IN BUTTON
+        # ==========================================
+
+        login = st.button(
+            "Sign In",
+            width=350,
+            key="login_button"
+        )
+
+
+        # ==========================================
+        # LOGIN PROCESS
+        # ==========================================
+
+        if login:
+
+            login_email_value = login_email.strip()
+
+            # ==========================================
+            # CHECK EMPTY FIELDS
+            # ==========================================
+
+            if not login_email_value:
+
+                show_warning(
+                    "Please enter your email address."
+                )
+
+            elif not login_password:
+
+                show_warning(
+                    "Please enter your password."
+                )
+
+
+            # ==========================================
+            # CHECK EMAIL
+            # ==========================================
+
+            elif not re.match(
+                r"^[^@\s]+@[^@\s]+\.[^@\s]+$",
+                login_email_value
+            ):
+
+                show_warning(
+                    "Invalid email address."
+                )
+
+
+            # ==========================================
+            # SUPABASE LOGIN
+            # ==========================================
+
+            else:
+
+                try:
+
+                    response = supabase.auth.sign_in_with_password(
+                        {
+                            "email": login_email_value,
+                            "password": login_password
+                        }
+                    )
+
+
+                    # ==========================================
+                    # CHECK AUTH USER
+                    # ==========================================
+
+                    if response.user:
+
+                        user_id = response.user.id
+
+
+                        # ==========================================
+                        # GET USER PROFILE
+                        # ==========================================
+
+                        user_data = (
+                            supabase
+                            .table("Users")
+                            .select("*")
+                            .eq("AuthId", user_id)
+                            .execute()
+                        )
+
+
+                        # ==========================================
+                        # USER PROFILE FOUND
+                        # ==========================================
+
+                        if user_data.data:
+
+                            user = user_data.data[0]
+
+                            first_name = user.get(
+                                "FirstName",
+                                ""
+                            )
+
+                            last_name = user.get(
+                                "LastName",
+                                ""
+                            )
+
+                            role = user.get(
+                                "Role",
+                                "Student"
+                            )
+
+
+                            # ==========================================
+                            # SUCCESS
+                            # ==========================================
+
+                            show_success(
+                                "Login successful!"
+                            )
+
+                            st.write(
+                                f"Welcome, {first_name} {last_name}!"
+                            )
+
+                            st.write(
+                                f"Role: {role}"
+                            )
+
+
+                            if remember_me:
+
+                                show_info(
+                                    "Your login will be remembered."
+                                )
+
+
+                        # ==========================================
+                        # PROFILE NOT FOUND
+                        # ==========================================
+
+                        else:
+
+                            show_warning(
+                                "Authentication successful, "
+                                "but your user profile was not found."
+                            )
+
+                            show_info(
+                                "Please check your Users table "
+                                "and Supabase trigger."
+                            )
+
+
+                    # ==========================================
+                    # AUTH USER NOT FOUND
+                    # ==========================================
+
+                    else:
+
+                        show_error(
+                            "Login failed. User was not found."
+                        )
+
+
+                except Exception as e:
+
+                    show_error(
+                        "Login failed."
+                    )
+
+                    st.code(
+                        str(e)
+                    )
+
+
+        # ==========================================
+        # CREATE ACCOUNT TEXT
+        # ==========================================
+
+        st.markdown(
+            """
+            <p style="
+                text-align:center;
+                color:#777;
+                margin-top:20px;
+            ">
+                Don't have an account?
+            </p>
+            """,
+            unsafe_allow_html=True
+        )
+
+
+        # ==========================================
+        # CREATE ACCOUNT BUTTON
+        # ==========================================
+
+        signup_button = st.button(
+            "Create an Account",
+            width=350,
+            key="create_account_button"
+        )
+
+
+        if signup_button:
+
+            st.session_state.page = "signup"
+
+            st.rerun()
+
+
+# ============================================================
+# SIGN UP PAGE
+# ============================================================
+
+elif st.session_state.page == "signup":
+
+    with st.container(key="login_card"):
+
+        # ==========================================
+        # TITLE
+        # ==========================================
+
+        st.markdown(
+            """
+            <h3 style="
+                text-align:center;
+                color:#243447;
+                margin-bottom:5px;
+                font-size:24px;
+            ">
+                Create Account
+            </h3>
+
+            <p style="
+                text-align:center;
+                color:#777777;
+                font-size:14px;
+                margin-bottom:25px;
+            ">
+                Register your account
+            </p>
+            """,
+            unsafe_allow_html=True
+        )
+
+
+        # ==========================================
+        # FIRST NAME
+        # ==========================================
+
+        first_name = st.text_input(
+            "First Name",
+            placeholder="Enter your first name",
+            key="signup_first_name"
+        )
+
+
+        # ==========================================
+        # LAST NAME
+        # ==========================================
+
+        last_name = st.text_input(
+            "Last Name",
+            placeholder="Enter your last name",
+            key="signup_last_name"
+        )
+
+
+        # ==========================================
+        # EMAIL
+        # ==========================================
+
+        signup_email = st.text_input(
+            "Email Address",
+            placeholder="you@example.com",
+            key="signup_email"
+        )
+
+
+        # ==========================================
+        # PASSWORD
+        # ==========================================
+
+        signup_password = st.text_input(
+            "Password",
+            type="password",
+            placeholder="Create a password",
+            key="signup_password"
+        )
+
+
+        # ==========================================
+        # CONFIRM PASSWORD
+        # ==========================================
+
+        confirm_password = st.text_input(
+            "Confirm Password",
+            type="password",
+            placeholder="Confirm your password",
+            key="signup_confirm_password"
+        )
+
+
+        # ==========================================
+        # ROLE
+        # ==========================================
+
+        role = st.selectbox(
+            "Role",
+            [
+                "Student",
+                "Teacher",
+                "Admin"
+            ],
+            key="signup_role"
+        )
+
+
+        # ==========================================
+        # SIGN UP BUTTON
+        # ==========================================
+
+        signup = st.button(
+            "Sign Up",
+            width=350,
+            key="signup_button"
+        )
+
+
+        # ==========================================
+        # SIGN UP PROCESS
+        # ==========================================
+
+        if signup:
+
+            # ==========================================
+            # GET VALUES
+            # ==========================================
+
+            fname = first_name.strip()
+
+            lname = last_name.strip()
+
+            signup_email_value = signup_email.strip()
+
+            password_value = signup_password
+
+            confirm_value = confirm_password
+
+
+            # ==========================================
+            # CHECK FIRST NAME
+            # ==========================================
+
+            if not fname:
+
+                show_warning(
+                    "Please enter your first name."
+                )
+
+
+            # ==========================================
+            # CHECK LAST NAME
+            # ==========================================
+
+            elif not lname:
+
+                show_warning(
+                    "Please enter your last name."
+                )
+
+
+            # ==========================================
+            # CHECK EMAIL
+            # ==========================================
+
+            elif not signup_email_value:
+
+                show_warning(
+                    "Please enter your email address."
+                )
+
+
+            # ==========================================
+            # CHECK PASSWORD
+            # ==========================================
+
+            elif not password_value:
+
+                show_warning(
+                    "Please enter your password."
+                )
+
+
+            # ==========================================
+            # CHECK CONFIRM PASSWORD
+            # ==========================================
+
+            elif not confirm_value:
+
+                show_warning(
+                    "Please confirm your password."
+                )
+
+
+            # ==========================================
+            # VALIDATE EMAIL
+            # ==========================================
+
+            elif not re.match(
+               r"^[^@\s]+@[^@\s]+\.[^@\s]+$",
+                signup_email_value
+            ):
+
+                show_warning(
+                    "Invalid email address."
+                )
+
+
+            # ==========================================
+            # CHECK PASSWORD MATCH
+            # ==========================================
+
+            elif password_value != confirm_value:
+
+                show_warning(
+                    "Passwords do not match."
+                )
+
+
+            # ==========================================
+            # CHECK PASSWORD LENGTH
+            # ==========================================
+
+            elif len(password_value) < 6:
+
+                show_warning(
+                    "Password must be at least 6 characters."
+                )
+
+
+            # ==========================================
+            # CREATE ACCOUNT
+            # ==========================================
+
+            else:
+
+                try:
+
+                    # ==========================================
+                    # SUPABASE AUTH SIGN UP
+                    # ==========================================
+
+                    response = supabase.auth.sign_up(
+                        {
+                            "email": signup_email_value,
+                            "password": password_value,
+
+                            "options": {
+                                "data": {
+                                    "first_name": fname,
+                                    "last_name": lname,
+                                    "role": role
+                                }
+                            }
+                        }
+                    )
+
+
+                    # ==========================================
+                    # CHECK RESPONSE
+                    # ==========================================
+
+                    if response.user:
+
+                        show_success(
+                            "Account created successfully!"
+                        )
+
+
+                        # ==========================================
+                        # EMAIL CONFIRMATION CHECK
+                        # ==========================================
+
+                        if response.session is None:
+
+                            show_info(
+                                "Your account was created. "
+                                "Please check your email and confirm "
+                                "your account before signing in."
+                            )
+
+                        else:
+
+                            show_info(
+                                "Your account has been registered. "
+                                "You can now sign in."
+                            )
+
+
+                        # ==========================================
+                        # RETURN TO LOGIN
+                        # ==========================================
+
+                        st.session_state.page = "login"
+
+                        st.rerun()
+
+
+                    else:
+
+                        show_error(
+                            "Account was not created."
+                        )
+
+
+                except Exception as e:
+
+                    # ==========================================
+                    # SHOW ACTUAL ERROR
+                    # ==========================================
+
+                    show_error(
+                        "Sign up failed."
+                    )
+
+                    st.code(
+                        str(e)
+                    )
+
+
+        # ==========================================
+        # BACK TO LOGIN
+        # ==========================================
+
+        st.markdown(
+            """
+            <p style="
+                text-align:center;
+                color:#777;
+                margin-top:20px;
+            ">
+                Already have an account?
+            </p>
+            """,
+            unsafe_allow_html=True
+        )
+
+
+        # ==========================================
+        # BACK BUTTON
+        # ==========================================
+
+        back_button = st.button(
+            "Back to Login",
+            width=350,
+            key="back_to_login_button"
+        )
+
+
+        if back_button:
+
+            st.session_state.page = "login"
+
+            st.rerun()
