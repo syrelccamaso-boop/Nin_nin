@@ -1,27 +1,28 @@
+
 """
 Centrum Laboratory - authentication screens (Log In, Sign Up, Reset password).
-
+ 
 Sign-up flow:  form  ->  "Check your email" (6-digit code)  ->  "Request sent" / "Account created"
-
+ 
 Run on its own to preview:      streamlit run login.py
 Use it in the main app (top of app.py, before anything else is drawn):
-
+ 
     import login
     if not login.require_login(logo="path/to/your/logo.png"):   # same logo as app.py
         st.stop()
     # ...the rest of your dashboard...
-
+ 
 To log out (e.g. from the Settings page):   login.logout()
-
+ 
 Admin helpers (for your admin page):
     login.list_pending_users()                 -> list of dicts waiting for approval
     login.set_user_status(user_id, "active")   -> approve  ("rejected" to decline)
-
+ 
 Needs Streamlit 1.39 or newer (container keys are used for styling).
 """
-
+ 
 from __future__ import annotations
-
+ 
 import base64
 import hashlib
 import hmac
@@ -29,44 +30,36 @@ import html
 import mimetypes
 import re
 import secrets
-import sqlite3
-from contextlib import contextmanager
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-
+ 
 import streamlit as st
-
+ 
 # ---------------------------------------------------------------------------
 # Config - change these to match your project
 # ---------------------------------------------------------------------------
 BASE_DIR = Path(__file__).resolve().parent
-
+ 
 # Your campus background photo. Only the file name matters: if it isn't at this
 # exact path, the page also looks in the project root, ./assets and the folders
 # one or two levels below the project root (e.g. static/, images/).
 BG_IMAGE = BASE_DIR / "isu.jpg"
-
+ 
 # How much to blur the background photo, in pixels. 0 = sharp, 6-10 = soft, 15+ = very blurry.
 BG_BLUR_PX = 8
-
+ 
 # Optional logo. If missing, a simple built-in wordmark is drawn instead.
 LOGO_IMAGE = BASE_DIR / "assets" / "logo.png"
-
-# NOTE: new file name on purpose. The sign-up form changed (no more ID number,
-# added department / contact number / status), so the old centrum_users.db
-# has a different table layout. Delete the old file if you don't need it.
-DB_PATH = BASE_DIR / "centrum_users_v2.db"
-
+ 
 MIN_PASSWORD_LENGTH = 8
-RESET_TOKEN_TTL = timedelta(hours=1)
-
+ 
 APP_SUBTITLE = "Computer Monitoring Management System"
 ROLES = ("Teacher", "Technician")
 DEPARTMENTS = ("CCSICT", "CAS", "CED", "CBAPA", "CON", "CA", "COE")
-
+ 
 # Roles whose new accounts must be confirmed by an admin before they can log in.
 APPROVAL_ROLES = ("Technician",)
-
+ 
 # Email verification code
 CODE_TTL = timedelta(minutes=10)
 CODE_MAX_ATTEMPTS = 5
@@ -74,168 +67,125 @@ CODE_MAX_ATTEMPTS = 5
 # checks it. Set to False, and fill in send_verification_email(), to enforce the
 # real 6-digit code.
 ACCEPT_ANY_CODE = True
-
+ 
 _IMAGE_EXTS = {".jpg", ".jpeg", ".png", ".webp"}
 _EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 _PHONE_RE = re.compile(r"^(?:\+63|0)9\d{9}$")  # 09XXXXXXXXX or +639XXXXXXXXX
-
-
+ 
+ 
 # ---------------------------------------------------------------------------
-# Backend (SQLite). Swap these functions if you use MySQL/another store.
+# Backend hooks - TODO: connect these functions to your backend / API.
+#
+# Until then, accounts are kept in memory (shared by everyone using the app, and
+# cleared when the server restarts) so the screens can be tested end to end.
 # ---------------------------------------------------------------------------
-@contextmanager
-def _db():
-    con = sqlite3.connect(DB_PATH)
-    con.row_factory = sqlite3.Row
-    try:
-        con.executescript(
-            """
-            CREATE TABLE IF NOT EXISTS users (
-                id              INTEGER PRIMARY KEY AUTOINCREMENT,
-                role            TEXT NOT NULL CHECK (role IN ('Teacher', 'Technician')),
-                first_name      TEXT NOT NULL,
-                last_name       TEXT NOT NULL,
-                department      TEXT NOT NULL,
-                email           TEXT NOT NULL UNIQUE COLLATE NOCASE,
-                contact_number  TEXT NOT NULL DEFAULT '',
-                pw_salt         TEXT NOT NULL,
-                pw_hash         TEXT NOT NULL,
-                status          TEXT NOT NULL DEFAULT 'active'
-                                CHECK (status IN ('active', 'pending', 'rejected')),
-                created_at      TEXT NOT NULL
-            );
-            CREATE TABLE IF NOT EXISTS password_resets (
-                token_hash  TEXT PRIMARY KEY,
-                user_id     INTEGER NOT NULL REFERENCES users(id),
-                expires_at  TEXT NOT NULL
-            );
-            """
-        )
-        yield con
-        con.commit()
-    finally:
-        con.close()
-
-
+@st.cache_resource
+def _store() -> dict:
+    return {"users": {}, "next_id": 1}
+ 
+ 
 def _hash_password(password: str, salt: bytes | None = None) -> tuple[str, str]:
     salt = salt or secrets.token_bytes(16)
     digest = hashlib.pbkdf2_hmac("sha256", password.encode(), salt, 200_000)
     return salt.hex(), digest.hex()
-
-
-def _user_dict(row: sqlite3.Row) -> dict:
-    return {
-        "id": row["id"],
-        "role": row["role"],
-        "first_name": row["first_name"],
-        "last_name": row["last_name"],
-        "department": row["department"],
-        "email": row["email"],
-        "contact_number": row["contact_number"],
-        "status": row["status"],
-    }
-
-
+ 
+ 
+def _user_dict(user: dict) -> dict:
+    """The user without the password fields."""
+    return {k: v for k, v in user.items() if k not in ("pw_salt", "pw_hash")}
+ 
+ 
 def authenticate(email: str, password: str) -> dict | None:
     """Return the user dict if the credentials are right, otherwise None."""
-    with _db() as con:
-        row = con.execute("SELECT * FROM users WHERE email = ?", (email,)).fetchone()
-    if row is None:
+    user = _store()["users"].get(email.lower())
+    if user is None:
         _hash_password(password)  # keep timing similar for unknown emails
         return None
-    _, digest = _hash_password(password, bytes.fromhex(row["pw_salt"]))
-    if not hmac.compare_digest(digest, row["pw_hash"]):
+    _, digest = _hash_password(password, bytes.fromhex(user["pw_salt"]))
+    if not hmac.compare_digest(digest, user["pw_hash"]):
         return None
-    return _user_dict(row)
-
-
+    return _user_dict(user)
+ 
+ 
 def email_taken(email: str) -> bool:
-    with _db() as con:
-        return con.execute("SELECT 1 FROM users WHERE email = ?", (email,)).fetchone() is not None
-
-
+    return email.lower() in _store()["users"]
+ 
+ 
 def create_user(role, first_name, last_name, department, email, password, contact_number="") -> str | None:
     """Create an account. Returns an error message, or None on success.
-
+ 
     Roles in APPROVAL_ROLES start as 'pending' until an admin approves them.
     """
-    salt, digest = _hash_password(password)
-    status = "pending" if role in APPROVAL_ROLES else "active"
-    try:
-        with _db() as con:
-            con.execute(
-                "INSERT INTO users (role, first_name, last_name, department, email,"
-                " contact_number, pw_salt, pw_hash, status, created_at)"
-                " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                (role, first_name, last_name, department, email, contact_number,
-                 salt, digest, status, datetime.now(timezone.utc).isoformat()),
-            )
-    except sqlite3.IntegrityError:
+    store = _store()
+    if email.lower() in store["users"]:
         return "An account with this email already exists."
+    salt, digest = _hash_password(password)
+    store["users"][email.lower()] = {
+        "id": store["next_id"],
+        "role": role,
+        "first_name": first_name,
+        "last_name": last_name,
+        "department": department,
+        "email": email,
+        "contact_number": contact_number,
+        "status": "pending" if role in APPROVAL_ROLES else "active",
+        "pw_salt": salt,
+        "pw_hash": digest,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    }
+    store["next_id"] += 1
     return None
-
-
+ 
+ 
 def list_pending_users() -> list[dict]:
     """Accounts waiting for admin approval (use this on your admin page)."""
-    with _db() as con:
-        rows = con.execute(
-            "SELECT * FROM users WHERE status = 'pending' ORDER BY created_at"
-        ).fetchall()
-    return [_user_dict(r) for r in rows]
-
-
+    return [_user_dict(u) for u in _store()["users"].values() if u["status"] == "pending"]
+ 
+ 
 def set_user_status(user_id: int, status: str) -> None:
     """Approve ('active') or decline ('rejected') an account."""
     if status not in ("active", "pending", "rejected"):
         raise ValueError(f"Unknown status: {status}")
-    with _db() as con:
-        con.execute("UPDATE users SET status = ? WHERE id = ?", (status, user_id))
-
-
+    for user in _store()["users"].values():
+        if user["id"] == user_id:
+            user["status"] = status
+ 
+ 
 def send_verification_email(email: str, code: str) -> None:
     """TODO: send a real email (SMTP, SendGrid, ...) containing the 6-digit `code`.
-
+ 
     For now the code is printed to the server console so you can test the flow.
     """
     print(f"[centrum] verification code for {email}: {code}")
-
-
+ 
+ 
 def send_reset_email(email: str, token: str) -> None:
     """TODO: send a real email (SMTP, SendGrid, ...) containing a link with `token`.
-
+ 
     For now the token is printed to the server console so you can test the flow.
     """
     print(f"[centrum] password reset token for {email}: {token}")
-
-
+ 
+ 
 def request_password_reset(email: str) -> None:
-    """Create a one-time reset token if the email is registered (silent otherwise)."""
-    with _db() as con:
-        row = con.execute("SELECT id FROM users WHERE email = ?", (email,)).fetchone()
-        if row is None:
-            return
-        token = secrets.token_urlsafe(32)
-        con.execute("DELETE FROM password_resets WHERE user_id = ?", (row["id"],))
-        con.execute(
-            "INSERT INTO password_resets (token_hash, user_id, expires_at) VALUES (?, ?, ?)",
-            (
-                hashlib.sha256(token.encode()).hexdigest(),
-                row["id"],
-                (datetime.now(timezone.utc) + RESET_TOKEN_TTL).isoformat(),
-            ),
-        )
-    send_reset_email(email, token)
-
-
+    """Start a password reset if the email is registered (silent otherwise).
+ 
+    TODO: have the backend create and store a one-time token that expires, then email
+    the link. This placeholder only generates a token and hands it to send_reset_email().
+    """
+    if email_taken(email):
+        send_reset_email(email, secrets.token_urlsafe(32))
+ 
+ 
 # ---------------------------------------------------------------------------
 # Session state + callbacks
 # ---------------------------------------------------------------------------
 ss = st.session_state
-
+ 
 _SIGNUP_FIELDS = ("su_first", "su_last", "su_dept", "su_email", "su_contact",
                   "su_password", "su_confirm", "su_code")
-
-
+ 
+ 
 def _init_state() -> None:
     ss.setdefault("authenticated", False)
     ss.setdefault("auth_user", None)
@@ -249,12 +199,12 @@ def _init_state() -> None:
     ss.setdefault("signup_code_expires", None)
     ss.setdefault("signup_attempts", 0)
     ss.setdefault("signup_done", None)
-
-
+ 
+ 
 def _notify(kind: str, message: str) -> None:
     ss.auth_notice = (kind, message)
-
-
+ 
+ 
 def _reset_signup() -> None:
     ss.signup_role = None
     ss.signup_step = "form"
@@ -265,18 +215,18 @@ def _reset_signup() -> None:
     ss.signup_done = None
     for key in _SIGNUP_FIELDS:
         ss.pop(key, None)
-
-
+ 
+ 
 def _go(view: str) -> None:
     ss.auth_view = view
     ss.auth_notice = None
     _reset_signup()
-
-
+ 
+ 
 def _set_role(role: str) -> None:
     ss.signup_role = role
-
-
+ 
+ 
 def _do_login() -> None:
     ss.auth_notice = None
     email = (ss.get("login_email") or "").strip()
@@ -294,8 +244,8 @@ def _do_login() -> None:
     ss.auth_user = user
     ss.auth_remember = bool(ss.get("login_remember"))
     ss.login_password = ""
-
-
+ 
+ 
 # --- sign-up: step 1 (details) ------------------------------------------------
 def _issue_code() -> None:
     """Make a fresh 6-digit code for the email in signup_data and 'send' it."""
@@ -304,8 +254,8 @@ def _issue_code() -> None:
     ss.signup_code_expires = datetime.now(timezone.utc) + CODE_TTL
     ss.signup_attempts = 0
     send_verification_email(ss.signup_data["email"], code)
-
-
+ 
+ 
 def _do_signup() -> None:
     """'Continue' button: validate the form, then move on to the email code."""
     ss.auth_notice = None
@@ -319,7 +269,7 @@ def _do_signup() -> None:
         "confirm": ss.get("su_confirm") or "",
     }
     role = ss.signup_role
-
+ 
     if not role:
         return _notify("err", "Pick your role first: Teacher or Technician.")
     if not (data["first"] and data["last"] and data["dept"] and data["email"]
@@ -338,12 +288,12 @@ def _do_signup() -> None:
         return _notify("err", "The two passwords don't match.")
     if email_taken(data["email"]):
         return _notify("err", "An account with this email already exists.")
-
+ 
     ss.signup_data = data
     _issue_code()
     ss.signup_step = "verify"
-
-
+ 
+ 
 # --- sign-up: step 2 (email code) -----------------------------------------------
 def _check_code(entered: str) -> str | None:
     """Real code check (used when ACCEPT_ANY_CODE is False). Returns an error or None."""
@@ -360,14 +310,14 @@ def _check_code(entered: str) -> str | None:
             return "Too many wrong tries. Tap Resend code to get a new one."
         return "That code isn't right. Check it and try again."
     return None
-
-
+ 
+ 
 def _do_verify() -> None:
     ss.auth_notice = None
     data = ss.get("signup_data")
     if not data:
         return _go("signup")
-
+ 
     entered = (ss.get("su_code") or "").strip()
     if not entered:
         return _notify("err", "Enter the verification code.")
@@ -375,7 +325,7 @@ def _do_verify() -> None:
         error = _check_code(entered)
         if error:
             return _notify("err", error)
-
+ 
     role = ss.signup_role
     error = create_user(role, data["first"], data["last"], data["dept"],
                         data["email"], data["password"], data["contact"])
@@ -383,7 +333,7 @@ def _do_verify() -> None:
         ss.signup_step = "form"
         _restore_form()
         return _notify("err", error)
-
+ 
     ss.signup_done = {
         "first": data["first"],
         "role": role,
@@ -392,8 +342,8 @@ def _do_verify() -> None:
     ss.signup_data = None
     ss.signup_code = None
     ss.signup_step = "done"
-
-
+ 
+ 
 def _restore_form() -> None:
     """Put the typed details back in the form (widgets forget their values when hidden)."""
     d = ss.get("signup_data") or {}
@@ -404,22 +354,22 @@ def _restore_form() -> None:
     ss.su_contact = d.get("contact", "")
     ss.su_password = d.get("password", "")
     ss.su_confirm = d.get("confirm", "")
-
-
+ 
+ 
 def _edit_details() -> None:
     _restore_form()
     ss.auth_notice = None
     ss.signup_step = "form"
-
-
+ 
+ 
 def _resend_code() -> None:
     if not ss.get("signup_data"):
         return _go("signup")
     _issue_code()
     ss.su_code = ""
     _notify("ok", "We sent you a new code.")
-
-
+ 
+ 
 def _do_reset() -> None:
     ss.auth_notice = None
     email = (ss.get("reset_email") or "").strip()
@@ -429,8 +379,8 @@ def _do_reset() -> None:
         return _notify("err", "Enter a valid email address.")
     request_password_reset(email)
     _notify("ok", "If that email is registered, a reset link is on its way.")
-
-
+ 
+ 
 def logout() -> None:
     """Sign the user out and show the login screen again."""
     ss.authenticated = False
@@ -438,8 +388,8 @@ def logout() -> None:
     ss.auth_view = "login"
     ss.auth_notice = None
     st.rerun()
-
-
+ 
+ 
 # ---------------------------------------------------------------------------
 # Assets
 # ---------------------------------------------------------------------------
@@ -447,8 +397,8 @@ def logout() -> None:
 def _file_data_uri(path: str, mtime: float) -> str:
     mime = mimetypes.guess_type(path)[0] or "image/jpeg"
     return f"data:{mime};base64," + base64.b64encode(Path(path).read_bytes()).decode()
-
-
+ 
+ 
 def _find_image(preferred: Path, hints: tuple[str, ...]) -> Path | None:
     if preferred.is_file():
         return preferred
@@ -464,12 +414,12 @@ def _find_image(preferred: Path, hints: tuple[str, ...]) -> Path | None:
             if f.suffix.lower() in _IMAGE_EXTS and any(h in f.stem.lower() for h in hints):
                 return f
     return None
-
-
+ 
+ 
 def _image_uri(path: Path | None) -> str | None:
     return _file_data_uri(str(path), path.stat().st_mtime) if path else None
-
-
+ 
+ 
 _FALLBACK_LOGO_SVG = (
     '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 190 54">'
     '<path d="M38 10 A19 19 0 1 0 38 40" stroke="#1d4ed8" stroke-width="9" '
@@ -480,8 +430,8 @@ _FALLBACK_LOGO_SVG = (
     'font-size="8" font-weight="700" letter-spacing="1.2" fill="#14213d">LABORATORY</text>'
     "</svg>"
 )
-
-
+ 
+ 
 def _logo_uri(logo: str | Path | None = None) -> str:
     """Logo passed in by the app, else the shared logo.py (same as app.py), else LOGO_IMAGE, else the wordmark."""
     if logo:
@@ -498,15 +448,15 @@ def _logo_uri(logo: str | Path | None = None) -> str:
     if uri:
         return uri
     return "data:image/svg+xml;base64," + base64.b64encode(_FALLBACK_LOGO_SVG.encode()).decode()
-
-
+ 
+ 
 # ---------------------------------------------------------------------------
 # Styling
 # ---------------------------------------------------------------------------
 _CSS = """
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap');
-
+ 
 /* --- page chrome & background ------------------------------------------ */
 [data-testid="stHeader"], [data-testid="stToolbar"], [data-testid="stDecoration"],
 [data-testid="stSidebar"], [data-testid="stSidebarCollapsedControl"],
@@ -519,11 +469,11 @@ _CSS = """
   background: __BACKGROUND__; filter: blur(__BLUR__px);
 }
 [data-testid="stAppViewContainer"] { position: relative; z-index: 1; }
-
+ 
 html, body, .stApp, .stApp p, .stApp label, .stApp input, .stApp button {
   font-family: 'Open Sans', 'Segoe UI', Roboto, Arial, sans-serif;
 }
-
+ 
 /* --- the white card ------------------------------------------------------ */
 [data-testid="stMainBlockContainer"], .stMainBlockContainer, .block-container {
   max-width: 480px !important;
@@ -543,14 +493,14 @@ html, body, .stApp, .stApp p, .stApp label, .stApp input, .stApp button {
     margin: 3vh 12px !important; padding: 24px 20px 26px !important; max-width: none !important;
   }
 }
-
+ 
 /* --- header text ---------------------------------------------------------- */
 .cx-head { text-align: center; padding-bottom: 14px; }
 .cx-head img { height: 56px; display: block; margin: 0 auto; }
 .cx-sub { font-size: 10.5px; font-weight: 600; color: #5b6472; margin-top: 4px; }
 .cx-title { font-size: 18px; font-weight: 700; color: #111827; line-height: 1.2; margin-top: 4px; }
 .cx-desc { font-size: 12.5px; color: #6b7280; margin-top: 3px; padding-bottom: 8px; }
-
+ 
 /* centered headings used on the "Check your email" / "Request sent" screens */
 .cx-badge {
   width: 64px; height: 64px; border-radius: 50%; margin: 6px auto 4px;
@@ -561,7 +511,7 @@ html, body, .stApp, .stApp p, .stApp label, .stApp input, .stApp button {
 .cx-badge.green { background: #e3f4ec; color: #1f9d63; }
 .cx-h1 { text-align: center; font-size: 22px; font-weight: 700; color: #111827; line-height: 1.25; margin-top: 6px; }
 .cx-p  { text-align: center; font-size: 14px; color: #6b7280; line-height: 1.5; padding: 0 4px 6px; }
-
+ 
 /* prototype notice (amber box) */
 .cx-notice {
   background: #fdeedd; color: #7a4a12; border-radius: 10px;
@@ -571,7 +521,7 @@ html, body, .stApp, .stApp p, .stApp label, .stApp input, .stApp button {
   background: #fff; color: #7a4a12; padding: 2px 8px; border-radius: 6px;
   font-family: Consolas, 'Courier New', monospace; font-weight: 700; font-size: 13px;
 }
-
+ 
 /* --- Log In / Sign Up switch ---------------------------------------------- */
 .st-key-authtabs { background: #e8eaef; border-radius: 12px; padding: 4px; }
 .st-key-authtabs [data-testid="stHorizontalBlock"] { gap: 4px; }
@@ -588,16 +538,16 @@ html, body, .stApp, .stApp p, .stApp label, .stApp input, .stApp button {
 .st-key-tab_login_off button, .st-key-tab_signup_off button {
   background: transparent !important; color: #4b5563 !important;
 }
-
+ 
 /* --- alerts ---------------------------------------------------------------- */
 .cx-alert { border-radius: 10px; padding: 10px 14px; font-size: 12.5px; line-height: 1.45; }
 .cx-alert.err { background: #fbe1e1; color: #b4322a; }
 .cx-alert.ok  { background: #dcf3e5; color: #1f7a45; }
-
+ 
 /* --- inputs ------------------------------------------------------------------ */
 [data-testid="stWidgetLabel"] p { font-size: 13px; font-weight: 600; color: #1f2937; }
 [data-testid="stWidgetLabel"] p span { font-weight: 400; }
-
+ 
 [data-testid="stTextInput"] [data-baseweb="input"], [data-testid="stTextInputRootElement"],
 [data-testid="stSelectbox"] [data-baseweb="select"] > div {
   background: #fff; border: 1px solid #dfe3ea; border-radius: 12px; min-height: 46px;
@@ -618,18 +568,18 @@ html, body, .stApp, .stApp p, .stApp label, .stApp input, .stApp button {
 [data-testid="stSelectbox"] [data-baseweb="select"] svg { color: #8b93a1; }
 [data-testid="InputInstructions"] { display: none; }
 [data-testid="stCheckbox"] label p { font-size: 12px; font-weight: 400; color: #4b5563; }
-
+ 
 /* verification code box: big, centered dots */
 .st-key-su_code input { text-align: center; letter-spacing: .4em; font-size: 18px; }
 .st-key-su_code input::placeholder { letter-spacing: .4em; }
-
+ 
 /* --- forms ------------------------------------------------------------------- */
 [data-testid="stForm"] { border: 0 !important; padding: 0 !important; background: transparent; }
 [data-testid="stFormSubmitButton"] { margin-top: .4rem; }
 /* Log In button is first in the DOM (so Enter submits it) but shown last */
 .st-key-login_actions { order: 2; }
 .st-key-login_submit  { order: 3; margin-top: .4rem; }
-
+ 
 /* --- primary (blue) buttons ------------------------------------------------- */
 [data-testid="stBaseButton-primary"], [data-testid="stBaseButton-primaryFormSubmit"] {
   display: flex; margin: 0 auto; width: 100%; height: 48px; border: 0; border-radius: 10px;
@@ -641,7 +591,7 @@ html, body, .stApp, .stApp p, .stApp label, .stApp input, .stApp button {
 [data-testid="stBaseButton-primary"]:hover, [data-testid="stBaseButton-primaryFormSubmit"]:hover {
   background: #2460cc; border: 0;
 }
-
+ 
 /* --- text-link buttons ---------------------------------------------------- */
 .st-key-forgot_link button, .st-key-back_link button,
 .st-key-resend_link button, .st-key-edit_link button {
@@ -657,7 +607,7 @@ html, body, .stApp, .stApp p, .stApp label, .stApp input, .stApp button {
 .st-key-resend_link button p, .st-key-edit_link button p { font-size: 14px; font-weight: 600; color: #2d6fe3; }
 .st-key-forgot_link button:hover p, .st-key-back_link button:hover p,
 .st-key-resend_link button:hover p, .st-key-edit_link button:hover p { text-decoration: underline; }
-
+ 
 /* --- role picker (Teacher / Technician) ---------------------------------------- */
 .st-key-role_teacher_on button, .st-key-role_teacher_off button,
 .st-key-role_technician_on button, .st-key-role_technician_off button {
@@ -691,8 +641,8 @@ html, body, .stApp, .stApp p, .stApp label, .stApp input, .stApp button {
 }
 </style>
 """
-
-
+ 
+ 
 def _build_css() -> str:
     bg = _image_uri(_find_image(BG_IMAGE, ("background", "bg", "campus", "gate")))
     if bg:
@@ -703,8 +653,8 @@ def _build_css() -> str:
     else:  # no photo found: sky-to-lawn gradient so the page still looks right
         background = "linear-gradient(180deg, #2b7fc0 0%, #86bde8 48%, #5c8a4a 100%)"
     return _CSS.replace("__BACKGROUND__", background).replace("__BLUR__", str(BG_BLUR_PX))
-
-
+ 
+ 
 # ---------------------------------------------------------------------------
 # Views
 # ---------------------------------------------------------------------------
@@ -719,8 +669,8 @@ _ICONS = {
         'stroke-linecap="round" stroke-linejoin="round"><polyline points="5,13 10,18 19,7"/></svg>'
     ),
 }
-
-
+ 
+ 
 def _alert() -> None:
     if ss.auth_notice:
         kind, message = ss.auth_notice
@@ -728,16 +678,16 @@ def _alert() -> None:
             f'<div class="cx-alert {kind}">{html.escape(message)}</div>',
             unsafe_allow_html=True,
         )
-
-
+ 
+ 
 def _heading(title: str, description: str) -> None:
     st.markdown(
         f'<div class="cx-title">{html.escape(title)}</div>'
         f'<div class="cx-desc">{html.escape(description)}</div>',
         unsafe_allow_html=True,
     )
-
-
+ 
+ 
 def _centered_heading(icon: str, tone: str, title: str, text: str) -> None:
     st.markdown(
         f'<div class="cx-badge {tone}">{_ICONS[icon]}</div>'
@@ -745,16 +695,16 @@ def _centered_heading(icon: str, tone: str, title: str, text: str) -> None:
         f'<div class="cx-p">{html.escape(text)}</div>',
         unsafe_allow_html=True,
     )
-
-
+ 
+ 
 def _render_header(logo: str | Path | None = None) -> None:
     st.markdown(
         f'<div class="cx-head"><img src="{_logo_uri(logo)}" alt="Centrum Laboratory">'
         f'<div class="cx-sub">{APP_SUBTITLE}</div></div>',
         unsafe_allow_html=True,
     )
-
-
+ 
+ 
 def _render_tabs() -> None:
     active = "signup" if ss.auth_view == "signup" else "login"
     with st.container(key="authtabs"):
@@ -769,8 +719,8 @@ def _render_tabs() -> None:
             key=f"tab_signup_{'on' if active == 'signup' else 'off'}",
             on_click=_go, args=("signup",),
         )
-
-
+ 
+ 
 def _render_login() -> None:
     _heading("Welcome back", "Sign in to your Centrum Laboratory account")
     _alert()
@@ -785,16 +735,16 @@ def _render_login() -> None:
             right.form_submit_button(
                 "Forgot password?", key="forgot_link", on_click=_go, args=("reset",)
             )
-
-
+ 
+ 
 def _render_signup() -> None:
     {"form": _render_signup_form, "verify": _render_verify, "done": _render_done}[ss.signup_step]()
-
-
+ 
+ 
 def _render_signup_form() -> None:
     _heading("Create your account", "Pick your role, then fill in the details.")
     _alert()
-
+ 
     role = ss.signup_role
     left, right = st.columns(2, gap="small")
     left.button(
@@ -807,7 +757,7 @@ def _render_signup_form() -> None:
         key=f"role_technician_{'on' if role == 'Technician' else 'off'}",
         on_click=_set_role, args=("Technician",),
     )
-
+ 
     with st.form("signup_form"):
         a, b = st.columns(2, gap="small")
         a.text_input("First name", key="su_first", placeholder="Juan")
@@ -827,8 +777,8 @@ def _render_signup_form() -> None:
             "Confirm password", type="password", key="su_confirm", placeholder="Re-enter your password"
         )
         st.form_submit_button("Continue", type="primary", on_click=_do_signup)
-
-
+ 
+ 
 def _render_verify() -> None:
     data = ss.signup_data or {}
     _centered_heading(
@@ -836,7 +786,7 @@ def _render_verify() -> None:
         f"We sent a 6-digit code to {data.get('email', 'your email')}.",
     )
     _alert()
-
+ 
     needs_approval = ss.signup_role in APPROVAL_ROLES
     with st.form("verify_form"):
         st.text_input(
@@ -850,8 +800,8 @@ def _render_verify() -> None:
     left, right = st.columns(2, gap="small")
     left.button("Resend code", key="resend_link", on_click=_resend_code)
     right.button("Edit details", key="edit_link", on_click=_edit_details)
-
-
+ 
+ 
 def _render_done() -> None:
     info = ss.signup_done or {}
     first = info.get("first", "")
@@ -868,8 +818,8 @@ def _render_done() -> None:
             f"Thanks, {first}! Your account is ready. You can log in now.",
         )
     st.button("Back to log in", type="primary", key="done_back", on_click=_go, args=("login",))
-
-
+ 
+ 
 def _render_reset() -> None:
     _heading("Reset your password", "Enter your email and we'll send you a reset link.")
     _alert()
@@ -877,8 +827,8 @@ def _render_reset() -> None:
         st.text_input("Email Address", key="reset_email")
         st.form_submit_button("Send reset link", type="primary", on_click=_do_reset)
     st.button("\u2039 Back to log in", key="back_link", on_click=_go, args=("login",))
-
-
+ 
+ 
 # ---------------------------------------------------------------------------
 # Public entry point
 # ---------------------------------------------------------------------------
@@ -892,18 +842,18 @@ def _page_config() -> None:
         )
     except st.errors.StreamlitAPIException:
         pass  # the main app already called set_page_config
-
-
+ 
+ 
 def require_login(logo: str | Path | None = None) -> bool:
     """Draw the auth screens unless the user is signed in. Returns True when signed in.
-
+ 
     `logo` is the path to your logo image - pass the same one app.py uses.
     """
     _page_config()
     _init_state()
     if ss.authenticated:
         return True
-
+ 
     st.markdown(_build_css(), unsafe_allow_html=True)
     # "Check your email" and "Request sent" are stand-alone cards: no logo, no tabs.
     standalone = ss.auth_view == "signup" and ss.signup_step != "form"
@@ -912,11 +862,12 @@ def require_login(logo: str | Path | None = None) -> bool:
         _render_tabs()
     {"login": _render_login, "signup": _render_signup, "reset": _render_reset}[ss.auth_view]()
     return False
-
-
+ 
+ 
 if __name__ == "__main__":
     # Preview mode: `streamlit run login.py`
     if require_login():
         user = ss.auth_user or {}
         st.success(f"Signed in as {user.get('first_name', '')} {user.get('last_name', '')} ({user.get('role', '')})")
         st.button("Log out", on_click=logout)
+ 
