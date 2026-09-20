@@ -483,7 +483,7 @@ if st.session_state.page == "login":
 
                             role = user.get(
                                 "Role",
-                                "Student"
+                                "Technician"
                             )
 
 
@@ -631,7 +631,16 @@ elif st.session_state.page == "signup":
             placeholder="Enter your first name",
             key="signup_first_name"
         )
-
+        # ==========================================
+        # CHECK FIRST NAME
+        # ==========================================
+        
+        if not first_name:
+        
+            show_warning(
+                "Please enter your first name."
+                        )
+        
 
         # ==========================================
         # LAST NAME
@@ -642,7 +651,10 @@ elif st.session_state.page == "signup":
             placeholder="Enter your last name",
             key="signup_last_name"
         )
-
+        if not last_name:
+                        
+            show_warning("Please enter your last name.")
+                 
 
         # ==========================================
         # EMAIL
@@ -653,8 +665,14 @@ elif st.session_state.page == "signup":
             placeholder="you@example.com",
             key="signup_email"
         )
-
-
+        if not signup_email:
+                        
+            show_warning("Please enter your email.")
+        elif not re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", signup_email):
+        
+            show_warning("Invalid email address.")
+              
+              
         # ==========================================
         # PASSWORD
         # ==========================================
@@ -665,8 +683,20 @@ elif st.session_state.page == "signup":
             placeholder="Create a password",
             key="signup_password"
         )
+        if not signup_password:
+            show_warning("Please enter a password")
 
+        elif len(signup_password) < 6:
+            show_warning("Password must be at least 6 characters")
 
+        elif not any(char.isupper() for char in signup_password):
+            show_warning("Password must contain at least one uppercase letter")
+
+        elif not any(char.isdigit() for char in signup_password):
+            show_warning("Password must contain at least one number")
+        
+
+        
         # ==========================================
         # CONFIRM PASSWORD
         # ==========================================
@@ -677,8 +707,18 @@ elif st.session_state.page == "signup":
             placeholder="Confirm your password",
             key="signup_confirm_password"
         )
-
-
+        # ==========================================
+        # CHECK CONFIRM PASSWORD
+        # ==========================================
+        
+        if not confirm_password:
+        
+            show_warning(
+                "Please confirm your password."
+                        )
+        elif confirm_password !=signup_password:
+            show_warning("Password does not match")
+        
         # ==========================================
         # ROLE
         # ==========================================
@@ -686,9 +726,8 @@ elif st.session_state.page == "signup":
         role = st.selectbox(
             "Role",
             [
-                "Student",
                 "Teacher",
-                "Admin"
+                "Technician"
             ],
             key="signup_role"
         )
@@ -726,104 +765,10 @@ elif st.session_state.page == "signup":
             confirm_value = confirm_password
 
 
-            # ==========================================
-            # CHECK FIRST NAME
-            # ==========================================
 
-            if not fname:
+            
 
-                show_warning(
-                    "Please enter your first name."
-                )
-
-
-            # ==========================================
-            # CHECK LAST NAME
-            # ==========================================
-
-            elif not lname:
-
-                show_warning(
-                    "Please enter your last name."
-                )
-
-
-            # ==========================================
-            # CHECK EMAIL
-            # ==========================================
-
-            elif not signup_email_value:
-
-                show_warning(
-                    "Please enter your email address."
-                )
-
-
-            # ==========================================
-            # CHECK PASSWORD
-            # ==========================================
-
-            elif not password_value:
-
-                show_warning(
-                    "Please enter your password."
-                )
-
-
-            # ==========================================
-            # CHECK CONFIRM PASSWORD
-            # ==========================================
-
-            elif not confirm_value:
-
-                show_warning(
-                    "Please confirm your password."
-                )
-
-
-            # ==========================================
-            # VALIDATE EMAIL
-            # ==========================================
-
-            elif not re.match(
-               r"^[^@\s]+@[^@\s]+\.[^@\s]+$",
-                signup_email_value
-            ):
-
-                show_warning(
-                    "Invalid email address."
-                )
-
-
-            # ==========================================
-            # CHECK PASSWORD MATCH
-            # ==========================================
-
-            elif password_value != confirm_value:
-
-                show_warning(
-                    "Passwords do not match."
-                )
-
-
-            # ==========================================
-            # CHECK PASSWORD LENGTH
-            # ==========================================
-
-            elif len(password_value) < 6:
-
-                show_warning(
-                    "Password must be at least 6 characters."
-                )
-
-
-            # ==========================================
-            # CREATE ACCOUNT
-            # ==========================================
-
-            else:
-
-                try:
+            try:
 
                     # ==========================================
                     # SUPABASE AUTH SIGN UP
@@ -892,7 +837,7 @@ elif st.session_state.page == "signup":
                         )
 
 
-                except Exception as e:
+            except Exception as e:
 
                     # ==========================================
                     # SHOW ACTUAL ERROR
