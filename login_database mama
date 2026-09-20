@@ -5,12 +5,14 @@ import os
 import re
 from supabase import create_client, Client
 
+
 # ==========================================
 # PAGE SETTINGS
 # ==========================================
 
 st.set_page_config(
-    page_title="Computer Monitoring and Management System", layout="centered"
+    page_title="Computer Monitoring and Management System",
+    layout="centered"
 )
 
 
@@ -21,13 +23,15 @@ st.set_page_config(
 supabase_url = "https://tulzhwumlzaidknodnob.supabase.co"
 supabase_key = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR1bHpod3VtbHphaWRrbm9kbm9iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk3MzQ3ODIsImV4cCI6MjEwNTMxMDc4Mn0.RSvksN-9ZpPGO4R42Snr-5xkChJZA_v-YQjezXLegOQ"
 
-supabase: Client = create_client(supabase_url, supabase_key)
+supabase: Client = create_client(
+    supabase_url,
+    supabase_key
+)
 
 
 # ==========================================
 # MESSAGE FUNCTIONS
 # ==========================================
-
 
 def show_success(message):
     st.markdown(
@@ -45,7 +49,7 @@ def show_success(message):
             ✅ {message}
         </div>
         """,
-        unsafe_allow_html=True,
+        unsafe_allow_html=True
     )
 
 
@@ -65,7 +69,7 @@ def show_error(message):
             ❌ {message}
         </div>
         """,
-        unsafe_allow_html=True,
+        unsafe_allow_html=True
     )
 
 
@@ -85,7 +89,7 @@ def show_warning(message):
             ⚠️ {message}
         </div>
         """,
-        unsafe_allow_html=True,
+        unsafe_allow_html=True
     )
 
 
@@ -105,7 +109,7 @@ def show_info(message):
             ℹ️ {message}
         </div>
         """,
-        unsafe_allow_html=True,
+        unsafe_allow_html=True
     )
 
 
@@ -141,11 +145,12 @@ components.html(
 # BACKGROUND IMAGE
 # ==========================================
 
-
 def set_background(image_file):
 
     with open(image_file, "rb") as file:
-        encoded_image = base64.b64encode(file.read()).decode()
+        encoded_image = base64.b64encode(
+            file.read()
+        ).decode()
 
     st.markdown(
         f"""
@@ -250,7 +255,7 @@ def set_background(image_file):
 
         </style>
         """,
-        unsafe_allow_html=True,
+        unsafe_allow_html=True
     )
 
 
@@ -258,12 +263,17 @@ def set_background(image_file):
 # GET BACKGROUND IMAGE
 # ==========================================
 
-image_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "isu.jpg")
+image_path = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)),
+    "isu.jpg"
+)
 
 if os.path.exists(image_path):
     set_background(image_path)
 else:
-    st.warning("Background image 'isu.jpg' was not found.")
+    st.warning(
+        "Background image 'isu.jpg' was not found."
+    )
 
 
 # ==========================================
@@ -308,16 +318,20 @@ if st.session_state.page == "login":
                 Computer Monitoring and Management System
             </p>
             """,
-            unsafe_allow_html=True,
+            unsafe_allow_html=True
         )
+
 
         # ==========================================
         # EMAIL
         # ==========================================
 
         login_email = st.text_input(
-            "Email Address", placeholder="you@example.com", key="login_email"
+            "Email Address",
+            placeholder="you@example.com",
+            key="login_email"
         )
+
 
         # ==========================================
         # PASSWORD
@@ -327,8 +341,9 @@ if st.session_state.page == "login":
             "Password",
             type="password",
             placeholder="Enter your password",
-            key="login_password",
+            key="login_password"
         )
+
 
         # ==========================================
         # REMEMBER ME / FORGOT PASSWORD
@@ -338,7 +353,10 @@ if st.session_state.page == "login":
 
         with col1:
 
-            remember_me = st.checkbox("Remember Me", key="remember_me")
+            remember_me = st.checkbox(
+                "Remember Me",
+                key="remember_me"
+            )
 
         with col2:
 
@@ -353,14 +371,20 @@ if st.session_state.page == "login":
                     </span>
                 </div>
                 """,
-                unsafe_allow_html=True,
+                unsafe_allow_html=True
             )
+
 
         # ==========================================
         # SIGN IN BUTTON
         # ==========================================
 
-        login = st.button("Sign In", width=350, key="login_button")
+        login = st.button(
+            "Sign In",
+            width=350,
+            key="login_button"
+        )
+
 
         # ==========================================
         # LOGIN PROCESS
@@ -376,19 +400,30 @@ if st.session_state.page == "login":
 
             if not login_email_value:
 
-                show_warning("Please enter your email address.")
+                show_warning(
+                    "Please enter your email address."
+                )
 
             elif not login_password:
 
-                show_warning("Please enter your password.")
+                show_warning(
+                    "Please enter your password."
+                )
+
 
             # ==========================================
             # CHECK EMAIL
             # ==========================================
 
-            elif not re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", login_email_value):
+            elif not re.match(
+                r"^[^@\s]+@[^@\s]+\.[^@\s]+$",
+                login_email_value
+            ):
 
-                show_warning("Invalid email address.")
+                show_warning(
+                    "Invalid email address."
+                )
+
 
             # ==========================================
             # SUPABASE LOGIN
@@ -399,8 +434,12 @@ if st.session_state.page == "login":
                 try:
 
                     response = supabase.auth.sign_in_with_password(
-                        {"email": login_email_value, "password": login_password}
+                        {
+                            "email": login_email_value,
+                            "password": login_password
+                        }
                     )
+
 
                     # ==========================================
                     # CHECK AUTH USER
@@ -410,16 +449,19 @@ if st.session_state.page == "login":
 
                         user_id = response.user.id
 
+
                         # ==========================================
                         # GET USER PROFILE
                         # ==========================================
 
                         user_data = (
-                            supabase.table("Users")
+                            supabase
+                            .table("Users")
                             .select("*")
                             .eq("AuthId", user_id)
                             .execute()
                         )
+
 
                         # ==========================================
                         # USER PROFILE FOUND
@@ -429,25 +471,45 @@ if st.session_state.page == "login":
 
                             user = user_data.data[0]
 
-                            first_name = user.get("FirstName", "")
+                            first_name = user.get(
+                                "FirstName",
+                                ""
+                            )
 
-                            last_name = user.get("LastName", "")
+                            last_name = user.get(
+                                "LastName",
+                                ""
+                            )
 
-                            role = user.get("Role", "Technician")
+                            role = user.get(
+                                "Role",
+                                "Technician"
+                            )
+
 
                             # ==========================================
                             # SUCCESS
                             # ==========================================
 
-                            show_success("Login successful!")
+                            show_success(
+                                "Login successful!"
+                            )
 
-                            st.write(f"Welcome, {first_name} {last_name}!")
+                            st.write(
+                                f"Welcome, {first_name} {last_name}!"
+                            )
 
-                            st.write(f"Role: {role}")
+                            st.write(
+                                f"Role: {role}"
+                            )
+
 
                             if remember_me:
 
-                                show_info("Your login will be remembered.")
+                                show_info(
+                                    "Your login will be remembered."
+                                )
+
 
                         # ==========================================
                         # PROFILE NOT FOUND
@@ -461,8 +523,10 @@ if st.session_state.page == "login":
                             )
 
                             show_info(
-                                "Please check your Users table " "and Supabase trigger."
+                                "Please check your Users table "
+                                "and Supabase trigger."
                             )
+
 
                     # ==========================================
                     # AUTH USER NOT FOUND
@@ -470,13 +534,21 @@ if st.session_state.page == "login":
 
                     else:
 
-                        show_error("Login failed. User was not found.")
+                        show_error(
+                            "Login failed. User was not found."
+                        )
+
 
                 except Exception as e:
 
-                    show_error("Login failed.")
+                    show_error(
+                        "Login failed."
+                    )
 
-                    st.code(str(e))
+                    st.code(
+                        str(e)
+                    )
+
 
         # ==========================================
         # CREATE ACCOUNT TEXT
@@ -492,23 +564,26 @@ if st.session_state.page == "login":
                 Don't have an account?
             </p>
             """,
-            unsafe_allow_html=True,
+            unsafe_allow_html=True
         )
+
 
         # ==========================================
         # CREATE ACCOUNT BUTTON
         # ==========================================
 
         signup_button = st.button(
-            "Create an Account", width=350, key="create_account_button"
+            "Create an Account",
+            width=350,
+            key="create_account_button"
         )
+
 
         if signup_button:
 
             st.session_state.page = "signup"
 
             st.rerun()
-
 
 # ============================================================
 # SIGN UP PAGE
@@ -542,7 +617,7 @@ elif st.session_state.page == "signup":
                 Register your account
             </p>
             """,
-            unsafe_allow_html=True,
+            unsafe_allow_html=True
         )
 
         # ==========================================
@@ -550,34 +625,42 @@ elif st.session_state.page == "signup":
         # ==========================================
 
         first_name = st.text_input(
-            "First Name", placeholder="Enter your first name", key="signup_first_name"
+            "First Name",
+            placeholder="Enter your first name",
+            key="signup_first_name"
         )
-        
+
         # ==========================================
         # LAST NAME
         # ==========================================
+
         last_name = st.text_input(
-            "Last Name", placeholder="Enter your last name", key="signup_last_name"
+            "Last Name",
+            placeholder="Enter your last name",
+            key="signup_last_name"
         )
-        
+
         # ==========================================
         # EMAIL
         # ==========================================
 
         signup_email = st.text_input(
-            "Email Address", placeholder="you@example.com", key="signup_email"
+            "Email Address",
+            placeholder="you@example.com",
+            key="signup_email"
         )
-        
+
         # ==========================================
         # PASSWORD
         # ==========================================
+
         signup_password = st.text_input(
             "Password",
             type="password",
             placeholder="Create a password",
-            key="signup_password",
+            key="signup_password"
         )
-        
+
         # ==========================================
         # CONFIRM PASSWORD
         # ==========================================
@@ -586,20 +669,28 @@ elif st.session_state.page == "signup":
             "Confirm Password",
             type="password",
             placeholder="Confirm your password",
-            key="signup_confirm_password",
+            key="signup_confirm_password"
         )
-        
+
         # ==========================================
         # ROLE
         # ==========================================
 
-        role = st.selectbox("Role", ["Teacher", "Technician"], key="signup_role")
+        role = st.selectbox(
+            "Role",
+            ["Student", "Teacher", "Admin"],
+            key="signup_role"
+        )
 
         # ==========================================
         # SIGN UP BUTTON
         # ==========================================
 
-        signup = st.button("Sign Up", width=350, key="signup_button")
+        signup = st.button(
+            "Sign Up",
+            width=350,
+            key="signup_button"
+        )
 
         # ==========================================
         # SIGN UP PROCESS
@@ -612,122 +703,205 @@ elif st.session_state.page == "signup":
             # ==========================================
 
             fname = first_name.strip()
-
             lname = last_name.strip()
-
             signup_email_value = signup_email.strip()
-
             password_value = signup_password
-
             confirm_value = confirm_password
-            
-            # ==========================================
-            # CHECK FIRST NAME
-            # ==========================================
-            if not first_name:
-                show_warning("Please enter your first name.")
-            
-            # ==========================================
-            # CHECK LAST NAME
-            # ==========================================                        
-            elif not last_name:
-                show_warning("Please enter your last name.")
-            # ==========================================
-            # CHECK EMAIL
-            # ==========================================  
-            elif not signup_email:
-                show_warning("Please enter your email.")
-                    
-            elif not re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", signup_email):
-                show_warning("Invalid email address.")
-            
-            # ==========================================
-            # CHECK PASSWORD
-            # ==========================================  
-            elif not signup_password:
-                show_warning("Please enter a password")
-            
-            elif len(signup_password) < 6:
-                show_warning("Password must be at least 6 characters")
-            
-            elif not any(char.isupper() for char in signup_password):
-                show_warning("Password must contain at least one uppercase letter")
-            
-            elif not any(char.isdigit() for char in signup_password):
-                show_warning("Password must contain at least one number")
-            
-            # ==========================================
-            # CHECK CONFIRM PASSWORD
-            # ==========================================            
-            elif not confirm_password:            
-                show_warning("Please confirm your password.")
-            elif confirm_password != signup_password:
-                show_warning("Password does not match")
-                        
 
             # ==========================================
-            # CREATE ACCOUNT
+            # VALIDATION
             # ==========================================
+
+            if not fname:
+
+                show_warning(
+                    "Please enter your first name."
+                )
+
+            elif not lname:
+
+                show_warning(
+                    "Please enter your last name."
+                )
+
+            elif not signup_email_value:
+
+                show_warning(
+                    "Please enter your email."
+                )
+
+            elif not re.match(
+                r"^[^@\s]+@[^@\s]+\.[^@\s]+$",
+                signup_email_value
+            ):
+
+                show_warning(
+                    "Invalid email address."
+                )
+
+            elif not password_value:
+
+                show_warning(
+                    "Please enter a password."
+                )
+
+            elif len(password_value) < 6:
+
+                show_warning(
+                    "Password must be at least 6 characters."
+                )
+
+            elif not any(
+                char.isupper()
+                for char in password_value
+            ):
+
+                show_warning(
+                    "Password must contain at least one uppercase letter."
+                )
+
+            elif not any(
+                char.isdigit()
+                for char in password_value
+            ):
+
+                show_warning(
+                    "Password must contain at least one number."
+                )
+
+            elif not confirm_value:
+
+                show_warning(
+                    "Please confirm your password."
+                )
+
+            elif confirm_value != password_value:
+
+                show_warning(
+                    "Password does not match."
+                )
 
             else:
 
                 try:
 
                     # ==========================================
-                    # SUPABASE AUTH SIGN UP
+                    # FIND ROLE ID
                     # ==========================================
 
-                    response = supabase.auth.sign_up(
-                        {
-                            "email": signup_email_value,
-                            "password": password_value,
-                            "options": {
-                                "data": {
-                                    "first_name": fname,
-                                    "last_name": lname,
-                                    "role": role,
-                                }
-                            },
-                        }
+                    role_result = (
+                        supabase
+                        .table("Role")
+                        .select("RoleId,Role")
+                        .eq("Role", role)
+                        .execute()
                     )
 
-                    # ==========================================
-                    # CHECK RESPONSE
-                    # ==========================================
+                    if not role_result.data:
 
-                    if response.user:
-
-                        show_success("Account created successfully!")
-
-                        # ==========================================
-                        # EMAIL CONFIRMATION CHECK
-                        # ==========================================
-
-                        if response.session is None:
-
-                            show_info(
-                                "Your account was created. "
-                                "Please check your email and confirm "
-                                "your account before signing in."
-                            )
-
-                        else:
-
-                            show_info(
-                                "Your account has been registered. " "You can now sign in."
-                            )
-
-                        # ==========================================
-                        # RETURN TO LOGIN
-                        # ==========================================
-
-                        st.session_state.page = "login"
-
-                        st.rerun()
+                        show_error(
+                            f"Role '{role}' was not found in the Role table."
+                        )
 
                     else:
 
-                        show_error("Account was not created.")
+                        role_id = role_result.data[0]["RoleId"]
+
+                        # ==========================================
+                        # CREATE SUPABASE AUTH ACCOUNT
+                        # ==========================================
+
+                        response = supabase.auth.sign_up(
+                            {
+                                "email": signup_email_value,
+                                "password": password_value,
+
+                                "options": {
+                                    "data": {
+                                        "first_name": fname,
+                                        "last_name": lname,
+                                        "role": role
+                                    }
+                                }
+                            }
+                        )
+
+                        # ==========================================
+                        # CHECK AUTH RESPONSE
+                        # ==========================================
+
+                        if response.user:
+
+                            user_id = response.user.id
+
+                            # ==========================================
+                            # INSERT USER PROFILE
+                            # ==========================================
+
+                            user_result = (
+                                supabase
+                                .table("Users")
+                                .insert(
+                                    {
+                                        "AuthId": user_id,
+                                        "FirstName": fname,
+                                        "LastName": lname,
+                                        "Email": signup_email_value,
+                                        "RoleId": role_id
+                                    }
+                                )
+                                .execute()
+                            )
+
+                            # ==========================================
+                            # CHECK PROFILE INSERT
+                            # ==========================================
+
+                            if user_result.data:
+
+                                show_success(
+                                    "Account created successfully!"
+                                )
+
+                                # ==========================================
+                                # EMAIL CONFIRMATION
+                                # ==========================================
+
+                                if response.session is None:
+
+                                    show_info(
+                                        "Your account was created. "
+                                        "Please check your email and confirm "
+                                        "your account before signing in."
+                                    )
+
+                                else:
+
+                                    show_info(
+                                        "Your account has been registered. "
+                                        "You can now sign in."
+                                    )
+
+                                # ==========================================
+                                # RETURN TO LOGIN
+                                # ==========================================
+
+                                st.session_state.page = "login"
+
+                                st.rerun()
+
+                            else:
+
+                                show_error(
+                                    "Authentication account was created, "
+                                    "but the user profile could not be saved."
+                                )
+
+                        else:
+
+                            show_error(
+                                "Account was not created."
+                            )
 
                 except Exception as e:
 
@@ -735,9 +909,13 @@ elif st.session_state.page == "signup":
                     # SHOW ACTUAL ERROR
                     # ==========================================
 
-                    show_error("Sign up failed.")
+                    show_error(
+                        "Sign up failed."
+                    )
 
-                    st.code(str(e))
+                    st.code(
+                        str(e)
+                    )
 
         # ==========================================
         # BACK TO LOGIN
@@ -753,17 +931,20 @@ elif st.session_state.page == "signup":
                 Already have an account?
             </p>
             """,
-            unsafe_allow_html=True,
+            unsafe_allow_html=True
         )
 
         # ==========================================
         # BACK BUTTON
         # ==========================================
 
-        back_button = st.button("Back to Login", width=350, key="back_to_login_button")
+        back_button = st.button(
+            "Back to Login",
+            width=350,
+            key="back_to_login_button"
+        )
 
         if back_button:
 
             st.session_state.page = "login"
-
             st.rerun()
