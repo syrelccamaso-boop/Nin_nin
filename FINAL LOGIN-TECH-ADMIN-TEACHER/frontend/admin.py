@@ -58,14 +58,6 @@ HTML_FILE = next(
     _PROJECT_DIR / HTML_NAME,
 )
 
-# Shown only by `... frontend/admin.py -- --preview`.
-DEMO_USER = {
-    "name": "Administrator",
-    "email": "admin@isu.edu.ph",
-    "contact_number": "",
-    "role": ROLE,
-}
-
 # Where a login script may have stored the signed-in user.
 _SESSION_KEYS = ("user", "auth_user", "current_user")
 
@@ -596,27 +588,4 @@ def render(user: dict | None = None, preview: bool = False) -> None:
     _show(_build_page(user, data, notice, flash, live))
 
 
-# ---------------------------------------------------------------------------
-# `python -m streamlit run frontend/admin.py -- --preview`
-# ---------------------------------------------------------------------------
-if __name__ == "__main__":
-    preview = "--preview" in sys.argv[1:]
-    current = session_user()
 
-    if current is None and preview:
-        if st.session_state.get("cl_logged_out"):
-            st.info("Logged out (preview).")
-            if st.button("Back to preview"):
-                st.session_state["cl_logged_out"] = False
-                st.rerun()
-            st.stop()
-        current = DEMO_USER
-
-    if current is None:
-        st.warning(
-            "You're not signed in. Log in from the main app first, or preview this "
-            "page with:  python -m streamlit run frontend/admin.py -- --preview"
-        )
-        st.stop()
-
-    render(current, preview=preview)
