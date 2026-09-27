@@ -1,0 +1,1457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Centrum Laboratory</title>
+<style>
+  :root{
+    --blue-700:#2555b8;
+    --blue-600:#2f6fe4;
+    --blue-500:#4a84ee;
+    --blue-50:#eaf2ff;
+    --blue-25:#f4f8ff;
+    --ink-900:#1c2430;
+    --ink-700:#3a4453;
+    --ink-500:#6b7686;
+    --ink-300:#a4adba;
+    --line:#e4e8ee;
+    --bg:#f3f5f9;
+    --white:#ffffff;
+    --green:#1f9d6f;
+    --green-bg:#e7f7f0;
+    --amber:#d98b1c;
+    --amber-bg:#fdf1de;
+    --red:#d5474f;
+    --red-bg:#fbe9ea;
+    --radius:10px;
+    --shadow:0 1px 2px rgba(28,36,48,.06), 0 1px 1px rgba(28,36,48,.04);
+    font-size:16px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--ink-900);
+    font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  button{font-family:inherit;}
+  .app{display:flex;min-height:100vh;}
+
+  /* ---------- SIDEBAR ---------- */
+  .sidebar{
+    width:230px;flex:0 0 230px;background:var(--white);
+    border-right:1px solid var(--line);
+    display:flex;flex-direction:column;
+    padding:20px 14px;
+  }
+  .brand{display:flex;flex-direction:column;align-items:flex-start;gap:8px;padding:4px 6px 22px;}
+  .brand-logo{width:100%;max-width:186px;height:auto;display:block;}
+  .role-badge{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.03em;color:var(--blue-700);background:var(--blue-50);padding:2px 7px;border-radius:100px;}
+  .nav-group{margin-bottom:16px;}
+  .nav-label{font-size:10.5px;font-weight:700;letter-spacing:.04em;color:var(--ink-300);padding:0 10px 6px;}
+  .nav-item{
+    display:flex;align-items:center;gap:10px;
+    padding:9px 10px;border-radius:8px;cursor:pointer;
+    color:var(--ink-700);font-size:14px;font-weight:500;
+    margin-bottom:2px;user-select:none;
+  }
+  .nav-item:hover{background:var(--blue-25);}
+  .nav-item.active{background:var(--blue-600);color:#fff;}
+  .nav-icon{width:17px;height:17px;flex:0 0 17px;display:flex;align-items:center;justify-content:center;}
+  .nav-icon svg{width:17px;height:17px;}
+
+  /* ---------- MAIN ---------- */
+  .main{flex:1;display:flex;flex-direction:column;min-width:0;}
+  .topbar{
+    height:60px;flex:0 0 60px;background:var(--white);border-bottom:1px solid var(--line);
+    display:flex;align-items:center;justify-content:space-between;padding:0 24px;
+  }
+  .search{
+    display:flex;align-items:center;gap:8px;background:var(--bg);
+    border:1px solid var(--line);border-radius:8px;padding:8px 12px;width:300px;color:var(--ink-500);font-size:13.5px;
+  }
+  .user{display:flex;align-items:center;gap:10px;cursor:pointer;padding:6px 8px;border-radius:8px;}
+  .user:hover{background:var(--bg);}
+  .user-dropdown-wrap{position:relative;}
+  .user-menu{
+    position:absolute;top:calc(100% + 8px);right:0;min-width:180px;
+    background:var(--white);border:1px solid var(--line);border-radius:10px;
+    box-shadow:0 8px 24px rgba(0,0,0,.12);padding:6px;display:none;z-index:50;
+  }
+  .user-menu.show{display:block;}
+  .user-menu-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:7px;font-size:13px;font-weight:600;color:var(--ink-700);cursor:pointer;}
+  .user-menu-item:hover{background:var(--bg);}
+  .user-menu-item.danger{color:var(--red);}
+  .user-menu-item.danger:hover{background:var(--red-bg);}
+  .avatar{width:30px;height:30px;border-radius:50%;background:var(--blue-50);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--blue-700);}
+  .content{padding:26px 30px 60px;overflow-y:auto;}
+  .crumbs{font-size:12.5px;color:var(--ink-500);margin-bottom:14px;}
+  .crumbs b{color:var(--ink-900);font-weight:600;}
+  .page-title{font-size:22px;font-weight:700;margin:0 0 4px;}
+  .page-sub{font-size:13.5px;color:var(--ink-500);margin:0 0 22px;}
+  .page{display:none;}
+  .page.active{display:block;}
+
+  /* ---------- shared bits ---------- */
+  .card{background:var(--white);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);}
+  .pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:4px 10px;border-radius:100px;}
+  .pill.green{background:var(--green-bg);color:var(--green);}
+  .pill.amber{background:var(--amber-bg);color:var(--amber);}
+  .pill.red{background:var(--red-bg);color:var(--red);}
+  .pill.blue{background:var(--blue-50);color:var(--blue-700);}
+  .pill.grey{background:#eef0f3;color:var(--ink-500);}
+  .dot{width:8px;height:8px;border-radius:50%;flex:0 0 8px;}
+  .dot.green{background:var(--green);}
+  .dot.amber{background:var(--amber);}
+  .dot.red{background:var(--red);}
+  .btn{
+    border:none;border-radius:8px;font-weight:600;font-size:13.5px;cursor:pointer;
+    padding:10px 16px;display:inline-flex;align-items:center;gap:7px;transition:background .12s;
+  }
+  .btn-primary{background:var(--blue-600);color:#fff;}
+  .btn-primary:hover{background:var(--blue-700);}
+  .btn-primary:disabled{background:#c6d4ef;cursor:not-allowed;}
+  .btn-ghost{background:var(--white);color:var(--ink-700);border:1px solid var(--line);}
+  .btn-ghost:hover{background:var(--bg);}
+  .btn-danger-ghost{background:var(--white);color:var(--red);border:1px solid var(--line);}
+  .btn-danger-ghost:hover{background:var(--red-bg);}
+  .btn-sm{padding:7px 12px;font-size:12.5px;}
+  label.field-label{display:block;font-size:13px;font-weight:600;color:var(--ink-700);margin-bottom:6px;}
+  select.input, input.input, textarea.input{
+    width:100%;border:1px solid var(--line);border-radius:8px;padding:10px 12px;
+    font-size:13.5px;color:var(--ink-900);background:var(--white);font-family:inherit;
+  }
+  select.input:focus, input.input:focus, textarea.input:focus{outline:2px solid var(--blue-500);outline-offset:0;border-color:var(--blue-500);}
+  textarea.input{resize:vertical;min-height:80px;}
+
+  /* ---------- DASHBOARD ---------- */
+  .stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:22px;}
+  .stat-card{padding:20px 22px;border-radius:14px;}
+  .stat-top{display:flex;align-items:center;gap:8px;margin-bottom:14px;}
+  .stat-icon{width:19px;height:19px;flex:0 0 19px;display:flex;align-items:center;justify-content:center;}
+  .stat-label{font-size:13px;color:var(--ink-500);font-weight:600;}
+  .stat-value{font-size:30px;font-weight:700;line-height:1;}
+  .stat-sub{font-size:11.5px;color:var(--ink-300);margin-top:6px;}
+
+  .section-card{padding:20px 22px;}
+  .section-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
+  .section-head h3{font-size:14.5px;margin:0;}
+  .link-btn{font-size:12.5px;color:var(--blue-600);font-weight:600;cursor:pointer;}
+  .filter-select{width:auto;padding:9px 10px;font-size:13px;}
+
+  .ra-legend{display:flex;gap:14px;font-size:11.5px;color:var(--ink-500);}
+  .ra-legend span{display:flex;align-items:center;gap:5px;}
+  .ra-legend .dot{display:inline-block;}
+  .activity-card{display:flex;justify-content:space-between;align-items:center;gap:16px;background:var(--bg);border-left:4px solid var(--line);border-radius:8px;padding:14px 16px;margin-bottom:10px;}
+  .activity-card:last-child{margin-bottom:0;}
+  .activity-card.st-resolved{border-left-color:var(--green);}
+  .activity-card.st-progress{border-left-color:var(--amber);}
+  .activity-card.st-followup{border-left-color:var(--red);}
+  .ac-title{font-size:14px;font-weight:700;color:var(--ink-900);}
+  .ac-sub{font-size:12px;color:var(--ink-500);margin-top:3px;}
+  .ac-tag{display:inline-block;background:var(--white);border:1px solid var(--line);border-radius:6px;padding:3px 9px;font-size:11px;color:var(--ink-700);margin-top:7px;}
+  .ac-right{text-align:right;flex:0 0 auto;}
+  .ac-date-label{font-size:10.5px;color:var(--ink-300);text-transform:uppercase;letter-spacing:.03em;}
+  .ac-date-value{font-size:12.5px;color:var(--ink-700);margin-top:2px;}
+
+  .glance-wrap{display:flex;align-items:center;gap:28px;}
+  .glance-icon{flex:0 0 100px;text-align:center;}
+  .glance-icon-box{width:80px;height:80px;border-radius:14px;background:linear-gradient(155deg,#5fb3e8,#2f8fd6);display:flex;align-items:center;justify-content:center;margin:0 auto 10px;}
+  .glance-room-name{font-size:12.5px;font-weight:700;color:var(--ink-900);line-height:1.3;}
+  .glance-chart{flex:1;}
+  .glance-bar-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+  .glance-bar-row:last-child{margin-bottom:0;}
+  .glance-bar-track{flex:1;height:20px;background:var(--bg);border-radius:5px;overflow:hidden;}
+  .glance-bar-fill{height:100%;border-radius:5px;}
+  .glance-axis{display:flex;justify-content:space-between;font-size:10.5px;color:var(--ink-300);margin-top:6px;}
+  .glance-stats{flex:0 0 190px;border-left:1px solid var(--line);padding-left:22px;}
+  .glance-total-label{font-size:11px;color:var(--ink-500);}
+  .glance-total-value{font-size:26px;font-weight:700;color:var(--ink-900);margin:2px 0 14px;}
+  .glance-legend-row{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink-700);margin-bottom:10px;}
+  .glance-legend-row:last-child{margin-bottom:0;}
+  .glance-legend-count{margin-left:auto;font-weight:700;color:var(--ink-900);}
+
+  /* ---------- REPORT AN ISSUE ---------- */
+  .wizard-steps{display:flex;align-items:center;gap:0;margin-bottom:26px;}
+  .wz-step{display:flex;align-items:center;gap:9px;}
+  .wz-num{
+    width:26px;height:26px;border-radius:50%;background:var(--bg);border:1px solid var(--line);
+    display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--ink-500);
+    flex:0 0 26px;
+  }
+  .wz-step.done .wz-num{background:var(--green);border-color:var(--green);color:#fff;}
+  .wz-step.current .wz-num{background:var(--blue-600);border-color:var(--blue-600);color:#fff;}
+  .wz-step-label{font-size:13px;font-weight:600;color:var(--ink-500);}
+  .wz-step.current .wz-step-label, .wz-step.done .wz-step-label{color:var(--ink-900);}
+  .wz-line{width:56px;height:1px;background:var(--line);margin:0 10px;}
+
+  .form-card{max-width:640px;padding:26px;}
+  .form-row{margin-bottom:20px;}
+  .form-row-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;}
+  .helptext{font-size:12px;color:var(--ink-300);margin-top:6px;}
+
+  .chip-grid{display:flex;flex-wrap:wrap;gap:8px;}
+  .chip{
+    border:1px solid var(--line);border-radius:100px;padding:8px 14px;font-size:13px;
+    color:var(--ink-700);cursor:pointer;user-select:none;background:var(--white);font-weight:500;
+  }
+  .chip.selected{background:var(--blue-600);border-color:var(--blue-600);color:#fff;}
+  .chip.other{border-style:dashed;}
+
+  .other-issue-box{margin-top:12px;display:none;}
+  .other-issue-box.show{display:block;}
+
+  .form-footer{display:flex;justify-content:flex-end;gap:10px;margin-top:26px;padding-top:20px;border-top:1px solid var(--line);}
+
+  /* review */
+  .review-card{max-width:640px;padding:26px;}
+  .review-row{display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--line);gap:20px;}
+  .review-row:last-child{border-bottom:none;}
+  .review-label{font-size:12.5px;color:var(--ink-500);font-weight:600;flex:0 0 150px;}
+  .review-value{font-size:13.5px;color:var(--ink-900);text-align:right;flex:1;}
+  .review-chips{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end;}
+  .review-note{background:var(--blue-25);border:1px solid var(--blue-50);border-radius:8px;padding:12px 14px;font-size:12.5px;color:var(--blue-700);margin-top:18px;display:flex;gap:8px;align-items:flex-start;}
+
+  /* confirmation */
+  .confirm-wrap{max-width:520px;text-align:center;padding:44px 30px;}
+  .confirm-icon{
+    width:56px;height:56px;border-radius:50%;background:var(--green-bg);color:var(--green);
+    display:flex;align-items:center;justify-content:center;margin:0 auto 18px;
+  }
+  .confirm-id{font-family:ui-monospace,monospace;background:var(--bg);border-radius:6px;padding:3px 9px;font-size:13px;color:var(--ink-700);}
+
+  /* ---------- MY REPORTS ---------- */
+  .reports-toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;gap:16px;flex-wrap:wrap;}
+  .toolbar-left{display:flex;align-items:center;gap:10px;}
+  .count-badge{font-size:13px;color:var(--ink-500);}
+  .count-badge b{color:var(--ink-900);}
+  .search-input{position:relative;width:250px;}
+  .search-input input{padding-left:34px;}
+  .search-input svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--ink-300);}
+  .sortby{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink-500);}
+  .sortby select{width:auto;padding:8px 10px;font-size:13px;}
+
+  table.reports-table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  table.reports-table thead th{
+    text-align:left;font-size:11.5px;letter-spacing:.03em;color:var(--ink-500);
+    padding:12px 16px;border-bottom:1px solid var(--line);font-weight:700;
+  }
+  table.reports-table tbody td{padding:14px 16px;border-bottom:1px solid var(--line);vertical-align:top;color:var(--ink-700);}
+  table.reports-table tbody tr:last-child td{border-bottom:none;}
+  table.reports-table tbody tr:hover{background:var(--blue-25);}
+  .rep-id{font-family:ui-monospace,monospace;font-size:12.5px;color:var(--ink-500);}
+  .rep-unit{font-weight:600;color:var(--ink-900);}
+  .issue-tags{display:flex;flex-wrap:wrap;gap:5px;max-width:220px;}
+  .issue-tag{background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:2px 8px;font-size:11.5px;color:var(--ink-700);}
+  .empty-state{padding:60px 20px;text-align:center;color:var(--ink-500);}
+  .empty-state svg{margin-bottom:12px;color:var(--ink-300);}
+
+  /* ---------- UNIT INVENTORY ---------- */
+  .room-tabs{display:flex;gap:6px;margin-bottom:16px;border-bottom:1px solid var(--line);}
+  .room-tab{padding:11px 18px;font-size:13.5px;font-weight:600;color:var(--ink-500);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;}
+  .room-tab.active{color:var(--ink-900);border-bottom-color:var(--blue-600);}
+  .inv-toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
+  .inv-filters{display:flex;gap:14px;font-size:13px;color:var(--ink-700);align-items:center;}
+  .inv-filters label{display:flex;align-items:center;gap:6px;cursor:pointer;}
+  .unit-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:14px;}
+  .unit-card{
+    background:var(--white);border:1px solid var(--line);border-radius:var(--radius);
+    padding:16px 10px 12px;text-align:center;cursor:pointer;position:relative;transition:border-color .12s, box-shadow .12s;
+  }
+  .unit-card:hover{border-color:var(--blue-500);box-shadow:var(--shadow);}
+  .unit-card .status-dot{position:absolute;top:10px;right:10px;}
+  .unit-card svg{margin-bottom:8px;}
+  .unit-card-name{font-size:13px;font-weight:600;color:var(--ink-900);}
+
+  /* unit detail */
+  .unit-detail-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:22px;}
+  .back-link{display:inline-flex;align-items:center;gap:6px;color:var(--blue-600);font-size:13px;font-weight:600;cursor:pointer;margin-bottom:14px;}
+  .unit-title-row{display:flex;align-items:center;gap:12px;}
+  .unit-title-row h1{font-size:21px;margin:0;}
+  .detail-grid{display:grid;grid-template-columns:1fr 300px;gap:20px;align-items:start;}
+  .tabs-row{display:flex;gap:4px;background:var(--bg);border-radius:9px;padding:4px;margin-bottom:18px;width:fit-content;}
+  .tab-btn{padding:8px 16px;border-radius:7px;font-size:13px;font-weight:600;color:var(--ink-500);cursor:pointer;}
+  .tab-btn.active{background:var(--white);color:var(--ink-900);box-shadow:var(--shadow);}
+  .tab-panel{display:none;}
+  .tab-panel.active{display:block;}
+  .spec-table{width:100%;border-collapse:collapse;}
+  .spec-table tr td{padding:11px 4px;border-bottom:1px solid var(--line);font-size:13.5px;}
+  .spec-table tr:last-child td{border-bottom:none;}
+  .spec-key{color:var(--ink-500);width:42%;}
+  .spec-val{color:var(--ink-900);font-weight:600;text-align:right;}
+  .sw-list{list-style:none;margin:0;padding:0;}
+  .sw-list li{display:flex;justify-content:space-between;padding:10px 2px;border-bottom:1px solid var(--line);font-size:13.5px;}
+  .sw-list li:last-child{border-bottom:none;}
+  .sw-name{color:var(--ink-900);font-weight:500;}
+  .sw-meta{color:var(--ink-300);font-size:12px;}
+
+  .history-item{display:flex;gap:14px;padding:16px 0;border-bottom:1px solid var(--line);}
+  .history-item:last-child{border-bottom:none;}
+  .history-rail{display:flex;flex-direction:column;align-items:center;flex:0 0 12px;padding-top:4px;}
+  .history-dot{width:9px;height:9px;border-radius:50%;}
+  .history-body{flex:1;}
+  .history-top{display:flex;justify-content:space-between;gap:10px;margin-bottom:4px;}
+  .history-issue{font-size:13.5px;font-weight:600;color:var(--ink-900);}
+  .history-date{font-size:12px;color:var(--ink-300);white-space:nowrap;}
+  .history-comment{font-size:13px;color:var(--ink-500);margin:4px 0;font-style:italic;}
+  .history-action{font-size:13px;color:var(--ink-700);background:var(--bg);border-radius:7px;padding:8px 10px;margin-top:6px;}
+  .history-action b{color:var(--ink-900);}
+
+  .side-card{padding:18px;margin-bottom:16px;}
+  .side-card h4{margin:0 0 12px;font-size:13px;text-transform:uppercase;letter-spacing:.03em;color:var(--ink-500);}
+  .issue-count-big{font-size:30px;font-weight:700;color:var(--ink-900);}
+  .issue-count-label{font-size:12.5px;color:var(--ink-500);}
+
+  /* toast */
+  .toast{
+    position:fixed;bottom:26px;right:26px;background:var(--ink-900);color:#fff;
+    padding:14px 18px;border-radius:10px;font-size:13.5px;font-weight:500;
+    display:flex;align-items:center;gap:10px;box-shadow:0 8px 24px rgba(0,0,0,.18);
+    transform:translateY(20px);opacity:0;pointer-events:none;transition:all .25s ease;z-index:50;
+  }
+  .toast.show{transform:translateY(0);opacity:1;}
+  .toast .dot.green{background:#4ade80;}
+
+  ::-webkit-scrollbar{width:9px;height:9px;}
+  ::-webkit-scrollbar-thumb{background:#d3d9e2;border-radius:6px;}
+
+  .soon{padding:60px 30px;text-align:center;color:var(--ink-500);}
+
+  /* ---------- SETTINGS ---------- */
+  .settings-tabs{display:flex;gap:4px;background:var(--bg);border-radius:9px;padding:4px;width:fit-content;margin-bottom:20px;}
+  .settings-tab{padding:9px 18px;border-radius:7px;font-size:13.5px;font-weight:600;color:var(--ink-500);cursor:pointer;}
+  .settings-tab.active{background:var(--white);color:var(--ink-900);box-shadow:var(--shadow);}
+  .settings-panel{display:none;max-width:640px;}
+  .settings-panel.active{display:block;}
+  .settings-layout{display:flex;gap:24px;align-items:flex-start;}
+  .settings-menu-col{flex:0 0 230px;}
+  .settings-menu{background:var(--white);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:6px;}
+  .settings-menu-item{display:flex;align-items:center;gap:12px;padding:12px 10px;border-bottom:1px solid var(--line);cursor:pointer;border-radius:8px;}
+  .settings-menu-item:last-child{border-bottom:none;}
+  .settings-menu-item:hover{background:var(--bg);}
+  .settings-menu-item.active{background:var(--blue-25);}
+  .settings-menu-icon{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex:0 0 32px;}
+  .settings-menu-icon.purple{background:#f1ecfb;color:#7c5cd4;}
+  .settings-menu-icon.orange{background:var(--amber-bg);color:var(--amber);}
+  .settings-menu-icon.blue{background:var(--blue-50);color:var(--blue-600);}
+  .settings-menu-label{font-size:13.5px;font-weight:600;color:var(--ink-700);}
+  .settings-menu-item.active .settings-menu-label{color:var(--ink-900);}
+  .settings-logout-btn{margin-top:12px;width:100%;padding:13px;border-radius:10px;border:none;background:linear-gradient(180deg,#6b7280,#374151);color:#fff;font-weight:700;font-size:13.5px;cursor:pointer;transition:background .12s;}
+  .settings-logout-btn:hover{background:linear-gradient(180deg,#4b5563,#1f2937);}
+  .settings-content{flex:1;min-width:0;}
+  .settings-card{padding:26px;margin-bottom:18px;}
+  .settings-card-title{font-size:15px;margin:0 0 18px;}
+  .profile-row{display:flex;align-items:center;gap:16px;margin-bottom:22px;}
+  .avatar-lg{width:56px;height:56px;border-radius:50%;background:var(--blue-50);color:var(--blue-700);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:17px;flex:0 0 56px;}
+  .profile-fixed-block{margin-bottom:16px;}
+  .profile-field-label{font-size:11.5px;font-weight:700;letter-spacing:.03em;color:var(--ink-300);text-transform:uppercase;margin-bottom:6px;}
+  .profile-fixed-name{font-size:14px;color:var(--ink-900);font-weight:600;}
+  .profile-fixed-name.muted{color:var(--ink-500);font-weight:500;}
+  .profile-divider{border:none;border-top:1px solid var(--line);margin:18px 0;}
+  .contact-info-row{display:flex;align-items:center;gap:10px;padding:8px 0;margin-bottom:6px;color:var(--ink-500);}
+  .contact-info-value{font-size:13.5px;color:var(--ink-900);font-weight:500;flex:1;}
+  .contact-info-edit{color:var(--ink-300);cursor:pointer;display:flex;align-items:center;}
+  .contact-info-edit:hover{color:var(--blue-600);}
+  .profile-inline-edit{padding:0 0 12px 25px;margin-top:-6px;}
+
+  .toggle-row{display:flex;justify-content:space-between;align-items:center;gap:20px;padding:16px 0;border-bottom:1px solid var(--line);}
+  .toggle-row-title{font-size:13.5px;font-weight:600;color:var(--ink-900);}
+  .toggle-row-sub{font-size:12.5px;color:var(--ink-500);margin-top:3px;max-width:400px;}
+  .switch{position:relative;display:inline-block;width:40px;height:22px;flex:0 0 40px;}
+  .switch input{opacity:0;width:0;height:0;}
+  .switch .slider{position:absolute;inset:0;background:var(--line);border-radius:100px;cursor:pointer;transition:background .15s;}
+  .switch .slider::before{content:"";position:absolute;width:16px;height:16px;left:3px;top:3px;background:#fff;border-radius:50%;transition:transform .15s;box-shadow:0 1px 2px rgba(0,0,0,.2);}
+  .switch input:checked + .slider{background:var(--blue-600);}
+  .switch input:checked + .slider::before{transform:translateX(18px);}
+
+  .pw-wrap{position:relative;}
+  .pw-wrap input{padding-right:40px;}
+  .pw-eye{position:absolute;right:11px;top:50%;transform:translateY(-50%);cursor:pointer;color:var(--ink-300);display:flex;}
+  .pw-eye:hover{color:var(--ink-500);}
+  .pw-strength{margin:-10px 0 18px;}
+  .pw-strength-bar{height:5px;background:var(--line);border-radius:3px;overflow:hidden;margin-bottom:6px;}
+  .pw-strength-fill{height:100%;width:0%;background:var(--red);border-radius:3px;transition:width .2s,background .2s;}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="brand">
+      <img class="brand-logo" src="data:image/png;base64,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" alt="Centrum Laboratory">
+      <div class="role-badge">TEACHER</div>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-label">OVERVIEW</div>
+      <div class="nav-item" data-page="dashboard">
+        <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 2"/></svg></span>
+        Dashboard
+      </div>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-label">REPORTING</div>
+      <div class="nav-item" data-page="report">
+        <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg></span>
+        Report an Issue
+      </div>
+      <div class="nav-item" data-page="myreports">
+        <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3h9l5 5v13H6z"/><path d="M9 12h6M9 16h6M9 8h3"/></svg></span>
+        My Reports
+      </div>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-label">ASSETS</div>
+      <div class="nav-item" data-page="inventory">
+        <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="12" rx="1"/><path d="M8 20h8M12 16v4"/></svg></span>
+        Unit Inventory
+      </div>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-label">SYSTEM</div>
+      <div class="nav-item" data-page="settings">
+        <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></span>
+        Settings
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="topbar">
+      <div class="search">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+        Search reports, units, rooms&hellip;
+      </div>
+      <div class="user-dropdown-wrap">
+        <div class="user" onclick="toggleUserMenu(event)">
+          <div class="avatar">AL</div>
+          <div style="font-size:13px;font-weight:600;">Alwyna Lopez</div>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+        <div class="user-menu" id="user-menu">
+          <div class="user-menu-item" onclick="goTo('settings'); toggleUserMenu();">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+            Settings
+          </div>
+          <div class="user-menu-item danger" onclick="logout()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+            Log out
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- ================= DASHBOARD ================= -->
+      <div class="page" id="page-dashboard">
+        <div class="crumbs">Overview &nbsp;&rsaquo;&nbsp; <b>Dashboard</b></div>
+        <p class="page-title">Dashboard</p>
+
+        <div class="stat-row" id="stat-row"></div>
+
+        <div class="card section-card" style="margin-bottom:18px;">
+          <div class="section-head">
+            <h3>Recent Activity</h3>
+            <div style="display:flex;align-items:center;gap:16px;">
+              <div class="ra-legend">
+                <span><span class="dot green"></span>Resolved</span>
+                <span><span class="dot amber"></span>In Progress</span>
+                <span><span class="dot red"></span>Follow-Up</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" onclick="goTo('myreports')">View My Reports</button>
+            </div>
+          </div>
+          <div id="dash-activity"></div>
+        </div>
+
+        <div class="card section-card">
+          <div class="section-head">
+            <h3>Room at a Glance</h3>
+            <button class="btn btn-ghost btn-sm" onclick="goTo('inventory')">View Inventory</button>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;font-size:13px;color:var(--ink-500);">
+            Select Room:
+            <select class="input filter-select" id="glance-room-select" onchange="renderRoomGlance()">
+              <option value="CL 1">CL 1</option>
+              <option value="CL 2">CL 2</option>
+              <option value="CL 3">CL 3</option>
+              <option value="CL 4">CL 4</option>
+            </select>
+          </div>
+          <div id="dash-room-glance"></div>
+        </div>
+      </div>
+
+      <!-- ================= REPORT AN ISSUE ================= -->
+      <div class="page" id="page-report">
+        <div class="crumbs">Reporting &nbsp;&rsaquo;&nbsp; <b>Report an Issue</b></div>
+        <p class="page-title">Report an Issue</p>
+        <p class="page-sub">Tell us what's wrong &mdash; the technician gets notified right away.</p>
+
+        <div class="wizard-steps">
+          <div class="wz-step current" id="wz-step-1"><div class="wz-num">1</div><div class="wz-step-label">Describe the issue</div></div>
+          <div class="wz-line"></div>
+          <div class="wz-step" id="wz-step-2"><div class="wz-num">2</div><div class="wz-step-label">Review</div></div>
+          <div class="wz-line"></div>
+          <div class="wz-step" id="wz-step-3"><div class="wz-num">3</div><div class="wz-step-label">Done</div></div>
+        </div>
+
+        <!-- STEP 1: FORM -->
+        <div id="report-step-form" class="card form-card">
+          <div class="form-row-2">
+            <div>
+              <label class="field-label">Room</label>
+              <select class="input" id="f-room" onchange="onRoomChange()">
+                <option value="">Select a room</option>
+                <option value="CL 1">Centrum Laboratory 1</option>
+                <option value="CL 2">Centrum Laboratory 2</option>
+                <option value="CL 3">Centrum Laboratory 3</option>
+                <option value="CL 4">Centrum Laboratory 4</option>
+              </select>
+            </div>
+            <div>
+              <label class="field-label">Computer unit</label>
+              <select class="input" id="f-unit" disabled>
+                <option value="">Select a room first</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <label class="field-label">Issue type &nbsp;<span style="font-weight:400;color:var(--ink-300);">(select all that apply)</span></label>
+            <div class="chip-grid" id="issue-chip-grid">
+              <div class="chip" data-issue="Won't turn on">Won't turn on</div>
+              <div class="chip" data-issue="Slow performance">Slow performance</div>
+              <div class="chip" data-issue="No internet">No internet</div>
+              <div class="chip" data-issue="Blue screen (BSOD)">Blue screen (BSOD)</div>
+              <div class="chip" data-issue="Missing keyboard">Missing keyboard</div>
+              <div class="chip" data-issue="Missing mouse">Missing mouse</div>
+              <div class="chip" data-issue="Monitor issue">Monitor issue</div>
+              <div class="chip" data-issue="Software error">Software error</div>
+              <div class="chip other" data-issue="Other" onclick="toggleOtherBox()">Other</div>
+            </div>
+            <div class="other-issue-box" id="other-issue-box">
+              <label class="field-label" style="margin-top:10px;">Describe the other issue(s)</label>
+              <input class="input" id="f-other-issue" placeholder="e.g. sticky spacebar, cracked casing">
+              <div class="helptext">Separate more than one with a comma.</div>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <label class="field-label">Comment &nbsp;<span style="font-weight:400;color:var(--ink-300);">(optional)</span></label>
+            <textarea class="input" id="f-comment" placeholder="Add any extra detail that could help the technician &mdash; when it started, what you were doing, etc."></textarea>
+          </div>
+
+          <div class="helptext" style="margin-bottom:-6px;">Your name and the date &amp; time are added automatically when you submit.</div>
+
+          <div class="form-footer">
+            <button class="btn btn-ghost" onclick="discardReport()">Discard</button>
+            <button class="btn btn-primary" id="btn-review" onclick="goToReview()" disabled>Review report</button>
+          </div>
+        </div>
+
+        <!-- STEP 2: REVIEW -->
+        <div id="report-step-review" class="card review-card" style="display:none;">
+          <div class="review-row"><div class="review-label">Reported by</div><div class="review-value">Alwyna Lopez</div></div>
+          <div class="review-row"><div class="review-label">Date &amp; time</div><div class="review-value" id="rv-datetime">&mdash;</div></div>
+          <div class="review-row"><div class="review-label">Room</div><div class="review-value" id="rv-room">&mdash;</div></div>
+          <div class="review-row"><div class="review-label">Computer unit</div><div class="review-value" id="rv-unit">&mdash;</div></div>
+          <div class="review-row"><div class="review-label">Issue type(s)</div><div class="review-value"><div class="review-chips" id="rv-issues"></div></div></div>
+          <div class="review-row"><div class="review-label">Comment</div><div class="review-value" id="rv-comment">&mdash;</div></div>
+
+          <div class="review-note">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex:0 0 15px;margin-top:1px;"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4h1"/></svg>
+            <div>Once submitted, this report can't be edited or deleted. The technician will pick it up from here.</div>
+          </div>
+
+          <div class="form-footer">
+            <button class="btn btn-danger-ghost" onclick="discardReport()">Discard</button>
+            <button class="btn btn-ghost" onclick="backToEdit()">Edit</button>
+            <button class="btn btn-primary" onclick="submitReport()">Confirm &amp; submit</button>
+          </div>
+        </div>
+
+        <!-- STEP 3: CONFIRMATION -->
+        <div id="report-step-done" class="card confirm-wrap" style="display:none;">
+          <div class="confirm-icon">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+          </div>
+          <h2 style="margin:0 0 8px;font-size:19px;">Report submitted</h2>
+          <p style="color:var(--ink-500);font-size:13.5px;margin:0 0 18px;">
+            Report <span class="confirm-id" id="done-report-id">CL-0000</span> is now in the technician's queue.
+            You'll see its status update in My Reports.
+          </p>
+          <div style="display:flex;gap:10px;justify-content:center;">
+            <button class="btn btn-ghost" onclick="startNewReport()">Report another issue</button>
+            <button class="btn btn-primary" onclick="goTo('myreports')">View my reports</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= MY REPORTS ================= -->
+      <div class="page" id="page-myreports">
+        <div class="crumbs">Reporting &nbsp;&rsaquo;&nbsp; <b>My Reports</b></div>
+        <p class="page-title">My Reports</p>
+        <p class="page-sub">Reports you've sent. You can track their status here &mdash; the technician handles the fix.</p>
+
+        <div class="reports-toolbar">
+          <div class="toolbar-left">
+            <div class="search-input">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+              <input class="input" id="reports-search" placeholder="Search room, unit, or issue" oninput="renderReports()">
+            </div>
+            <div class="sortby">
+              Sort by
+              <select id="reports-sort" onchange="renderReports()">
+                <option value="date-desc">Newest first</option>
+                <option value="date-asc">Oldest first</option>
+                <option value="status">Status</option>
+                <option value="room">Room</option>
+              </select>
+            </div>
+          </div>
+          <div class="count-badge"><b id="reports-count">0</b> reports</div>
+        </div>
+
+        <div class="card" style="overflow:hidden;">
+          <table class="reports-table">
+            <thead>
+              <tr>
+                <th>Report ID</th>
+                <th>Room / Unit</th>
+                <th>Issue type(s)</th>
+                <th>Status</th>
+                <th>Date &amp; time</th>
+              </tr>
+            </thead>
+            <tbody id="reports-tbody"></tbody>
+          </table>
+          <div class="empty-state" id="reports-empty" style="display:none;">
+            <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 3h9l5 5v13H6z"/><path d="M9 12h6M9 16h6"/></svg>
+            <div>No reports match your search.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= UNIT INVENTORY (grid) ================= -->
+      <div class="page" id="page-inventory">
+        <div id="inventory-grid-view">
+          <div class="crumbs">Assets &nbsp;&rsaquo;&nbsp; <b>Unit Inventory</b></div>
+          <p class="page-title">Unit Inventory</p>
+          <p class="page-sub">Tap a unit to see its full hardware, software, and maintenance history.</p>
+
+          <div class="room-tabs" id="room-tabs"></div>
+
+          <div class="inv-toolbar">
+            <div style="font-size:13px;color:var(--ink-500);"><span id="inv-total-count">0</span> computer(s)</div>
+            <div class="inv-filters">
+              <label><input type="radio" name="inv-filter" value="all" checked onchange="renderUnitGrid()">All</label>
+              <label><input type="radio" name="inv-filter" value="good" onchange="renderUnitGrid()"><span class="dot green"></span>Good</label>
+              <label><input type="radio" name="inv-filter" value="issue" onchange="renderUnitGrid()"><span class="dot amber"></span>Have issue</label>
+              <label><input type="radio" name="inv-filter" value="replace" onchange="renderUnitGrid()"><span class="dot red"></span>Need replacement</label>
+            </div>
+          </div>
+
+          <div class="unit-grid" id="unit-grid"></div>
+        </div>
+
+        <!-- UNIT DETAIL -->
+        <div id="inventory-detail-view" style="display:none;">
+          <div class="back-link" onclick="closeUnitDetail()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 18l-6-6 6-6"/></svg>
+            Back to Unit Inventory
+          </div>
+
+          <div class="unit-detail-header">
+            <div>
+              <div class="unit-title-row">
+                <h1 id="det-title">Unit</h1>
+                <span class="pill" id="det-status-pill">Good</span>
+              </div>
+              <p style="color:var(--ink-500);font-size:13px;margin:6px 0 0;" id="det-subtitle">Centrum Laboratory 1</p>
+            </div>
+          </div>
+
+          <div class="detail-grid">
+            <div>
+              <div class="tabs-row">
+                <div class="tab-btn active" data-tab="hardware" onclick="switchDetailTab('hardware')">Hardware</div>
+                <div class="tab-btn" data-tab="software" onclick="switchDetailTab('software')">Software</div>
+                <div class="tab-btn" data-tab="history" onclick="switchDetailTab('history')">Maintenance history</div>
+              </div>
+
+              <div class="card" style="padding:22px;">
+                <div class="tab-panel active" id="panel-hardware">
+                  <table class="spec-table" id="hardware-table"></table>
+                </div>
+                <div class="tab-panel" id="panel-software">
+                  <ul class="sw-list" id="software-list"></ul>
+                </div>
+                <div class="tab-panel" id="panel-history">
+                  <div id="history-list"></div>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <div class="card side-card">
+                <h4>Issues logged</h4>
+                <div class="issue-count-big" id="side-issue-count">0</div>
+                <div class="issue-count-label">total reports on this unit</div>
+              </div>
+              <div class="card side-card">
+                <h4>Lifecycle</h4>
+                <table class="spec-table" id="lifecycle-table"></table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= SETTINGS ================= -->
+      <div class="page" id="page-settings">
+        <div class="crumbs">System &nbsp;&rsaquo;&nbsp; <b>Settings</b></div>
+        <p class="page-title">Settings</p>
+        <p class="page-sub">Manage your profile, notifications, and password.</p>
+
+        <div class="settings-layout">
+          <div class="settings-menu-col">
+            <div class="settings-menu">
+              <div class="settings-menu-item active" data-stab="profile" onclick="switchSettingsTab('profile')">
+                <span class="settings-menu-icon purple"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></span>
+                <span class="settings-menu-label">Profile</span>
+              </div>
+              <div class="settings-menu-item" data-stab="notifications" onclick="switchSettingsTab('notifications')">
+                <span class="settings-menu-icon orange"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg></span>
+                <span class="settings-menu-label">Notifications</span>
+              </div>
+              <div class="settings-menu-item" data-stab="security" onclick="switchSettingsTab('security')">
+                <span class="settings-menu-icon blue"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="1.5"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span>
+                <span class="settings-menu-label">Password and Security</span>
+              </div>
+            </div>
+            <button class="settings-logout-btn" onclick="logout()">Logout</button>
+          </div>
+
+          <div class="settings-content">
+        <!-- PROFILE -->
+        <div class="settings-panel active" id="spanel-profile">
+          <div class="card settings-card">
+            <h3 class="settings-card-title">Profile details</h3>
+            <div class="profile-row">
+              <div class="avatar-lg">AL</div>
+              <div>
+                <button class="btn btn-ghost btn-sm" type="button">Change photo</button>
+                <div class="helptext" style="margin-top:6px;">JPG or PNG, up to 2MB.</div>
+              </div>
+            </div>
+
+            <div class="profile-fixed-block">
+              <div class="profile-field-label">Full Name</div>
+              <div class="profile-fixed-name muted">Alwyna Lopez</div>
+            </div>
+
+            <hr class="profile-divider">
+
+            <div class="profile-field-label" style="margin-bottom:12px;">Contact info</div>
+
+            <div class="contact-info-row">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.1-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.7a2 2 0 0 1-.5 2.1L7.9 9.9a16 16 0 0 0 6 6l1.4-1.4a2 2 0 0 1 2.1-.5c.9.3 1.8.5 2.7.6a2 2 0 0 1 1.9 2.1z"/></svg>
+              <span class="contact-info-value" id="profile-number-display">0983 765 6748</span>
+              <span class="contact-info-edit" onclick="toggleInlineEdit('number')" title="Edit contact number">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5z"/></svg>
+              </span>
+            </div>
+            <div class="profile-inline-edit" id="profile-number-edit" style="display:none;">
+              <input class="input" type="tel" id="profile-number-input" placeholder="09XX XXX XXXX">
+              <div style="display:flex;gap:8px;margin-top:8px;">
+                <button class="btn btn-primary btn-sm" onclick="saveInlineEdit('number')">Save</button>
+                <button class="btn btn-ghost btn-sm" onclick="cancelInlineEdit('number')">Cancel</button>
+              </div>
+            </div>
+
+            <div class="contact-info-row" style="margin-bottom:0;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 7l10 6 10-6"/></svg>
+              <span class="contact-info-value">alwyna.lopez@isu.edu.ph</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- NOTIFICATIONS -->
+        <div class="settings-panel" id="spanel-notifications">
+          <div class="card settings-card">
+            <h3 class="settings-card-title">Notification preferences</h3>
+            <p class="helptext" style="margin:-8px 0 18px;">Choose how you want to hear about updates on your reports.</p>
+
+            <div class="toggle-row">
+              <div>
+                <div class="toggle-row-title">Report status updates</div>
+                <div class="toggle-row-sub">Get notified when a technician starts or finishes fixing your report.</div>
+              </div>
+              <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
+            </div>
+            <div class="toggle-row">
+              <div>
+                <div class="toggle-row-title">Follow-up flags</div>
+                <div class="toggle-row-sub">Get notified if a unit you reported is flagged for repeated issues.</div>
+              </div>
+              <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
+            </div>
+            <div class="toggle-row">
+              <div>
+                <div class="toggle-row-title">Email notifications</div>
+                <div class="toggle-row-sub">Send the above updates to your email as well as in-app.</div>
+              </div>
+              <label class="switch"><input type="checkbox"><span class="slider"></span></label>
+            </div>
+            <div class="toggle-row" style="border-bottom:none;">
+              <div>
+                <div class="toggle-row-title">Weekly summary</div>
+                <div class="toggle-row-sub">A Monday recap of all your open and resolved reports.</div>
+              </div>
+              <label class="switch"><input type="checkbox"><span class="slider"></span></label>
+            </div>
+
+            <div class="form-footer" style="border-top:none;padding-top:4px;">
+              <button class="btn btn-primary" onclick="showToast('Notification preferences saved')">Save changes</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECURITY -->
+        <div class="settings-panel" id="spanel-security">
+          <div class="card settings-card">
+            <h3 class="settings-card-title">Change password</h3>
+            <div class="form-row">
+              <label class="field-label">Current password</label>
+              <div class="pw-wrap">
+                <input class="input" type="password" id="pw-current" placeholder="Enter current password">
+                <span class="pw-eye" onclick="togglePw('pw-current')" id="eye-pw-current"></span>
+              </div>
+            </div>
+            <div class="form-row-2">
+              <div>
+                <label class="field-label">New password</label>
+                <div class="pw-wrap">
+                  <input class="input" type="password" id="pw-new" placeholder="At least 8 characters" oninput="checkPwStrength()">
+                  <span class="pw-eye" onclick="togglePw('pw-new')" id="eye-pw-new"></span>
+                </div>
+              </div>
+              <div>
+                <label class="field-label">Confirm new password</label>
+                <div class="pw-wrap">
+                  <input class="input" type="password" id="pw-confirm" placeholder="Re-enter new password">
+                  <span class="pw-eye" onclick="togglePw('pw-confirm')" id="eye-pw-confirm"></span>
+                </div>
+              </div>
+            </div>
+            <div class="pw-strength" id="pw-strength-wrap" style="display:none;">
+              <div class="pw-strength-bar"><div class="pw-strength-fill" id="pw-strength-fill"></div></div>
+              <div class="helptext" id="pw-strength-label">Weak</div>
+            </div>
+            <div class="form-footer" style="border-top:none;padding-top:12px;">
+              <button class="btn btn-primary" onclick="showToast('Password updated')">Update password</button>
+            </div>
+          </div>
+
+          <div class="card settings-card">
+            <h3 class="settings-card-title">Active sessions</h3>
+            <p class="helptext" style="margin:-8px 0 16px;">Sign out from other devices you may have logged into.</p>
+            <button class="btn btn-danger-ghost btn-sm" onclick="showToast('Signed out of all other sessions')">Sign out of other devices</button>
+          </div>
+        </div>
+
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"><span class="dot green"></span><span id="toast-text">Saved</span></div>
+
+<script>
+/* ---------------------------------------------------------------
+   DATA
+--------------------------------------------------------------- */
+const ROOMS = ["CL 1","CL 2","CL 3","CL 4"];
+const UNIT_COUNTS = {"CL 1":35,"CL 2":28,"CL 3":30,"CL 4":32};
+
+// status per unit for CL1 (matches the screenshots), other rooms randomized-but-fixed
+const CL1_STATUS = {2:"issue",10:"issue",12:"issue",15:"replace"};
+function statusFor(room, num){
+  if(room === "CL 1" && CL1_STATUS[num]) return CL1_STATUS[num];
+  // deterministic pseudo-variety for other rooms
+  const seed = (room.charCodeAt(3) + num*7) % 23;
+  if(seed === 3) return "issue";
+  if(seed === 11) return "replace";
+  return "good";
+}
+
+const UNIT_DETAILS = {
+  "CL 1-02": {
+    hardware:{"Processor":"Intel Core i5-10400 @ 2.90GHz","RAM":"8 GB DDR4","Storage":"256 GB SSD","GPU":"Intel UHD 630","Monitor":"19\" LED","Peripherals":"Keyboard, Mouse"},
+    software:[["Windows 10 Pro","Licensed \u2014 up to date"],["Google Chrome","v128 \u2014 up to date"],["Microsoft Office 2019","Licensed"],["VS Code","v1.92"],["Antivirus (Defender)","Active"]],
+    system:{"OS build":"19045.4780","Last update check":"Aug 20, 2026","Domain":"CCSICT-LAB","Asset tag":"CL1-U02","IP address":"192.168.14.32"},
+    lifecycle:{"Deployed":"June 2023","Warranty":"Expired Jun 2025","Age":"3 yrs 3 mo","Flag":"None"},
+    history:[
+      {date:"Aug 21, 2026 \u00b7 8:19 AM", issue:"Slow performance", comment:"Takes almost 5 minutes to boot and opens apps slowly.", action:"Cleared temp files and disabled unnecessary startup apps. Ran disk cleanup.", status:"progress", by:"In progress"},
+      {date:"May 03, 2026 \u00b7 1:40 PM", issue:"Slow performance", comment:"Laggy during video playback.", action:"Updated GPU driver and added 4GB RAM stick.", status:"resolved", by:"Resolved by J. Domingo"},
+      {date:"Jan 14, 2026 \u00b7 10:02 AM", issue:"Software error", comment:"Office kept crashing when saving files.", action:"Reinstalled Microsoft Office and applied latest patch.", status:"resolved", by:"Resolved by J. Domingo"}
+    ]
+  },
+  "CL 1-10": {
+    hardware:{"Processor":"Intel Core i5-10400 @ 2.90GHz","RAM":"8 GB DDR4","Storage":"256 GB SSD","GPU":"Intel UHD 630","Monitor":"19\" LED","Peripherals":"Keyboard, Mouse"},
+    software:[["Windows 10 Pro","Licensed \u2014 up to date"],["Google Chrome","v127 \u2014 update available"],["Microsoft Office 2019","Licensed"]],
+    system:{"OS build":"19045.4780","Last update check":"Jul 30, 2026","Domain":"CCSICT-LAB","Asset tag":"CL1-U10","IP address":"192.168.14.40"},
+    lifecycle:{"Deployed":"June 2023","Warranty":"Expired Jun 2025","Age":"3 yrs 3 mo","Flag":"None"},
+    history:[
+      {date:"Aug 18, 2026 \u00b7 11:09 AM", issue:"No internet", comment:"Ethernet connected but no internet access shown.", action:"Checking network switch port \u2014 technician notified.", status:"progress", by:"In progress"},
+      {date:"Mar 02, 2026 \u00b7 9:15 AM", issue:"No internet", comment:"Same issue as before, keeps disconnecting.", action:"Replaced LAN cable and reset network adapter.", status:"resolved", by:"Resolved by J. Domingo"}
+    ]
+  },
+  "CL 1-12": {
+    hardware:{"Processor":"Intel Core i3-10100 @ 3.60GHz","RAM":"8 GB DDR4","Storage":"256 GB SSD","GPU":"Intel UHD 630","Monitor":"19\" LED","Peripherals":"Keyboard, Mouse"},
+    software:[["Windows 10 Pro","Licensed \u2014 up to date"],["Google Chrome","v128 \u2014 up to date"]],
+    system:{"OS build":"19045.4780","Last update check":"Aug 10, 2026","Domain":"CCSICT-LAB","Asset tag":"CL1-U12","IP address":"192.168.14.42"},
+    lifecycle:{"Deployed":"June 2023","Warranty":"Expired Jun 2025","Age":"3 yrs 3 mo","Flag":"None"},
+    history:[
+      {date:"Jul 30, 2026 \u00b7 2:05 PM", issue:"Missing mouse", comment:"Mouse is gone from the unit.", action:"Replacement mouse issued from stock.", status:"resolved", by:"Resolved by J. Domingo"}
+    ]
+  },
+  "CL 1-15": {
+    hardware:{"Processor":"Intel Core i3-8100 @ 3.60GHz","RAM":"4 GB DDR4","Storage":"128 GB SSD","GPU":"Intel UHD 630","Monitor":"19\" LED (flickering)","Peripherals":"Keyboard, Mouse"},
+    software:[["Windows 10 Pro","Licensed \u2014 outdated"],["Google Chrome","v119 \u2014 outdated"]],
+    system:{"OS build":"19044.3086","Last update check":"Feb 2, 2026","Domain":"CCSICT-LAB","Asset tag":"CL1-U15","IP address":"192.168.14.45"},
+    lifecycle:{"Deployed":"Jan 2020","Warranty":"Expired Jan 2022","Age":"6 yrs 8 mo","Flag":"Needs replacement"},
+    history:[
+      {date:"Jul 01, 2026 \u00b7 10:05 AM", issue:"Won't turn on", comment:"No response even when plugged directly to outlet.", action:"Diagnosed failing PSU. 5th report on this unit \u2014 flagged for full inspection.", status:"followup", by:"Needs follow-up"},
+      {date:"Apr 22, 2026 \u00b7 9:00 AM", issue:"Won't turn on", comment:"Powers on then shuts off after a few seconds.", action:"Cleaned dust from internals, reseated RAM.", status:"resolved", by:"Resolved by J. Domingo"},
+      {date:"Feb 11, 2026 \u00b7 8:45 AM", issue:"Slow performance", comment:"Very slow to load anything.", action:"Ran malware scan, cleared disk space.", status:"resolved", by:"Resolved by J. Domingo"},
+      {date:"Nov 06, 2025 \u00b7 1:20 PM", issue:"Monitor issue", comment:"Screen flickers on and off.", action:"Replaced VGA cable.", status:"resolved", by:"Resolved by J. Domingo"},
+      {date:"Sep 15, 2025 \u00b7 10:30 AM", issue:"Won't turn on", comment:"Had to restart twice before it booted.", action:"Checked power supply, temporary fix applied.", status:"resolved", by:"Resolved by J. Domingo"}
+    ]
+  }
+};
+
+function defaultDetail(room, num, status){
+  const good = status === "good";
+  return {
+    hardware:{"Processor":"Intel Core i3-10100 @ 3.60GHz","RAM":"8 GB DDR4","Storage":"256 GB SSD","GPU":"Intel UHD 630","Monitor":"19\" LED","Peripherals":"Keyboard, Mouse"},
+    software:[["Windows 10 Pro","Licensed \u2014 up to date"],["Google Chrome","v128 \u2014 up to date"],["Microsoft Office 2019","Licensed"]],
+    system:{"OS build":"19045.4780","Last update check":"Aug 2026","Domain":"CCSICT-LAB","Asset tag":room.replace(" ","")+"-U"+String(num).padStart(2,"0"),"IP address":"192.168.14."+(20+num)},
+    lifecycle:{"Deployed":"June 2023","Warranty":"Expired Jun 2025","Age":"3 yrs 3 mo","Flag": status==="replace" ? "Needs replacement" : "None"},
+    history: good ? [] : [{date:"Jun 2026", issue:"General issue", comment:"", action:"Logged and pending review.", status: status==="replace" ? "followup" : "progress", by: status==="replace" ? "Needs follow-up" : "In progress"}]
+  };
+}
+
+/* ---------------------------------------------------------------
+   NAVIGATION
+--------------------------------------------------------------- */
+document.querySelectorAll('.nav-item').forEach(el=>{
+  el.addEventListener('click', ()=> goTo(el.dataset.page));
+});
+function goTo(page){
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('active', n.dataset.page===page));
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  if(page==='myreports') renderReports();
+  if(page==='inventory') { closeUnitDetail(); renderUnitGrid(); }
+  if(page==='dashboard') renderDashboard();
+}
+
+/* ---------------------------------------------------------------
+   REPORT AN ISSUE
+--------------------------------------------------------------- */
+let selectedIssues = new Set();
+let editingBackFromReview = false;
+
+function onRoomChange(){
+  const room = document.getElementById('f-room').value;
+  const unitSel = document.getElementById('f-unit');
+  unitSel.innerHTML = '';
+  if(!room){
+    unitSel.disabled = true;
+    unitSel.innerHTML = '<option value="">Select a room first</option>';
+  } else {
+    unitSel.disabled = false;
+    unitSel.innerHTML = '<option value="">Select a unit</option>';
+    const n = UNIT_COUNTS[room];
+    for(let i=1;i<=n;i++){
+      const label = "Unit "+String(i).padStart(2,"0");
+      unitSel.innerHTML += `<option value="${label}">${label}</option>`;
+    }
+  }
+  validateForm();
+}
+document.getElementById('f-unit').addEventListener('change', validateForm);
+
+document.querySelectorAll('.chip[data-issue]').forEach(chip=>{
+  chip.addEventListener('click', ()=>{
+    if(chip.dataset.issue === "Other") return; // handled separately by toggleOtherBox
+    chip.classList.toggle('selected');
+    if(chip.classList.contains('selected')) selectedIssues.add(chip.dataset.issue);
+    else selectedIssues.delete(chip.dataset.issue);
+    validateForm();
+  });
+});
+function toggleOtherBox(){
+  const chip = document.querySelector('.chip.other');
+  chip.classList.toggle('selected');
+  const box = document.getElementById('other-issue-box');
+  box.classList.toggle('show', chip.classList.contains('selected'));
+  if(!chip.classList.contains('selected')) document.getElementById('f-other-issue').value='';
+  validateForm();
+}
+document.getElementById('f-other-issue').addEventListener('input', validateForm);
+
+function validateForm(){
+  const room = document.getElementById('f-room').value;
+  const unit = document.getElementById('f-unit').value;
+  const otherChecked = document.querySelector('.chip.other').classList.contains('selected');
+  const otherText = document.getElementById('f-other-issue').value.trim();
+  const hasIssue = selectedIssues.size>0 || (otherChecked && otherText.length>0);
+  document.getElementById('btn-review').disabled = !(room && unit && hasIssue);
+}
+
+function currentIssueList(){
+  const list = [...selectedIssues];
+  const otherChecked = document.querySelector('.chip.other').classList.contains('selected');
+  if(otherChecked){
+    const extra = document.getElementById('f-other-issue').value.split(',').map(s=>s.trim()).filter(Boolean);
+    list.push(...extra);
+  }
+  return list;
+}
+
+function goToReview(){
+  const room = document.getElementById('f-room').value;
+  const unit = document.getElementById('f-unit').value;
+  const comment = document.getElementById('f-comment').value.trim();
+  const issues = currentIssueList();
+
+  document.getElementById('rv-room').textContent = "Centrum Laboratory " + room.split(" ")[1];
+  document.getElementById('rv-unit').textContent = unit;
+  document.getElementById('rv-comment').textContent = comment || "\u2014";
+  document.getElementById('rv-datetime').textContent = nowString();
+  document.getElementById('rv-issues').innerHTML = issues.map(i=>`<span class="issue-tag">${escapeHtml(i)}</span>`).join('');
+
+  document.getElementById('report-step-form').style.display='none';
+  document.getElementById('report-step-review').style.display='block';
+  setWizard(2);
+}
+function backToEdit(){
+  document.getElementById('report-step-review').style.display='none';
+  document.getElementById('report-step-form').style.display='block';
+  setWizard(1);
+}
+function setWizard(step){
+  [1,2,3].forEach(s=>{
+    const el = document.getElementById('wz-step-'+s);
+    el.classList.remove('current','done');
+    if(s<step) el.classList.add('done');
+    if(s===step) el.classList.add('current');
+  });
+}
+
+let reportCounter = 1043;
+let reports = [
+  {id:"CL-1039", room:"CL 3", unit:"Unit 03", issues:["Won't turn on"], status:"followup", date:"Jul 01, 2026 \u00b7 10:05 AM", sortDate: new Date(2026,6,1,10,5)},
+  {id:"CL-1040", room:"CL 2", unit:"Unit 02", issues:["No internet"], status:"progress", date:"Aug 18, 2026 \u00b7 11:09 AM", sortDate: new Date(2026,7,18,11,9)},
+  {id:"CL-1041", room:"CL 1", unit:"Unit 02", issues:["Slow performance"], status:"resolved", date:"Aug 21, 2026 \u00b7 8:19 AM", sortDate: new Date(2026,7,21,8,19)},
+  {id:"CL-1028", room:"CL 1", unit:"Unit 12", issues:["Missing mouse"], status:"resolved", date:"Jul 30, 2026 \u00b7 2:05 PM", sortDate: new Date(2026,6,30,14,5)},
+  {id:"CL-1029", room:"CL 2", unit:"Unit 05", issues:["Monitor issue"], status:"resolved", date:"Jul 22, 2026 \u00b7 10:00 AM", sortDate: new Date(2026,6,22,10,0)},
+  {id:"CL-1030", room:"CL 4", unit:"Unit 08", issues:["Slow performance"], status:"resolved", date:"Jul 15, 2026 \u00b7 9:30 AM", sortDate: new Date(2026,6,15,9,30)},
+  {id:"CL-1031", room:"CL 3", unit:"Unit 14", issues:["Software error"], status:"resolved", date:"Jul 10, 2026 \u00b7 8:45 AM", sortDate: new Date(2026,6,10,8,45)},
+  {id:"CL-1025", room:"CL 1", unit:"Unit 10", issues:["No internet"], status:"resolved", date:"Mar 02, 2026 \u00b7 9:15 AM", sortDate: new Date(2026,2,2,9,15)},
+  {id:"CL-1042", room:"CL 4", unit:"Unit 05", issues:["Software error"], status:"progress", date:"Sep 05, 2026 \u00b7 1:00 PM", sortDate: new Date(2026,8,5,13,0)}
+];
+
+/* ---------------------------------------------------------------
+   DASHBOARD
+--------------------------------------------------------------- */
+function iconDoc(){return '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3h9l5 5v13H6z"/><path d="M9 12h6M9 16h6M9 8h3"/></svg>';}
+function iconClock(){return '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>';}
+function iconCheck(){return '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M20 6L9 17l-5-5"/></svg>';}
+function iconFlag(){return '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 21V4a1 1 0 0 1 1-1h11l-2 5 2 5H6a1 1 0 0 0-1 1v7"/></svg>';}
+
+function renderDashboard(){
+  const myReports = reports.length;
+  const inProgress = reports.filter(r=>r.status==='progress').length;
+  const resolvedCount = reports.filter(r=>r.status==='resolved').length;
+  const followupCount = reports.filter(r=>r.status==='followup').length;
+
+  const stats = [
+    {label:"My Reports", value:myReports, sub:"all-time submissions", color:"blue", icon:iconDoc()},
+    {label:"Being Fixed (in progress)", value:inProgress, sub:"awaiting a fix", color:"amber", icon:iconClock()},
+    {label:"Resolved", value:resolvedCount, sub:"issues fixed", color:"green", icon:iconCheck()},
+    {label:"Needs Follow-Up", value:followupCount, sub:"repeat or unresolved", color:"red", icon:iconFlag()}
+  ];
+  document.getElementById('stat-row').innerHTML = stats.map(s=>`
+    <div class="card stat-card">
+      <div class="stat-top"><div class="stat-icon" style="color:var(--${s.color==='blue'?'blue-600':s.color});">${s.icon}</div><div class="stat-label">${s.label}</div></div>
+      <div class="stat-value">${s.value}</div>
+      <div class="stat-sub">${s.sub}</div>
+    </div>`).join('');
+
+  const recent = reports.slice().sort((a,b)=>b.sortDate-a.sortDate).slice(0,5);
+  document.getElementById('dash-activity').innerHTML = recent.map(r=>{
+    const meta = STATUS_META[r.status];
+    return `<div class="activity-card st-${r.status}" onclick="goTo('myreports');" style="cursor:pointer;">
+      <div>
+        <div class="ac-title">${r.room} - ${r.unit}</div>
+        <div class="ac-sub">Issue: ${r.issues.length}</div>
+        <div class="ac-tag">${escapeHtml(r.issues[0])}${r.issues.length>1?' +'+(r.issues.length-1):''}</div>
+      </div>
+      <div class="ac-right">
+        <span class="pill ${meta.cls}">${meta.label}</span>
+        <div class="ac-date-label" style="margin-top:8px;">Date &amp; Time</div>
+        <div class="ac-date-value">${r.date}</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  renderRoomGlance();
+}
+
+function renderRoomGlance(){
+  const room = document.getElementById('glance-room-select').value;
+  const total = UNIT_COUNTS[room];
+  let good=0, issue=0, replace=0;
+  for(let i=1;i<=total;i++){ const s=statusFor(room,i); if(s==='good') good++; else if(s==='issue') issue++; else replace++; }
+  const maxVal = total;
+  const ticks = [0, Math.round(maxVal*0.25), Math.round(maxVal*0.5), Math.round(maxVal*0.75), maxVal];
+
+  document.getElementById('dash-room-glance').innerHTML = `
+    <div class="glance-wrap">
+      <div class="glance-icon">
+        <div class="glance-icon-box">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><rect x="3" y="4" width="18" height="12" rx="1"/><path d="M8 20h8M12 16v4"/></svg>
+        </div>
+        <div class="glance-room-name">Centrum<br>Laboratory ${room.split(' ')[1]}</div>
+      </div>
+      <div class="glance-chart">
+        <div class="glance-bar-row"><div class="glance-bar-track"><div class="glance-bar-fill" style="width:${good/maxVal*100}%;background:#a9d6f5;"></div></div></div>
+        <div class="glance-bar-row"><div class="glance-bar-track"><div class="glance-bar-fill" style="width:${issue/maxVal*100}%;background:#4a84ee;"></div></div></div>
+        <div class="glance-bar-row"><div class="glance-bar-track"><div class="glance-bar-fill" style="width:${replace/maxVal*100}%;background:#1c3f8f;"></div></div></div>
+        <div class="glance-axis">${ticks.map(t=>`<span>${t}</span>`).join('')}</div>
+      </div>
+      <div class="glance-stats">
+        <div class="glance-total-label">Total Computers</div>
+        <div class="glance-total-value">${total}</div>
+        <div class="glance-legend-row"><span class="dot" style="background:#a9d6f5;"></span>Good (working)<span class="glance-legend-count">${good}</span></div>
+        <div class="glance-legend-row"><span class="dot" style="background:#4a84ee;"></span>Not Good (Have issue)<span class="glance-legend-count">${issue}</span></div>
+        <div class="glance-legend-row"><span class="dot" style="background:#1c3f8f;"></span>Need for replacement<span class="glance-legend-count">${replace}</span></div>
+      </div>
+    </div>`;
+}
+
+function submitReport(){
+  const room = document.getElementById('f-room').value;
+  const unit = document.getElementById('f-unit').value;
+  const issues = currentIssueList();
+  reportCounter++;
+  const id = "CL-"+reportCounter;
+  const now = new Date();
+  reports.unshift({
+    id, room, unit, issues, status:"progress",
+    date: nowString(), sortDate: now
+  });
+
+  document.getElementById('done-report-id').textContent = id;
+  document.getElementById('report-step-review').style.display='none';
+  document.getElementById('report-step-done').style.display='block';
+  setWizard(3);
+  showToast("Report "+id+" submitted");
+}
+
+function discardReport(){
+  resetForm();
+}
+function startNewReport(){
+  resetForm();
+}
+function resetForm(){
+  document.getElementById('f-room').value='';
+  onRoomChange();
+  document.getElementById('f-comment').value='';
+  document.getElementById('f-other-issue').value='';
+  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('selected'));
+  document.getElementById('other-issue-box').classList.remove('show');
+  selectedIssues = new Set();
+  validateForm();
+  document.getElementById('report-step-form').style.display='block';
+  document.getElementById('report-step-review').style.display='none';
+  document.getElementById('report-step-done').style.display='none';
+  setWizard(1);
+}
+
+function nowString(){
+  const d = new Date();
+  return d.toLocaleDateString('en-US',{month:'short',day:'2-digit',year:'numeric'}) + " \u00b7 " + d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+}
+function escapeHtml(s){
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+const STATUS_VERB = {resolved:'Resolved', progress:'Updated', followup:'Flagged for follow-up'};
+function formatHistorySentence(h){
+  const datePart = h.date.split(' \u00b7')[0].trim();
+  let weekday = '';
+  const d = new Date(datePart);
+  if(!isNaN(d)) weekday = d.toLocaleDateString('en-US',{weekday:'long'})+', ';
+  const verb = STATUS_VERB[h.status] || 'Updated';
+  return `${verb} on ${weekday}${datePart}: ${escapeHtml(h.action)}`;
+}
+
+/* ---------------------------------------------------------------
+   MY REPORTS
+--------------------------------------------------------------- */
+const STATUS_META = {
+  progress:{label:"Being fixed", cls:"amber"},
+  resolved:{label:"Resolved", cls:"green"},
+  followup:{label:"Needs follow-up", cls:"red"}
+};
+
+function renderReports(){
+  const q = document.getElementById('reports-search').value.trim().toLowerCase();
+  const sort = document.getElementById('reports-sort').value;
+
+  let list = reports.filter(r=>{
+    if(!q) return true;
+    const hay = (r.room+" "+r.unit+" "+r.issues.join(" ")).toLowerCase();
+    return hay.includes(q);
+  });
+
+  list = list.slice().sort((a,b)=>{
+    if(sort==='date-desc') return b.sortDate - a.sortDate;
+    if(sort==='date-asc') return a.sortDate - b.sortDate;
+    if(sort==='status') return a.status.localeCompare(b.status);
+    if(sort==='room') return a.room.localeCompare(b.room);
+    return 0;
+  });
+
+  document.getElementById('reports-count').textContent = list.length;
+  const tbody = document.getElementById('reports-tbody');
+  const empty = document.getElementById('reports-empty');
+
+  if(list.length===0){
+    tbody.innerHTML='';
+    empty.style.display='block';
+    return;
+  }
+  empty.style.display='none';
+
+  tbody.innerHTML = list.map(r=>{
+    const meta = STATUS_META[r.status];
+    return `<tr>
+      <td class="rep-id">${r.id}</td>
+      <td><div class="rep-unit">${r.room} &mdash; ${r.unit}</div></td>
+      <td><div class="issue-tags">${r.issues.map(i=>`<span class="issue-tag">${escapeHtml(i)}</span>`).join('')}</div></td>
+      <td><span class="pill ${meta.cls}">${meta.label}</span></td>
+      <td style="white-space:nowrap;color:var(--ink-500);">${r.date}</td>
+    </tr>`;
+  }).join('');
+}
+
+/* ---------------------------------------------------------------
+   UNIT INVENTORY
+--------------------------------------------------------------- */
+let currentRoom = "CL 1";
+
+function initRoomTabs(){
+  const wrap = document.getElementById('room-tabs');
+  wrap.innerHTML = ROOMS.map(r=>`<div class="room-tab ${r===currentRoom?'active':''}" data-room="${r}">Centrum Laboratory ${r.split(' ')[1]}</div>`).join('');
+  wrap.querySelectorAll('.room-tab').forEach(t=>{
+    t.addEventListener('click', ()=>{
+      currentRoom = t.dataset.room;
+      wrap.querySelectorAll('.room-tab').forEach(x=>x.classList.toggle('active', x===t));
+      renderUnitGrid();
+    });
+  });
+}
+initRoomTabs();
+
+function renderUnitGrid(){
+  const filter = document.querySelector('input[name="inv-filter"]:checked').value;
+  const total = UNIT_COUNTS[currentRoom];
+  document.getElementById('inv-total-count').textContent = total;
+
+  let html='';
+  for(let i=1;i<=total;i++){
+    const status = statusFor(currentRoom, i);
+    if(filter!=='all' && filter!==status) continue;
+    const dotClass = status==='good' ? '' : (status==='issue' ? 'amber' : 'red');
+    html += `<div class="unit-card" onclick="openUnitDetail('${currentRoom}', ${i})">
+      ${dotClass ? `<span class="dot ${dotClass} status-dot"></span>` : ''}
+      <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#7c93c0" stroke-width="1.6"><rect x="3" y="4" width="18" height="12" rx="1"/><path d="M8 20h8M12 16v4"/></svg>
+      <div class="unit-card-name">Unit ${String(i).padStart(2,'0')}</div>
+    </div>`;
+  }
+  document.getElementById('unit-grid').innerHTML = html || `<div style="grid-column:1/-1;padding:40px;text-align:center;color:var(--ink-500);">No units match this filter.</div>`;
+}
+renderUnitGrid();
+
+function openUnitDetail(room, num){
+  const key = room+"-"+String(num).padStart(2,"0");
+  const status = statusFor(room, num);
+  const data = UNIT_DETAILS[key] || defaultDetail(room, num, status);
+
+  document.getElementById('inventory-grid-view').style.display='none';
+  document.getElementById('inventory-detail-view').style.display='block';
+
+  document.getElementById('det-title').textContent = "Unit "+String(num).padStart(2,"0");
+  document.getElementById('det-subtitle').textContent = "Centrum Laboratory "+room.split(' ')[1];
+  const pill = document.getElementById('det-status-pill');
+  const meta = {good:["Good","green"], issue:["Has issue","amber"], replace:["Needs replacement","red"]}[status];
+  pill.textContent = meta[0];
+  pill.className = "pill "+meta[1];
+
+  document.getElementById('hardware-table').innerHTML = Object.entries(data.hardware).map(([k,v])=>`<tr><td class="spec-key">${k}</td><td class="spec-val">${v}</td></tr>`).join('');
+  document.getElementById('lifecycle-table').innerHTML = Object.entries(data.lifecycle).map(([k,v])=>`<tr><td class="spec-key">${k}</td><td class="spec-val">${v}</td></tr>`).join('');
+  document.getElementById('software-list').innerHTML = data.software.map(([name,meta2])=>`<li><span class="sw-name">${name}</span><span class="sw-meta">${meta2}</span></li>`).join('');
+
+  document.getElementById('side-issue-count').textContent = data.history.length;
+
+  const histColor = {resolved:'green', progress:'amber', followup:'red'};
+  document.getElementById('history-list').innerHTML = data.history.length ? data.history.map(h=>`
+    <div class="history-item">
+      <div class="history-rail"><div class="history-dot" style="background:var(--${histColor[h.status]==='amber'?'amber':histColor[h.status]==='red'?'red':'green'})"></div></div>
+      <div class="history-body">
+        <div class="history-issue">${escapeHtml(h.issue)}</div>
+        ${h.comment ? `<div class="history-comment">&ldquo;${escapeHtml(h.comment)}&rdquo;</div>` : ''}
+        <div class="history-action">${formatHistorySentence(h)}</div>
+      </div>
+    </div>
+  `).join('') : `<div style="padding:20px 0;color:var(--ink-500);font-size:13.5px;">No issues reported for this unit yet.</div>`;
+
+  switchDetailTab('hardware');
+  window.scrollTo({top:0,behavior:'instant'});
+}
+function closeUnitDetail(){
+  document.getElementById('inventory-detail-view').style.display='none';
+  document.getElementById('inventory-grid-view').style.display='block';
+}
+function switchDetailTab(tab){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active', b.dataset.tab===tab));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('panel-'+tab).classList.add('active');
+}
+
+/* ---------------------------------------------------------------
+   SETTINGS
+--------------------------------------------------------------- */
+const EYE_OPEN = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>';
+const EYE_CLOSED = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a19.4 19.4 0 0 1 4.22-5.5M9.9 4.24A9.6 9.6 0 0 1 12 4c7 0 11 8 11 8a19.5 19.5 0 0 1-2.16 3.19M14.12 14.12a3 3 0 1 1-4.24-4.24"/><path d="M1 1l22 22"/></svg>';
+document.querySelectorAll('.pw-eye').forEach(el=> el.innerHTML = EYE_OPEN);
+
+function switchSettingsTab(tab){
+  document.querySelectorAll('.settings-menu-item').forEach(t=>t.classList.toggle('active', t.dataset.stab===tab));
+  document.querySelectorAll('.settings-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('spanel-'+tab).classList.add('active');
+}
+function toggleInlineEdit(field){
+  const editBox = document.getElementById('profile-'+field+'-edit');
+  const input = document.getElementById('profile-'+field+'-input');
+  const current = document.getElementById('profile-'+field+'-display').textContent.trim();
+  input.value = current;
+  editBox.style.display = 'block';
+}
+function cancelInlineEdit(field){
+  document.getElementById('profile-'+field+'-edit').style.display = 'none';
+}
+function saveInlineEdit(field){
+  const input = document.getElementById('profile-'+field+'-input');
+  const val = input.value.trim();
+  if(!val){ showToast('Enter a value first'); return; }
+  document.getElementById('profile-'+field+'-display').textContent = val;
+  document.getElementById('profile-'+field+'-edit').style.display = 'none';
+  showToast('Contact number updated');
+}
+function logout(){
+  window.location.href = 'centrum-laboratory-login.html';
+}
+function toggleUserMenu(e){
+  if(e) e.stopPropagation();
+  document.getElementById('user-menu').classList.toggle('show');
+}
+document.addEventListener('click', (e)=>{
+  const menu = document.getElementById('user-menu');
+  if(menu && menu.classList.contains('show') && !menu.contains(e.target)){
+    menu.classList.remove('show');
+  }
+});
+
+function togglePw(id){
+  const input = document.getElementById(id);
+  const eye = document.getElementById('eye-'+id);
+  const showing = input.type === 'text';
+  input.type = showing ? 'password' : 'text';
+  eye.innerHTML = showing ? EYE_OPEN : EYE_CLOSED;
+}
+
+function checkPwStrength(){
+  const val = document.getElementById('pw-new').value;
+  const wrap = document.getElementById('pw-strength-wrap');
+  const fill = document.getElementById('pw-strength-fill');
+  const label = document.getElementById('pw-strength-label');
+  if(!val){ wrap.style.display='none'; return; }
+  wrap.style.display='block';
+  let score = 0;
+  if(val.length>=8) score++;
+  if(/[A-Z]/.test(val)) score++;
+  if(/[0-9]/.test(val)) score++;
+  if(/[^A-Za-z0-9]/.test(val)) score++;
+  const levels = [
+    {w:'25%', c:'var(--red)', l:'Weak'},
+    {w:'50%', c:'var(--amber)', l:'Fair'},
+    {w:'75%', c:'#3b82f6', l:'Good'},
+    {w:'100%', c:'var(--green)', l:'Strong'}
+  ];
+  const lvl = levels[Math.max(0,score-1)] || levels[0];
+  fill.style.width = lvl.w;
+  fill.style.background = lvl.c;
+  label.textContent = lvl.l;
+}
+
+/* ---------------------------------------------------------------
+   TOAST
+--------------------------------------------------------------- */
+let toastTimer;
+function showToast(text){
+  const t = document.getElementById('toast');
+  document.getElementById('toast-text').textContent = text;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>t.classList.remove('show'), 3200);
+}
+
+/* ---------------------------------------------------------------
+   INIT — runs after every declaration above is ready
+--------------------------------------------------------------- */
+goTo('dashboard');
+
+/* ---------------------------------------------------------------
+   PERSONALIZE FROM LOGIN REDIRECT (?name=...)
+--------------------------------------------------------------- */
+(function applyLoginName(){
+  const params = new URLSearchParams(window.location.search);
+  const name = params.get('name');
+  if(!name) return;
+  document.querySelectorAll('.user > div:not(.avatar)').forEach(el=>{ if(el.tagName==='DIV') el.textContent = name; });
+  const initials = name.trim().split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase();
+  document.querySelectorAll('.avatar, .avatar-lg').forEach(el=> el.textContent = initials);
+  const fixedName = document.querySelector('.profile-fixed-name');
+  if(fixedName) fixedName.textContent = name;
+})();
+</script>
+</body>
+</html>
