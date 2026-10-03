@@ -1,19 +1,20 @@
 """
 Home.py - Centrum Laboratory | public homepage (Streamlit)
 
-The homepage design is built into this file (HOME_HTML at the bottom), so there
-are no extra files to keep track of. To edit the design in a separate file
-instead, save it as centrum-laboratory-home.html next to this file: if that file
-exists, it is used instead of the built-in one.
+The homepage keeps the original design (navigation bar, hero with the Centrum
+floor plan, stats strip, laboratories, features, how it works, about, call to
+action, contact and footer). It is built in Python with Streamlit: the design's
+sections are drawn with st.html using the design's own CSS, and every button
+("Login / Register", "Get Started", the feature tabs, "Sign up as a teacher",
+"Create an account", "Log in") is a real Streamlit button styled to match.
+No iframe, HTML file or JavaScript is used.
 
-The page's "Login / Register", "Log in", "Get Started" and "Sign up" buttons call
-the functions you pass to render():
+The buttons call the functions you pass to render():
 
     import Home
     Home.render(on_login=open_login, on_signup=open_signup)
 
 Preview on its own:   streamlit run Home.py
-A picture of the page is in media/homepage.png.
 """
 
 from __future__ import annotations
@@ -22,106 +23,201 @@ from pathlib import Path
 
 import streamlit as st
 
-HTML_FILE = Path(__file__).resolve().parent / "centrum-laboratory-home.html"   # optional override
+ss = st.session_state
 
-_PAGE_CSS = """
-<style>
-html, body, body .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] { background: #ffffff !important; }
-[data-testid="stHeader"], [data-testid="stToolbar"], [data-testid="stDecoration"],
-[data-testid="stSidebar"], [data-testid="stSidebarNav"], [data-testid="collapsedControl"],
-[data-testid="stStatusWidget"], footer, #MainMenu { display: none !important; }
-.block-container, [data-testid="stMainBlockContainer"] { max-width: 100% !important; padding: 0 !important; }
-[data-testid="stVerticalBlock"] { gap: 0 !important; }
-/* the homepage fills the whole browser window */
-iframe { border: 0 !important; display: block; height: 100vh !important; height: 100dvh !important; }
-[data-testid="stElementContainer"]:has(> iframe), .element-container:has(> iframe) {
-    height: 100vh !important; height: 100dvh !important; flex: 0 0 100vh !important; flex: 0 0 100dvh !important; }
-/* the real Log In / Sign Up buttons. The homepage's own buttons click them. */
-.st-key-cl_home_login, .st-key-cl_home_signup {
-    position: absolute !important; left: -9999px !important; width: 1px !important; height: 1px !important; overflow: hidden !important; }
-</style>
-"""
+# assets/logo-icon.png (next to app.py) is used as the browser-tab icon.
+_HERE = Path(__file__).resolve().parent
+_ICON = next((p for p in (_HERE / "assets" / "logo-icon.png", _HERE.parent / "assets" / "logo-icon.png") if p.is_file()), None)
 
-# Runs inside the homepage, after its own script.
-_BRIDGE = r"""
-<script>
-/* ---- added by Home.py: Login / Register -> Streamlit ---- */
-(function () {
-  window.clGo = function (view) {
-    try {
-      var key = view === 'signup' ? 'cl_home_signup' : 'cl_home_login';
-      var btn = window.parent.document.querySelector('.st-key-' + key + ' button');
-      if (btn) { btn.click(); return; }
-    } catch (e) {}
-    showToast('Could not open the login page - please refresh.');
-  };
-  function fit() {
-    try { var f = window.frameElement, h = window.parent.innerHeight;
-          if (f && h) { f.style.height = h + 'px'; f.setAttribute('height', h); } } catch (e) {}
-  }
-  fit();
-  try { var P = window.parent; if (P.__clFit) P.removeEventListener('resize', P.__clFit);
-        P.__clFit = fit; P.addEventListener('resize', fit); } catch (e) {}
-})();
-</script>
-"""
+TABS = [("teacher", "Teacher", ":material/school:"), ("technician", "Technician", ":material/build:"),
+        ("admin", "Admin", ":material/verified_user:")]
 
 
-def _page_html() -> str:
-    page = HTML_FILE.read_text(encoding="utf-8") if HTML_FILE.exists() else HOME_HTML
-    head, sep, tail = page.rpartition("</body>")
-    return head + _BRIDGE + sep + tail if sep else page + _BRIDGE
+try:
+    from frontend.ui import _markup, scope_css
+except ImportError:  # Home.py placed inside frontend/ and run from there
+    from ui import _markup, scope_css  # type: ignore
+
+_CSS: list[str] = []
 
 
-def _show(page_html: str) -> None:
-    if hasattr(st, "iframe"):                        # newer Streamlit
-        st.iframe(page_html, height=900)
-    else:                                            # older Streamlit
-        import streamlit.components.v1 as components
-        components.html(page_html, height=900, scrolling=True)
+def _css() -> str:
+    """The homepage stylesheet, scoped to the .clx wrappers (built once)."""
+    if not _CSS:
+        _CSS.append(scope_css(HOME_CSS + STREAMLIT_CSS))
+    return _CSS[0]
+
+
+def _html(markup: str) -> None:
+    """A section of the design. st.markdown keeps the inline SVG (icons, floor plan, logo)."""
+    st.markdown(f'<div class="clx">{_markup(markup)}</div>', unsafe_allow_html=True)
 
 
 def _preview_click(view: str) -> None:
-    st.session_state["home_preview_msg"] = f"In the app this opens the {'Sign Up' if view == 'signup' else 'Log In'} screen."
+    ss["home_preview_msg"] = f"In the app this opens the {'Sign Up' if view == 'signup' else 'Log In'} screen."
 
 
 def render(on_login=None, on_signup=None) -> None:
-    """Draw the homepage full-screen. `on_login` / `on_signup` run when those buttons are clicked."""
+    """Draw the homepage. `on_login` / `on_signup` run when those buttons are clicked."""
     try:
-        st.set_page_config(page_title="Centrum Laboratory", page_icon="\U0001F5A5️",
+        st.set_page_config(page_title="Centrum Laboratory", page_icon=str(_ICON) if _ICON else "\U0001F5A5\ufe0f",
                            layout="wide", initial_sidebar_state="collapsed")
     except st.errors.StreamlitAPIException:
         pass
-    st.markdown(_PAGE_CSS, unsafe_allow_html=True)
-    if on_login is None:
-        on_login, args_l = _preview_click, ("login",)
-    else:
-        args_l = ()
-    if on_signup is None:
-        on_signup, args_s = _preview_click, ("signup",)
-    else:
-        args_s = ()
-    st.button("Log in", key="cl_home_login", on_click=on_login, args=args_l)
-    st.button("Sign up", key="cl_home_signup", on_click=on_signup, args=args_s)
-    msg = st.session_state.pop("home_preview_msg", None)
+
+    actions = {
+        "login": (on_login, ()) if on_login else (_preview_click, ("login",)),
+        "signup": (on_signup, ()) if on_signup else (_preview_click, ("signup",)),
+    }
+
+    def button(label: str, view: str, key: str, kind: str, icon: str | None = None) -> None:
+        func, args = actions[view]
+        extra = {"icon": icon} if icon else {}
+        st.button(label, key=f"{key}__{kind}__", on_click=func, args=args, **extra)
+
+    st.markdown(f"<style>{_css()}</style>", unsafe_allow_html=True)
+    msg = ss.pop("home_preview_msg", None)
     if msg:
         st.toast(msg)
-    _show(_page_html())
+
+    # ---- navigation bar ------------------------------------------------------
+    _html(NAV_HTML)
+    with st.container(key="home_navbtn"):
+        button("Login / Register", "login", "cl_home_login", "hnav", ":material/person:")
+
+    # ---- hero ----------------------------------------------------------------
+    with st.container(key="home_hero"):
+        left, right = st.columns([1.02, 1], gap="medium", vertical_alignment="center")
+        with left:
+            _html(f'<div class="hero" style="background:none;overflow:visible;">{HERO_LEFT_HTML}</div>')
+            with st.container(key="home_ctas"):
+                button("Get Started", "signup", "cl_home_start", "hprimary", ":material/arrow_forward:")
+                _html('<a class="btn btn-ghost" href="#how">See How It Works</a>')
+            _html(HERO_ROLES_HTML)
+        with right:
+            _html(HERO_ART_HTML)
+
+    # ---- stats strip + laboratories --------------------------------------------
+    _html(STRIP_HTML)
+    _html(LABS_HTML)
+
+    # ---- features (role tabs) --------------------------------------------------
+    current = ss.get("home_tab", "teacher")
+    with st.container(key="home_features"):
+        _html(FEATURES_HEAD_HTML)
+        with st.container(key="home_tabs"):
+            for role, label, icon in TABS:
+                st.button(label, key=f"cl_home_tab_{role}__htab{'on' if role == current else ''}__", icon=icon,
+                          on_click=ss.__setitem__, args=("home_tab", role))
+        left_html, label, view, grid_html = PANELS[current]
+        left, right = st.columns([1, 1.1], gap="large", vertical_alignment="center")
+        with left:
+            _html(f"<div class=\"panel-left\">{left_html}</div>")
+            button(label, view, f"cl_home_feat_{current}", "hprimarymt")
+        with right:
+            _html(grid_html)
+
+    # ---- how it works + about ----------------------------------------------------
+    _html(HOW_HTML)
+    _html(ABOUT_HTML)
+
+    # ---- call to action + contact --------------------------------------------------
+    with st.container(key="home_contact"):
+        with st.container(key="home_cta"):
+            left, right = st.columns([1.3, 1], gap="medium", vertical_alignment="center")
+            with left:
+                _html(f"<div class=\"cta-text\">{CTA_LEFT_HTML}</div>")
+            with right:
+                with st.container(key="home_cta_btns"):
+                    button("Create an account", "signup", "cl_home_cta_signup", "hwhite")
+                    button("Log in", "login", "cl_home_cta_login", "hline")
+        _html(CONTACT_HTML)
+
+    _html(FOOTER_HTML)
 
 
 # ---------------------------------------------------------------------------
-# The homepage design (HTML + CSS + JavaScript)
+# How Streamlit's widgets fit into the design
 # ---------------------------------------------------------------------------
-HOME_HTML = r'''<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Centrum Laboratory | Computer Monitoring Management System</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-<style>
+STREAMLIT_CSS = """
+[data-testid="stToolbar"], [data-testid="stDecoration"], [data-testid="stStatusWidget"], #MainMenu,
+footer:not(.cl-footer) { display: none !important; }
+header[data-testid="stHeader"] { background: transparent !important; height: 0 !important; }
+.stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] { background: #fff !important; }
+[data-testid="stMain"] { scroll-behavior: smooth; scroll-padding-top: 84px; }
+[data-testid="stMainBlockContainer"], .block-container { max-width: 100% !important; padding: 0 !important; }
+:where([data-testid="stMain"]) [data-testid="stVerticalBlock"] { gap: 0 !important; }
+[data-testid="stMarkdownContainer"]:has(> .clx) { margin: 0 !important; }
+[data-testid="stMarkdownContainer"] > .clx { display: block; }
+.reveal { opacity: 1 !important; transform: none !important; }
+.menu-btn, .mobile-menu { display: none !important; }
+
+/* nav bar stays on top; the real Login / Register button sits where the design has it */
+.nav { position: fixed !important; top: 0; left: 0; right: 0; border-color: var(--line) !important; }
+.st-key-home_navbtn { position: fixed !important; top: 16px; right: max(24px, calc((100vw - 1200px) / 2));
+  z-index: 60; width: auto !important; }
+
+/* sections built from Streamlit containers */
+.st-key-home_hero { padding: 76px max(24px, calc((100% - 1200px) / 2)) 0;
+  background: radial-gradient(900px 500px at 88% 40%, #eef4fe 0%, rgba(238, 244, 254, 0) 70%), #fff; }
+.st-key-home_hero [data-testid="stHorizontalBlock"] { min-height: calc(100vh - 76px); padding: 48px 0 64px; }
+.st-key-home_ctas { flex-direction: row !important; flex-wrap: wrap; gap: 14px !important; align-items: center; }
+.st-key-home_ctas > div { width: auto !important; flex: 0 0 auto; }
+.st-key-home_features { background: var(--bg-soft); padding: 104px max(24px, calc((100% - 1200px) / 2)); }
+.st-key-home_tabs { flex-direction: row !important; justify-content: center; gap: 8px !important; margin: -24px auto 44px;
+  background: #fff; border: 1px solid var(--line); border-radius: 999px; padding: 6px; width: max-content !important;
+  max-width: 100%; flex-wrap: wrap; }
+.st-key-home_tabs > div { width: auto !important; }
+.panel-left h3 { font-size: 28px; line-height: 1.25; margin: 10px 0 14px; }
+.panel-left > p { color: var(--muted); margin: 0 0 24px; }
+.st-key-home_contact { padding: 104px max(24px, calc((100% - 1200px) / 2)) 0; }
+.st-key-home_cta { background: linear-gradient(120deg, var(--blue) 0%, var(--blue-dk) 100%); border-radius: 28px;
+  padding: 56px; color: #fff; position: relative; overflow: hidden; }
+.st-key-home_cta::after { content: ""; position: absolute; right: -80px; top: -80px; width: 320px; height: 320px;
+  border-radius: 50%; border: 46px solid rgba(255, 255, 255, .08); pointer-events: none; }
+.cta-text h2 { color: #fff !important; font-size: clamp(26px, 3vw, 36px); line-height: 1.2; margin-bottom: 10px; }
+.cta-text p { margin: 0; color: #dbe7fd; }
+.st-key-home_cta_btns { flex-direction: row !important; justify-content: flex-end; gap: 12px !important;
+  flex-wrap: wrap; position: relative; z-index: 1; }
+.st-key-home_cta_btns > div { width: auto !important; }
+
+/* buttons = the design's .btn variants */
+[class*="__hnav__"] button, [class*="__hprimary"] button, [class*="__hwhite__"] button, [class*="__hline__"] button {
+  border-radius: 999px !important; font: 600 15px 'Poppins', sans-serif !important; padding: 13px 26px !important;
+  min-height: 0 !important; transition: transform .15s, box-shadow .15s, background .15s; }
+[class*="__hnav__"] button p, [class*="__hprimary"] button p, [class*="__hwhite__"] button p, [class*="__hline__"] button p,
+[class*="__htab"] button p { font: inherit !important; margin: 0; }
+[class*="__hnav__"] button, [class*="__hprimary"] button { background: var(--blue) !important; color: #fff !important;
+  border: 0 !important; box-shadow: 0 10px 24px rgba(45, 111, 227, .30) !important; }
+[class*="__hnav__"] button:hover, [class*="__hprimary"] button:hover { background: var(--blue-dk) !important;
+  box-shadow: 0 12px 28px rgba(45, 111, 227, .38) !important; }
+[class*="__hnav__"] button { padding: 11px 22px !important; font-size: 14.5px !important; }
+[class*="__hprimary__"] button > div { flex-direction: row-reverse; }
+[class*="__hprimarymt__"] { margin-top: 28px; }
+[class*="__hwhite__"] button { background: #fff !important; color: var(--blue) !important; border: 0 !important; }
+[class*="__hwhite__"] button:hover { background: #eef4fe !important; }
+[class*="__hline__"] button { background: transparent !important; color: #fff !important;
+  border: 1.5px solid rgba(255, 255, 255, .5) !important; }
+[class*="__hline__"] button:hover { border-color: #fff !important; }
+[class*="__htab"] button { border: 0 !important; background: transparent !important; border-radius: 999px !important;
+  padding: 10px 22px !important; font: 600 14.5px 'Poppins', sans-serif !important; color: var(--muted) !important;
+  min-height: 0 !important; box-shadow: none !important; }
+[class*="__htabon__"] button { background: var(--navy) !important; color: #fff !important; }
+[data-testid="stToast"] { background: var(--navy) !important; border-radius: 12px !important; }
+[data-testid="stToast"], [data-testid="stToast"] p { color: #fff !important; font-size: 14px; }
+@media (max-width: 900px) {
+  .st-key-home_hero [data-testid="stHorizontalBlock"] { min-height: 0; padding-top: 36px; }
+  .st-key-home_cta { padding: 40px 28px; }
+  .st-key-home_cta_btns { justify-content: flex-start; }
+}
+"""
+
+
+# ---------------------------------------------------------------------------
+# The homepage design: its stylesheet and sections (edit to change the look)
+# ---------------------------------------------------------------------------
+HOME_CSS = """
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Open+Sans:wght@400;500;600;700&display=swap');
 :root {
   --blue: #2d6fe3; --blue-dk: #1d4ed8; --blue-soft: #eaf1fd; --blue-line: #cfdcf6;
   --navy: #14213d; --navy-2: #0f1a33;
@@ -367,12 +463,9 @@ footer nav a:hover { color: #fff; }
   html { scroll-behavior: auto; }
   .reveal { opacity: 1; transform: none; }
 }
-</style>
-</head>
-<body>
+"""
 
-<!-- ============================================================ NAV -->
-<header class="nav" id="nav">
+NAV_HTML = r'''<header class="nav" id="nav">
   <div class="wrap">
     <a href="#home" class="nav-logo" aria-label="Centrum Laboratory home"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 382 128" role="img" aria-label="Centrum Laboratory"><title>Centrum Laboratory</title><defs><linearGradient id="h-room" x1="0" y1="0" x2="0.35" y2="1"><stop offset="0" stop-color="#3b7cf0"/><stop offset="1" stop-color="#1d4ed8"/></linearGradient></defs><mask id="h-cut" maskUnits="userSpaceOnUse"><rect x="2" y="4" width="120" height="120" fill="white"/><rect x="57.60" y="4" width="8.80" height="120" fill="black"/><rect x="2" y="59.60" width="60" height="8.80" fill="black"/></mask>
 <path d="M107.70,28.29 A58.00,58.00 0 1 0 107.70,99.71 L88.93,85.04 A34.18,34.18 0 1 1 88.93,42.96 Z" fill="url(#h-room)" mask="url(#h-cut)"/>
@@ -395,45 +488,24 @@ footer nav a:hover { color: #fff; }
       <a href="#about">About Us</a>
       <a href="#contact">Contact</a>
     </nav>
-    <button class="btn btn-primary btn-sm btn-login" onclick="clGo('login')">
-      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
-      Login / Register
-    </button>
-    <button class="menu-btn" aria-label="Open menu" onclick="toggleMenu()">
-      <svg class="icon" style="width:26px;height:26px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
-    </button>
+    <span class="btn btn-primary btn-sm btn-login" style="visibility:hidden">Login / Register</span>
+    
   </div>
-  <div class="mobile-menu" id="mobile-menu">
-    <a href="#home">Home</a><a href="#labs">Laboratories</a><a href="#features">Features</a>
-    <a href="#how">How It Works</a><a href="#about">About Us</a><a href="#contact">Contact</a>
-    <button class="btn btn-primary" onclick="clGo('login')">Login / Register</button>
-  </div>
-</header>
+  </header>'''
 
-<!-- ============================================================ HERO -->
-<section class="hero" id="home">
-  <div class="wrap">
-    <div>
-      <span class="pill"><span class="live"></span>MONITOR. REPORT. RESOLVE.</span>
+HERO_LEFT_HTML = r'''<span class="pill"><span class="live"></span>MONITOR. REPORT. RESOLVE.</span>
       <h1>Every Computer,<br>Every Laboratory,
         <span class="accent">Always Ready.</span></h1>
       <p class="lead">Report a broken PC in seconds, let technicians track and fix it, and see the status
-        of all four Centrum laboratories in one place. Less downtime, more learning.</p>
-      <div class="hero-ctas">
-        <button class="btn btn-primary" onclick="clGo('signup')">
-          Get Started
-          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-        </button>
-        <a class="btn btn-ghost" href="#how">See How It Works</a>
-      </div>
-      <div class="roles-row">
+        of all four Centrum laboratories in one place. Less downtime, more learning.</p>'''
+
+HERO_ROLES_HTML = r'''<div class="roles-row">
         <span><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10 12 5 2 10l10 5 10-5z"/><path d="M6 12v5c3 2 9 2 12 0v-5"/></svg>For Teachers</span>
         <span><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.4-.6-.6-2.4z"/></svg>For Technicians</span>
         <span><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/><path d="m9 12 2 2 4-4"/></svg>For Admins</span>
-      </div>
-    </div>
+      </div>'''
 
-    <div class="hero-art" aria-hidden="false">
+HERO_ART_HTML = r'''<div class="hero-art" aria-hidden="false">
       <svg class="fp" viewBox="0 0 600 600" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Centrum Laboratory floor plan showing computer status in each laboratory"><defs><mask id="fp-cut" maskUnits="userSpaceOnUse"><rect width="600" height="600" fill="white"/><rect x="277.0" y="0" width="46" height="600" fill="black"/><rect x="0" y="277.0" width="600" height="46" fill="black"/></mask><linearGradient id="fp-room" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#eef4fe"/><stop offset="1" stop-color="#e3ecfc"/></linearGradient></defs><circle cx="300" cy="300" r="277.0" fill="none" stroke="#f3f6fb" stroke-width="30"/><circle cx="300" cy="300" r="292" fill="none" stroke="#d5deec" stroke-width="1.5"/><g mask="url(#fp-cut)"><circle cx="300" cy="300" r="189.0" fill="none" stroke="url(#fp-room)" stroke-width="134"/><circle cx="300" cy="300" r="256" fill="none" stroke="#b9c9e6" stroke-width="2"/><circle cx="300" cy="300" r="122" fill="none" stroke="#b9c9e6" stroke-width="2"/></g><rect x="277.0" y="44" width="46" height="144" fill="#f8fafd"/><rect x="277.0" y="412" width="46" height="144" fill="#f8fafd"/><rect x="44" y="277.0" width="144" height="46" fill="#f8fafd"/><rect x="412" y="277.0" width="144" height="46" fill="#f8fafd"/><rect class="fp-tech" x="496" y="281" width="54" height="38" rx="6"/><text class="fp-tech-t" x="523" y="304" text-anchor="middle">TECH</text><circle cx="300" cy="300" r="98.0" fill="none" stroke="#14213d" stroke-width="28"/><circle cx="394.7" cy="274.6" r="3.2" fill="#ffffff" opacity=".85"/><circle cx="369.3" cy="230.7" r="3.2" fill="#ffffff" opacity=".85"/><circle cx="325.4" cy="205.3" r="3.2" fill="#ffffff" opacity=".85"/><circle cx="274.6" cy="205.3" r="3.2" fill="#ffffff" opacity=".85"/><circle cx="230.7" cy="230.7" r="3.2" fill="#ffffff" opacity=".85"/><circle cx="205.3" cy="274.6" r="3.2" fill="#ffffff" opacity=".85"/><circle cx="205.3" cy="325.4" r="3.2" fill="#ffffff" opacity=".85"/><circle cx="230.7" cy="369.3" r="3.2" fill="#ffffff" opacity=".85"/><circle cx="274.6" cy="394.7" r="3.2" fill="#ffffff" opacity=".85"/><circle cx="325.4" cy="394.7" r="3.2" fill="#ffffff" opacity=".85"/><circle cx="369.3" cy="369.3" r="3.2" fill="#ffffff" opacity=".85"/><circle cx="394.7" cy="325.4" r="3.2" fill="#ffffff" opacity=".85"/><circle cx="300" cy="300" r="84" fill="#ffffff"/><circle class="fp-ping" cx="300" cy="300" r="26" fill="none" stroke="#2d6fe3" stroke-width="2"/><circle cx="300" cy="300" r="26" fill="#2d6fe3"/><g transform="translate(288 289)" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="1" width="22" height="15" rx="2.5"/><path d="M8 21h8M12 16v5"/></g><g class="fp-room" data-room="1"><rect class="pc pc-ok" x="335.1" y="434.8" width="14" height="10" rx="2.5" transform="rotate(-196.7 342.1 439.8)"/><rect class="pc pc-ok" x="357.4" y="426.0" width="14" height="10" rx="2.5" transform="rotate(-206.2 364.4 431.0)"/><rect class="pc pc-ok" x="378.0" y="413.7" width="14" height="10" rx="2.5" transform="rotate(-215.6 385.0 418.7)"/><rect class="pc pc-ok" x="396.2" y="398.2" width="14" height="10" rx="2.5" transform="rotate(-225.0 403.2 403.2)"/><rect class="pc pc-ok" x="411.7" y="380.0" width="14" height="10" rx="2.5" transform="rotate(-234.4 418.7 385.0)"/><rect class="pc pc-rep" x="424.0" y="359.4" width="14" height="10" rx="2.5" transform="rotate(-243.8 431.0 364.4)"/><rect class="pc pc-ok" x="432.8" y="337.1" width="14" height="10" rx="2.5" transform="rotate(-253.3 439.8 342.1)"/><rect class="pc pc-ok" x="331.8" y="462.6" width="14" height="10" rx="2.5" transform="rotate(-193.0 338.8 467.6)"/><rect class="pc pc-ok" x="354.7" y="455.6" width="14" height="10" rx="2.5" transform="rotate(-201.0 361.7 460.6)"/><rect class="pc pc-ok" x="376.4" y="445.4" width="14" height="10" rx="2.5" transform="rotate(-209.0 383.4 450.4)"/><rect class="pc pc-ok" x="396.5" y="432.4" width="14" height="10" rx="2.5" transform="rotate(-217.0 403.5 437.4)"/><rect class="pc pc-ok" x="414.6" y="416.6" width="14" height="10" rx="2.5" transform="rotate(-225.0 421.6 421.6)"/><rect class="pc pc-ok" x="430.4" y="398.5" width="14" height="10" rx="2.5" transform="rotate(-233.0 437.4 403.5)"/><rect class="pc pc-ok" x="443.4" y="378.4" width="14" height="10" rx="2.5" transform="rotate(-241.0 450.4 383.4)"/><rect class="pc pc-fix" x="453.6" y="356.7" width="14" height="10" rx="2.5" transform="rotate(-249.0 460.6 361.7)"/><rect class="pc pc-ok" x="460.6" y="333.8" width="14" height="10" rx="2.5" transform="rotate(-257.0 467.6 338.8)"/><rect class="pc pc-ok" x="328.3" y="489.8" width="14" height="10" rx="2.5" transform="rotate(-190.3 335.3 494.8)"/><rect class="pc pc-ok" x="351.6" y="484.1" width="14" height="10" rx="2.5" transform="rotate(-197.2 358.6 489.1)"/><rect class="pc pc-ok" x="374.1" y="475.6" width="14" height="10" rx="2.5" transform="rotate(-204.2 381.1 480.6)"/><rect class="pc pc-ok" x="395.3" y="464.5" width="14" height="10" rx="2.5" transform="rotate(-211.1 402.3 469.5)"/><rect class="pc pc-ok" x="415.1" y="450.9" width="14" height="10" rx="2.5" transform="rotate(-218.1 422.1 455.9)"/><rect class="pc pc-ok" x="433.0" y="435.0" width="14" height="10" rx="2.5" transform="rotate(-225.0 440.0 440.0)"/><rect class="pc pc-ok" x="448.9" y="417.1" width="14" height="10" rx="2.5" transform="rotate(-231.9 455.9 422.1)"/><rect class="pc pc-rep" x="462.5" y="397.3" width="14" height="10" rx="2.5" transform="rotate(-238.9 469.5 402.3)"/><rect class="pc pc-ok" x="473.6" y="376.1" width="14" height="10" rx="2.5" transform="rotate(-245.8 480.6 381.1)"/><rect class="pc pc-ok" x="482.1" y="353.6" width="14" height="10" rx="2.5" transform="rotate(-252.8 489.1 358.6)"/><rect class="pc pc-ok" x="487.8" y="330.3" width="14" height="10" rx="2.5" transform="rotate(-259.7 494.8 335.3)"/><rect class="pc pc-ok" x="336.6" y="514.7" width="14" height="10" rx="2.5" transform="rotate(-191.2 343.6 519.7)"/><rect class="pc pc-ok" x="359.9" y="508.8" width="14" height="10" rx="2.5" transform="rotate(-197.4 366.9 513.8)"/><rect class="pc pc-ok" x="382.4" y="500.4" width="14" height="10" rx="2.5" transform="rotate(-203.5 389.4 505.4)"/><rect class="pc pc-ok" x="403.8" y="489.7" width="14" height="10" rx="2.5" transform="rotate(-209.7 410.8 494.7)"/><rect class="pc pc-ok" x="424.0" y="476.7" width="14" height="10" rx="2.5" transform="rotate(-215.8 431.0 481.7)"/><rect class="pc pc-ok" x="442.7" y="461.6" width="14" height="10" rx="2.5" transform="rotate(-221.9 449.7 466.6)"/><rect class="pc pc-ok" x="459.6" y="444.7" width="14" height="10" rx="2.5" transform="rotate(-228.1 466.6 449.7)"/><rect class="pc pc-ok" x="474.7" y="426.0" width="14" height="10" rx="2.5" transform="rotate(-234.2 481.7 431.0)"/><rect class="pc pc-ok" x="487.7" y="405.8" width="14" height="10" rx="2.5" transform="rotate(-240.3 494.7 410.8)"/><rect class="pc pc-ok" x="498.4" y="384.4" width="14" height="10" rx="2.5" transform="rotate(-246.5 505.4 389.4)"/><rect class="pc pc-ok" x="506.8" y="361.9" width="14" height="10" rx="2.5" transform="rotate(-252.6 513.8 366.9)"/><rect class="pc pc-ok" x="512.7" y="338.6" width="14" height="10" rx="2.5" transform="rotate(-258.8 519.7 343.6)"/></g><g class="fp-room" data-room="2"><rect class="pc pc-ok" x="153.2" y="337.1" width="14" height="10" rx="2.5" transform="rotate(-106.7 160.2 342.1)"/><rect class="pc pc-ok" x="162.0" y="359.4" width="14" height="10" rx="2.5" transform="rotate(-116.2 169.0 364.4)"/><rect class="pc pc-fix" x="174.3" y="380.0" width="14" height="10" rx="2.5" transform="rotate(-125.6 181.3 385.0)"/><rect class="pc pc-ok" x="189.8" y="398.2" width="14" height="10" rx="2.5" transform="rotate(-135.0 196.8 403.2)"/><rect class="pc pc-ok" x="208.0" y="413.7" width="14" height="10" rx="2.5" transform="rotate(-144.4 215.0 418.7)"/><rect class="pc pc-ok" x="228.6" y="426.0" width="14" height="10" rx="2.5" transform="rotate(-153.8 235.6 431.0)"/><rect class="pc pc-ok" x="250.9" y="434.8" width="14" height="10" rx="2.5" transform="rotate(-163.3 257.9 439.8)"/><rect class="pc pc-ok" x="125.4" y="333.8" width="14" height="10" rx="2.5" transform="rotate(-103.0 132.4 338.8)"/><rect class="pc pc-ok" x="132.4" y="356.7" width="14" height="10" rx="2.5" transform="rotate(-111.0 139.4 361.7)"/><rect class="pc pc-rep" x="142.6" y="378.4" width="14" height="10" rx="2.5" transform="rotate(-119.0 149.6 383.4)"/><rect class="pc pc-ok" x="155.6" y="398.5" width="14" height="10" rx="2.5" transform="rotate(-127.0 162.6 403.5)"/><rect class="pc pc-ok" x="171.4" y="416.6" width="14" height="10" rx="2.5" transform="rotate(-135.0 178.4 421.6)"/><rect class="pc pc-ok" x="189.5" y="432.4" width="14" height="10" rx="2.5" transform="rotate(-143.0 196.5 437.4)"/><rect class="pc pc-ok" x="209.6" y="445.4" width="14" height="10" rx="2.5" transform="rotate(-151.0 216.6 450.4)"/><rect class="pc pc-ok" x="231.3" y="455.6" width="14" height="10" rx="2.5" transform="rotate(-159.0 238.3 460.6)"/><rect class="pc pc-ok" x="254.2" y="462.6" width="14" height="10" rx="2.5" transform="rotate(-167.0 261.2 467.6)"/><rect class="pc pc-ok" x="98.2" y="330.3" width="14" height="10" rx="2.5" transform="rotate(-100.3 105.2 335.3)"/><rect class="pc pc-ok" x="103.9" y="353.6" width="14" height="10" rx="2.5" transform="rotate(-107.2 110.9 358.6)"/><rect class="pc pc-ok" x="112.4" y="376.1" width="14" height="10" rx="2.5" transform="rotate(-114.2 119.4 381.1)"/><rect class="pc pc-ok" x="123.5" y="397.3" width="14" height="10" rx="2.5" transform="rotate(-121.1 130.5 402.3)"/><rect class="pc pc-ok" x="137.1" y="417.1" width="14" height="10" rx="2.5" transform="rotate(-128.1 144.1 422.1)"/><rect class="pc pc-ok" x="153.0" y="435.0" width="14" height="10" rx="2.5" transform="rotate(-135.0 160.0 440.0)"/><rect class="pc pc-ok" x="170.9" y="450.9" width="14" height="10" rx="2.5" transform="rotate(-141.9 177.9 455.9)"/><rect class="pc pc-ok" x="190.7" y="464.5" width="14" height="10" rx="2.5" transform="rotate(-148.9 197.7 469.5)"/><rect class="pc pc-ok" x="211.9" y="475.6" width="14" height="10" rx="2.5" transform="rotate(-155.8 218.9 480.6)"/><rect class="pc pc-ok" x="234.4" y="484.1" width="14" height="10" rx="2.5" transform="rotate(-162.8 241.4 489.1)"/><rect class="pc pc-ok" x="257.7" y="489.8" width="14" height="10" rx="2.5" transform="rotate(-169.7 264.7 494.8)"/><rect class="pc pc-ok" x="73.3" y="338.6" width="14" height="10" rx="2.5" transform="rotate(-101.2 80.3 343.6)"/><rect class="pc pc-ok" x="79.2" y="361.9" width="14" height="10" rx="2.5" transform="rotate(-107.4 86.2 366.9)"/><rect class="pc pc-ok" x="87.6" y="384.4" width="14" height="10" rx="2.5" transform="rotate(-113.5 94.6 389.4)"/><rect class="pc pc-fix" x="98.3" y="405.8" width="14" height="10" rx="2.5" transform="rotate(-119.7 105.3 410.8)"/><rect class="pc pc-ok" x="111.3" y="426.0" width="14" height="10" rx="2.5" transform="rotate(-125.8 118.3 431.0)"/><rect class="pc pc-ok" x="126.4" y="444.7" width="14" height="10" rx="2.5" transform="rotate(-131.9 133.4 449.7)"/><rect class="pc pc-ok" x="143.3" y="461.6" width="14" height="10" rx="2.5" transform="rotate(-138.1 150.3 466.6)"/><rect class="pc pc-ok" x="162.0" y="476.7" width="14" height="10" rx="2.5" transform="rotate(-144.2 169.0 481.7)"/><rect class="pc pc-ok" x="182.2" y="489.7" width="14" height="10" rx="2.5" transform="rotate(-150.3 189.2 494.7)"/><rect class="pc pc-ok" x="203.6" y="500.4" width="14" height="10" rx="2.5" transform="rotate(-156.5 210.6 505.4)"/><rect class="pc pc-ok" x="226.1" y="508.8" width="14" height="10" rx="2.5" transform="rotate(-162.6 233.1 513.8)"/><rect class="pc pc-ok" x="249.4" y="514.7" width="14" height="10" rx="2.5" transform="rotate(-168.8 256.4 519.7)"/></g><g class="fp-room" data-room="3"><rect class="pc pc-ok" x="432.8" y="252.9" width="14" height="10" rx="2.5" transform="rotate(73.3 439.8 257.9)"/><rect class="pc pc-ok" x="424.0" y="230.6" width="14" height="10" rx="2.5" transform="rotate(63.8 431.0 235.6)"/><rect class="pc pc-ok" x="411.7" y="210.0" width="14" height="10" rx="2.5" transform="rotate(54.4 418.7 215.0)"/><rect class="pc pc-rep" x="396.2" y="191.8" width="14" height="10" rx="2.5" transform="rotate(45.0 403.2 196.8)"/><rect class="pc pc-ok" x="378.0" y="176.3" width="14" height="10" rx="2.5" transform="rotate(35.6 385.0 181.3)"/><rect class="pc pc-ok" x="357.4" y="164.0" width="14" height="10" rx="2.5" transform="rotate(26.2 364.4 169.0)"/><rect class="pc pc-ok" x="335.1" y="155.2" width="14" height="10" rx="2.5" transform="rotate(16.7 342.1 160.2)"/><rect class="pc pc-ok" x="460.6" y="256.2" width="14" height="10" rx="2.5" transform="rotate(77.0 467.6 261.2)"/><rect class="pc pc-ok" x="453.6" y="233.3" width="14" height="10" rx="2.5" transform="rotate(69.0 460.6 238.3)"/><rect class="pc pc-ok" x="443.4" y="211.6" width="14" height="10" rx="2.5" transform="rotate(61.0 450.4 216.6)"/><rect class="pc pc-ok" x="430.4" y="191.5" width="14" height="10" rx="2.5" transform="rotate(53.0 437.4 196.5)"/><rect class="pc pc-ok" x="414.6" y="173.4" width="14" height="10" rx="2.5" transform="rotate(45.0 421.6 178.4)"/><rect class="pc pc-ok" x="396.5" y="157.6" width="14" height="10" rx="2.5" transform="rotate(37.0 403.5 162.6)"/><rect class="pc pc-ok" x="376.4" y="144.6" width="14" height="10" rx="2.5" transform="rotate(29.0 383.4 149.6)"/><rect class="pc pc-ok" x="354.7" y="134.4" width="14" height="10" rx="2.5" transform="rotate(21.0 361.7 139.4)"/><rect class="pc pc-ok" x="331.8" y="127.4" width="14" height="10" rx="2.5" transform="rotate(13.0 338.8 132.4)"/><rect class="pc pc-ok" x="487.8" y="259.7" width="14" height="10" rx="2.5" transform="rotate(79.7 494.8 264.7)"/><rect class="pc pc-ok" x="482.1" y="236.4" width="14" height="10" rx="2.5" transform="rotate(72.8 489.1 241.4)"/><rect class="pc pc-rep" x="473.6" y="213.9" width="14" height="10" rx="2.5" transform="rotate(65.8 480.6 218.9)"/><rect class="pc pc-ok" x="462.5" y="192.7" width="14" height="10" rx="2.5" transform="rotate(58.9 469.5 197.7)"/><rect class="pc pc-ok" x="448.9" y="172.9" width="14" height="10" rx="2.5" transform="rotate(51.9 455.9 177.9)"/><rect class="pc pc-ok" x="433.0" y="155.0" width="14" height="10" rx="2.5" transform="rotate(45.0 440.0 160.0)"/><rect class="pc pc-ok" x="415.1" y="139.1" width="14" height="10" rx="2.5" transform="rotate(38.1 422.1 144.1)"/><rect class="pc pc-ok" x="395.3" y="125.5" width="14" height="10" rx="2.5" transform="rotate(31.1 402.3 130.5)"/><rect class="pc pc-ok" x="374.1" y="114.4" width="14" height="10" rx="2.5" transform="rotate(24.2 381.1 119.4)"/><rect class="pc pc-ok" x="351.6" y="105.9" width="14" height="10" rx="2.5" transform="rotate(17.2 358.6 110.9)"/><rect class="pc pc-ok" x="328.3" y="100.2" width="14" height="10" rx="2.5" transform="rotate(10.3 335.3 105.2)"/><rect class="pc pc-rep" x="512.7" y="251.4" width="14" height="10" rx="2.5" transform="rotate(78.8 519.7 256.4)"/><rect class="pc pc-ok" x="506.8" y="228.1" width="14" height="10" rx="2.5" transform="rotate(72.6 513.8 233.1)"/><rect class="pc pc-ok" x="498.4" y="205.6" width="14" height="10" rx="2.5" transform="rotate(66.5 505.4 210.6)"/><rect class="pc pc-ok" x="487.7" y="184.2" width="14" height="10" rx="2.5" transform="rotate(60.3 494.7 189.2)"/><rect class="pc pc-ok" x="474.7" y="164.0" width="14" height="10" rx="2.5" transform="rotate(54.2 481.7 169.0)"/><rect class="pc pc-ok" x="459.6" y="145.3" width="14" height="10" rx="2.5" transform="rotate(48.1 466.6 150.3)"/><rect class="pc pc-ok" x="442.7" y="128.4" width="14" height="10" rx="2.5" transform="rotate(41.9 449.7 133.4)"/><rect class="pc pc-ok" x="424.0" y="113.3" width="14" height="10" rx="2.5" transform="rotate(35.8 431.0 118.3)"/><rect class="pc pc-ok" x="403.8" y="100.3" width="14" height="10" rx="2.5" transform="rotate(29.7 410.8 105.3)"/><rect class="pc pc-ok" x="382.4" y="89.6" width="14" height="10" rx="2.5" transform="rotate(23.5 389.4 94.6)"/><rect class="pc pc-ok" x="359.9" y="81.2" width="14" height="10" rx="2.5" transform="rotate(17.4 366.9 86.2)"/><rect class="pc pc-ok" x="336.6" y="75.3" width="14" height="10" rx="2.5" transform="rotate(11.2 343.6 80.3)"/></g><g class="fp-room" data-room="4"><rect class="pc pc-ok" x="250.9" y="155.2" width="14" height="10" rx="2.5" transform="rotate(-16.7 257.9 160.2)"/><rect class="pc pc-ok" x="228.6" y="164.0" width="14" height="10" rx="2.5" transform="rotate(-26.2 235.6 169.0)"/><rect class="pc pc-ok" x="208.0" y="176.3" width="14" height="10" rx="2.5" transform="rotate(-35.6 215.0 181.3)"/><rect class="pc pc-ok" x="189.8" y="191.8" width="14" height="10" rx="2.5" transform="rotate(-45.0 196.8 196.8)"/><rect class="pc pc-ok" x="174.3" y="210.0" width="14" height="10" rx="2.5" transform="rotate(-54.4 181.3 215.0)"/><rect class="pc pc-ok" x="162.0" y="230.6" width="14" height="10" rx="2.5" transform="rotate(-63.8 169.0 235.6)"/><rect class="pc pc-ok" x="153.2" y="252.9" width="14" height="10" rx="2.5" transform="rotate(-73.3 160.2 257.9)"/><rect class="pc pc-ok" x="254.2" y="127.4" width="14" height="10" rx="2.5" transform="rotate(-13.0 261.2 132.4)"/><rect class="pc pc-ok" x="231.3" y="134.4" width="14" height="10" rx="2.5" transform="rotate(-21.0 238.3 139.4)"/><rect class="pc pc-ok" x="209.6" y="144.6" width="14" height="10" rx="2.5" transform="rotate(-29.0 216.6 149.6)"/><rect class="pc pc-ok" x="189.5" y="157.6" width="14" height="10" rx="2.5" transform="rotate(-37.0 196.5 162.6)"/><rect class="pc pc-rep" x="171.4" y="173.4" width="14" height="10" rx="2.5" transform="rotate(-45.0 178.4 178.4)"/><rect class="pc pc-ok" x="155.6" y="191.5" width="14" height="10" rx="2.5" transform="rotate(-53.0 162.6 196.5)"/><rect class="pc pc-ok" x="142.6" y="211.6" width="14" height="10" rx="2.5" transform="rotate(-61.0 149.6 216.6)"/><rect class="pc pc-ok" x="132.4" y="233.3" width="14" height="10" rx="2.5" transform="rotate(-69.0 139.4 238.3)"/><rect class="pc pc-ok" x="125.4" y="256.2" width="14" height="10" rx="2.5" transform="rotate(-77.0 132.4 261.2)"/><rect class="pc pc-ok" x="257.7" y="100.2" width="14" height="10" rx="2.5" transform="rotate(-10.3 264.7 105.2)"/><rect class="pc pc-ok" x="234.4" y="105.9" width="14" height="10" rx="2.5" transform="rotate(-17.2 241.4 110.9)"/><rect class="pc pc-ok" x="211.9" y="114.4" width="14" height="10" rx="2.5" transform="rotate(-24.2 218.9 119.4)"/><rect class="pc pc-ok" x="190.7" y="125.5" width="14" height="10" rx="2.5" transform="rotate(-31.1 197.7 130.5)"/><rect class="pc pc-ok" x="170.9" y="139.1" width="14" height="10" rx="2.5" transform="rotate(-38.1 177.9 144.1)"/><rect class="pc pc-fix" x="153.0" y="155.0" width="14" height="10" rx="2.5" transform="rotate(-45.0 160.0 160.0)"/><rect class="pc pc-ok" x="137.1" y="172.9" width="14" height="10" rx="2.5" transform="rotate(-51.9 144.1 177.9)"/><rect class="pc pc-ok" x="123.5" y="192.7" width="14" height="10" rx="2.5" transform="rotate(-58.9 130.5 197.7)"/><rect class="pc pc-ok" x="112.4" y="213.9" width="14" height="10" rx="2.5" transform="rotate(-65.8 119.4 218.9)"/><rect class="pc pc-ok" x="103.9" y="236.4" width="14" height="10" rx="2.5" transform="rotate(-72.8 110.9 241.4)"/><rect class="pc pc-ok" x="98.2" y="259.7" width="14" height="10" rx="2.5" transform="rotate(-79.7 105.2 264.7)"/><rect class="pc pc-ok" x="249.4" y="75.3" width="14" height="10" rx="2.5" transform="rotate(-11.2 256.4 80.3)"/><rect class="pc pc-ok" x="226.1" y="81.2" width="14" height="10" rx="2.5" transform="rotate(-17.4 233.1 86.2)"/><rect class="pc pc-ok" x="203.6" y="89.6" width="14" height="10" rx="2.5" transform="rotate(-23.5 210.6 94.6)"/><rect class="pc pc-ok" x="182.2" y="100.3" width="14" height="10" rx="2.5" transform="rotate(-29.7 189.2 105.3)"/><rect class="pc pc-ok" x="162.0" y="113.3" width="14" height="10" rx="2.5" transform="rotate(-35.8 169.0 118.3)"/><rect class="pc pc-ok" x="143.3" y="128.4" width="14" height="10" rx="2.5" transform="rotate(-41.9 150.3 133.4)"/><rect class="pc pc-ok" x="126.4" y="145.3" width="14" height="10" rx="2.5" transform="rotate(-48.1 133.4 150.3)"/><rect class="pc pc-ok" x="111.3" y="164.0" width="14" height="10" rx="2.5" transform="rotate(-54.2 118.3 169.0)"/><rect class="pc pc-ok" x="98.3" y="184.2" width="14" height="10" rx="2.5" transform="rotate(-60.3 105.3 189.2)"/><rect class="pc pc-ok" x="87.6" y="205.6" width="14" height="10" rx="2.5" transform="rotate(-66.5 94.6 210.6)"/><rect class="pc pc-ok" x="79.2" y="228.1" width="14" height="10" rx="2.5" transform="rotate(-72.6 86.2 233.1)"/><rect class="pc pc-ok" x="73.3" y="251.4" width="14" height="10" rx="2.5" transform="rotate(-78.8 80.3 256.4)"/></g><defs><path id="fp-lbl-1" d="M324.5,579.9 A281.0,281.0 0 0 0 579.9,324.5"/><path id="fp-lbl-2" d="M20.1,324.5 A281.0,281.0 0 0 0 275.5,579.9"/><path id="fp-lbl-3" d="M323.8,28.0 A273.0,273.0 0 0 1 572.0,276.2"/><path id="fp-lbl-4" d="M28.0,276.2 A273.0,273.0 0 0 1 276.2,28.0"/></defs><text class="fp-lbl"><textPath href="#fp-lbl-1" startOffset="50%" text-anchor="middle" dominant-baseline="middle">CENTRUM 1</textPath></text><text class="fp-lbl"><textPath href="#fp-lbl-2" startOffset="50%" text-anchor="middle" dominant-baseline="middle">CENTRUM 2</textPath></text><text class="fp-lbl"><textPath href="#fp-lbl-3" startOffset="50%" text-anchor="middle" dominant-baseline="middle">CENTRUM 3</textPath></text><text class="fp-lbl"><textPath href="#fp-lbl-4" startOffset="50%" text-anchor="middle" dominant-baseline="middle">CENTRUM 4</textPath></text></svg>
       <div class="float-card fc-1">
         <div class="ic"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg></div>
@@ -444,22 +516,18 @@ footer nav a:hover { color: #fff; }
         <div><b>Fixed · Centrum 2</b><small>PC 07 — keyboard replaced</small></div>
       </div>
       <div class="legend"><span><i style="background:#9fbdf2"></i>Working</span><span><i style="background:var(--rep)"></i>Reported</span><span><i style="background:var(--fix)"></i>Under repair</span></div>
-    </div>
-  </div>
-</section>
+    </div>'''
 
-<!-- ============================================================ STRIP -->
-<div class="strip">
+STRIP_HTML = r'''<div class="strip">
   <div class="wrap">
     <div class="stat"><div class="ic"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></div><div><div class="num">4</div><div class="lbl">Computer laboratories</div></div></div>
     <div class="stat"><div class="ic"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18.5 20a6.5 6.5 0 0 0-3-5.5"/></svg></div><div><div class="num">3</div><div class="lbl">User roles, one system</div></div></div>
     <div class="stat"><div class="ic"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg></div><div><div class="num">Live</div><div class="lbl">PC status per laboratory</div></div></div>
     <div class="stat"><div class="ic"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M8 13h8M8 17h5"/></svg></div><div><div class="num">1</div><div class="lbl">Place for every report</div></div></div>
   </div>
-</div>
+</div>'''
 
-<!-- ============================================================ LABS -->
-<section class="block" id="labs">
+LABS_HTML = r'''<section class="block" id="labs">
   <div class="wrap">
     <div class="sec-head reveal">
       <div class="eyebrow">Our Laboratories</div>
@@ -473,29 +541,15 @@ footer nav a:hover { color: #fff; }
 <article class="lab reveal" data-room="4"><div class="lab-top"><div class="lab-num"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M23.74,37.61 A18,18 0 0 0 37.61,23.74 L29.78,22.08 A10,10 0 0 1 22.08,29.78 Z" fill="#c9d8f5"/><path d="M2.39,23.74 A18,18 0 0 0 16.26,37.61 L17.92,29.78 A10,10 0 0 1 10.22,22.08 Z" fill="#c9d8f5"/><path d="M37.61,16.26 A18,18 0 0 0 23.74,2.39 L22.08,10.22 A10,10 0 0 1 29.78,17.92 Z" fill="#c9d8f5"/><path d="M16.26,2.39 A18,18 0 0 0 2.39,16.26 L10.22,17.92 A10,10 0 0 1 17.92,10.22 Z" fill="#2d6fe3"/><circle cx="20" cy="20" r="6" fill="#14213d"/><circle cx="20" cy="20" r="2.4" fill="#fff"/></svg></div><span class="lab-tag">Northwest wing</span></div><h3>Centrum 4</h3><p>Near the Socio-Cultural and Publication offices.</p></article>
     </div>
   </div>
-</section>
+</section>'''
 
-<!-- ============================================================ FEATURES -->
-<section class="block soft" id="features">
-  <div class="wrap">
-    <div class="sec-head reveal">
+FEATURES_HEAD_HTML = r'''<div class="sec-head reveal">
       <div class="eyebrow">Features</div>
       <h2>Built for everyone in the lab</h2>
       <p>Each role gets its own dashboard with exactly the tools it needs.</p>
-    </div>
-    <div class="tabs" role="tablist">
-      <button class="tab on" role="tab" data-tab="teacher"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10 12 5 2 10l10 5 10-5z"/><path d="M6 12v5c3 2 9 2 12 0v-5"/></svg>Teacher</button>
-      <button class="tab" role="tab" data-tab="technician"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.4-.6-.6-2.4z"/></svg>Technician</button>
-      <button class="tab" role="tab" data-tab="admin"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/></svg>Admin</button>
-    </div>
-    <div class="panel on" data-panel="teacher"><div><div class="eyebrow">For teachers</div><h3>Report issues in seconds, then follow the fix</h3><p>Spot a problem during class? Send it to the technicians without leaving the room.</p><ul class="checks"><li><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg><span><b>Report a PC problem</b> — pick the lab, the PC and what's wrong.</span></li><li><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg><span><b>Follow every report</b> — see when it's received, being repaired, and fixed.</span></li><li><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg><span><b>Keep your details current</b> — update your contact number and email in your profile.</span></li></ul><button class="btn btn-primary" style="margin-top:28px" onclick="clGo('signup')">Sign up as a teacher</button></div><div class="feat-grid"><div class="feat"><div class="ic"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M12 12v5M9.5 14.5h5"/></svg></div><h4>Quick reports</h4><p>A short guided form with a review step before sending.</p></div><div class="feat"><div class="ic"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div><h4>Live status</h4><p>Each report shows where it is right now.</p></div><div class="feat"><div class="ic"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 8v4l3 2"/></svg></div><h4>Report history</h4><p>All your past reports in one list.</p></div><div class="feat"><div class="ic"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></div><h4>Your profile</h4><p>Your name, email and number, always up to date.</p></div></div></div>
-<div class="panel" data-panel="technician"><div><div class="eyebrow">For technicians</div><h3>Fix, track, and analyze every laboratory</h3><p>Every new report lands in one queue, with the lab and PC already filled in.</p><ul class="checks"><li><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg><span><b>See new reports first</b> — sorted so nothing gets missed.</span></li><li><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg><span><b>Update the repair status</b> — so teachers know what's happening.</span></li><li><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg><span><b>Escalate the hard cases</b> — when a PC needs parts or the admin's help.</span></li></ul><button class="btn btn-primary" style="margin-top:28px" onclick="clGo('signup')">Sign up as a technician</button></div><div class="feat-grid"><div class="feat"><div class="ic"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg></div><h4>Report queue</h4><p>One list for all four Centrum labs.</p></div><div class="feat"><div class="ic"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.4-.6-.6-2.4z"/></svg></div><h4>Repair updates</h4><p>Mark PCs under repair or fixed.</p></div><div class="feat"><div class="ic"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg></div><h4>Escalation</h4><p>Pass bigger problems to the admin.</p></div><div class="feat"><div class="ic"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></div><h4>Analytics</h4><p>See which labs and PCs break most often.</p></div></div></div>
-<div class="panel" data-panel="admin"><div><div class="eyebrow">For admins</div><h3>See every lab, every report, every account</h3><p>Keep the whole building running and decide who gets access.</p><ul class="checks"><li><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg><span><b>Approve new accounts</b> — technician requests wait for your confirmation.</span></li><li><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg><span><b>Watch every laboratory</b> — reports and PC status across Centrum 1 to 4.</span></li><li><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg><span><b>Handle escalations</b> — and keep the inventory of equipment current.</span></li></ul><button class="btn btn-primary" style="margin-top:28px" onclick="clGo('login')">Admin log in</button></div><div class="feat-grid"><div class="feat"><div class="ic"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18.5 20a6.5 6.5 0 0 0-3-5.5"/></svg></div><h4>User requests</h4><p>Confirm or decline new sign-ups.</p></div><div class="feat"><div class="ic"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M8 13h8M8 17h5"/></svg></div><h4>Reports</h4><p>Every report from every lab.</p></div><div class="feat"><div class="ic"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg></div><h4>Inventory</h4><p>The equipment in each laboratory.</p></div><div class="feat"><div class="ic"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg></div><h4>Escalations</h4><p>Problems that need your decision.</p></div></div></div>
-  </div>
-</section>
+    </div>'''
 
-<!-- ============================================================ HOW IT WORKS -->
-<section class="block" id="how">
+HOW_HTML = r'''<section class="block" id="how">
   <div class="wrap">
     <div class="sec-head reveal">
       <div class="eyebrow">How It Works</div>
@@ -513,10 +567,9 @@ footer nav a:hover { color: #fff; }
         <h4>Resolved</h4><p>The teacher sees it's fixed, and the admin sees it in the reports.</p><span class="who">Everyone</span></div>
     </div>
   </div>
-</section>
+</section>'''
 
-<!-- ============================================================ ABOUT -->
-<section class="block soft" id="about">
+ABOUT_HTML = r'''<section class="block soft" id="about">
   <div class="wrap about">
     <div class="about-art reveal">
       <div class="logo-mark"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Centrum Laboratory"><title>Centrum Laboratory</title><defs><linearGradient id="k-room" x1="0" y1="0" x2="0.35" y2="1"><stop offset="0" stop-color="#3b7cf0"/><stop offset="1" stop-color="#1d4ed8"/></linearGradient></defs><mask id="k-cut" maskUnits="userSpaceOnUse"><rect x="69.68" y="69.68" width="372.64" height="372.64" fill="white"/><rect x="242.01" y="69.68" width="27.98" height="372.64" fill="black"/><rect x="69.68" y="242.01" width="186.32" height="27.98" fill="black"/></mask>
@@ -549,33 +602,20 @@ footer nav a:hover { color: #fff; }
       <p>Even the logo comes from the floor plan: four rooms, four lobbies and the hallway, arranged into the letter C.</p>
     </div>
   </div>
-</section>
+</section>'''
 
-<!-- ============================================================ CTA + CONTACT -->
-<section class="block" id="contact" style="padding-bottom:0">
-  <div class="wrap">
-    <div class="cta reveal">
-      <div>
-        <h2>Ready to report your first issue?</h2>
-        <p>Create an account as a teacher or technician. Technician accounts are confirmed by the admin first.</p>
-      </div>
-      <div class="btns">
-        <button class="btn btn-white" onclick="clGo('signup')">Create an account</button>
-        <button class="btn btn-line" onclick="clGo('login')">Log in</button>
-      </div>
-    </div>
-    <div class="contact">
+CTA_LEFT_HTML = r'''<h2>Ready to report your first issue?</h2>
+        <p>Create an account as a teacher or technician. Technician accounts are confirmed by the admin first.</p>'''
+
+CONTACT_HTML = r'''<div class="contact">
       <div class="card reveal"><div class="ic"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg></div>
         <div><h4>Visit us</h4><p>Technician Room, east lobby of the Centrum Laboratory building.</p></div></div>
       <div class="card reveal"><div class="ic"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.4-.6-.6-2.4z"/></svg></div>
         <div><h4>Report a problem</h4><p>Log in and send a report. It goes straight to the technicians.</p></div></div>
       <div class="card reveal"><div class="ic"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/><path d="m9 12 2 2 4-4"/></svg></div>
-        <div><h4>Account requests</h4><p>New technician accounts are reviewed by the laboratory admin.</p></div></div>
-    </div>
-  </div>
-</section>
+        <div><h4>Account requests</h4><p>New technician accounts are reviewed by the laboratory admin.</p></div></div></div>'''
 
-<footer>
+FOOTER_HTML = r'''<footer class="cl-footer">
   <div class="wrap">
     <a href="#home" class="flogo" aria-label="Centrum Laboratory"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 382 128" role="img" aria-label="Centrum Laboratory"><title>Centrum Laboratory</title><defs><linearGradient id="hd-room" x1="0" y1="0" x2="0.35" y2="1"><stop offset="0" stop-color="#5b93f5"/><stop offset="1" stop-color="#2d6fe3"/></linearGradient></defs><mask id="hd-cut" maskUnits="userSpaceOnUse"><rect x="2" y="4" width="120" height="120" fill="white"/><rect x="57.60" y="4" width="8.80" height="120" fill="black"/><rect x="2" y="59.60" width="60" height="8.80" fill="black"/></mask>
 <path d="M107.70,28.29 A58.00,58.00 0 1 0 107.70,99.71 L88.93,85.04 A34.18,34.18 0 1 1 88.93,42.96 Z" fill="url(#hd-room)" mask="url(#hd-cut)"/>
@@ -593,70 +633,17 @@ footer nav a:hover { color: #fff; }
     <nav><a href="#labs">Laboratories</a><a href="#features">Features</a><a href="#how">How It Works</a><a href="#about">About Us</a><a href="#contact">Contact</a></nav>
     <div>© <span id="yr">2026</span> Centrum Laboratory · Computer Monitoring Management System</div>
   </div>
-</footer>
+</footer>'''
 
-<div class="toast" id="toast"></div>
-
-<script>
-/* Login / Register buttons. App.py replaces this with a link to the Streamlit login. */
-window.clGo = window.clGo || function (view) {
-  showToast(view === 'signup' ? 'Opens the Sign Up screen in the app.' : 'Opens the Log In screen in the app.');
-};
-function showToast(msg) {
-  var t = document.getElementById('toast');
-  t.textContent = msg; t.classList.add('show');
-  clearTimeout(t._h); t._h = setTimeout(function () { t.classList.remove('show'); }, 2400);
+# role -> (left column HTML, button label, 'login' or 'signup', feature-card grid HTML)
+PANELS = {
+    'teacher': (r'''<div class="eyebrow">For teachers</div><h3>Report issues in seconds, then follow the fix</h3><p>Spot a problem during class? Send it to the technicians without leaving the room.</p><ul class="checks"><li><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg><span><b>Report a PC problem</b> — pick the lab, the PC and what's wrong.</span></li><li><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg><span><b>Follow every report</b> — see when it's received, being repaired, and fixed.</span></li><li><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg><span><b>Keep your details current</b> — update your contact number and email in your profile.</span></li></ul>''', 'Sign up as a teacher', 'signup',
+             r'''<div class="feat-grid"><div class="feat"><div class="ic"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M12 12v5M9.5 14.5h5"/></svg></div><h4>Quick reports</h4><p>A short guided form with a review step before sending.</p></div><div class="feat"><div class="ic"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div><h4>Live status</h4><p>Each report shows where it is right now.</p></div><div class="feat"><div class="ic"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 8v4l3 2"/></svg></div><h4>Report history</h4><p>All your past reports in one list.</p></div><div class="feat"><div class="ic"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></div><h4>Your profile</h4><p>Your name, email and number, always up to date.</p></div></div>'''),
+    'technician': (r'''<div class="eyebrow">For technicians</div><h3>Fix, track, and analyze every laboratory</h3><p>Every new report lands in one queue, with the lab and PC already filled in.</p><ul class="checks"><li><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg><span><b>See new reports first</b> — sorted so nothing gets missed.</span></li><li><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg><span><b>Update the repair status</b> — so teachers know what's happening.</span></li><li><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg><span><b>Escalate the hard cases</b> — when a PC needs parts or the admin's help.</span></li></ul>''', 'Sign up as a technician', 'signup',
+             r'''<div class="feat-grid"><div class="feat"><div class="ic"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg></div><h4>Report queue</h4><p>One list for all four Centrum labs.</p></div><div class="feat"><div class="ic"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.4-.6-.6-2.4z"/></svg></div><h4>Repair updates</h4><p>Mark PCs under repair or fixed.</p></div><div class="feat"><div class="ic"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg></div><h4>Escalation</h4><p>Pass bigger problems to the admin.</p></div><div class="feat"><div class="ic"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></div><h4>Analytics</h4><p>See which labs and PCs break most often.</p></div></div>'''),
+    'admin': (r'''<div class="eyebrow">For admins</div><h3>See every lab, every report, every account</h3><p>Keep the whole building running and decide who gets access.</p><ul class="checks"><li><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg><span><b>Approve new accounts</b> — technician requests wait for your confirmation.</span></li><li><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg><span><b>Watch every laboratory</b> — reports and PC status across Centrum 1 to 4.</span></li><li><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg><span><b>Handle escalations</b> — and keep the computer inventory current.</span></li></ul>''', 'Admin log in', 'login',
+             r'''<div class="feat-grid"><div class="feat"><div class="ic"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18.5 20a6.5 6.5 0 0 0-3-5.5"/></svg></div><h4>User requests</h4><p>Confirm or decline new sign-ups.</p></div><div class="feat"><div class="ic"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M8 13h8M8 17h5"/></svg></div><h4>Reports</h4><p>Every report from every lab.</p></div><div class="feat"><div class="ic"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg></div><h4>Inventory</h4><p>Every computer, its specs and history.</p></div><div class="feat"><div class="ic"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg></div><h4>Escalations</h4><p>Problems that need your decision.</p></div></div>'''),
 }
-function toggleMenu() { document.getElementById('mobile-menu').classList.toggle('open'); }
-document.querySelectorAll('.mobile-menu a').forEach(function (a) {
-  a.addEventListener('click', function () { document.getElementById('mobile-menu').classList.remove('open'); });
-});
-document.getElementById('yr').textContent = new Date().getFullYear();
-
-/* sticky nav shadow */
-var nav = document.getElementById('nav');
-addEventListener('scroll', function () { nav.classList.toggle('scrolled', scrollY > 8); }, { passive: true });
-
-/* active nav link while scrolling */
-var links = document.querySelectorAll('.nav-links a');
-var sections = ['home', 'labs', 'features', 'how', 'about', 'contact'].map(function (id) { return document.getElementById(id); });
-function markActive() {
-  var y = scrollY + 120, cur = 'home';
-  sections.forEach(function (s) { if (s && s.offsetTop <= y) cur = s.id; });
-  if (innerHeight + scrollY >= document.body.scrollHeight - 4) cur = 'contact';
-  links.forEach(function (a) { a.classList.toggle('active', a.getAttribute('href') === '#' + cur); });
-}
-addEventListener('scroll', markActive, { passive: true }); markActive();
-
-/* feature tabs */
-document.querySelectorAll('.tab').forEach(function (b) {
-  b.addEventListener('click', function () {
-    document.querySelectorAll('.tab').forEach(function (x) { x.classList.toggle('on', x === b); });
-    document.querySelectorAll('.panel').forEach(function (p) { p.classList.toggle('on', p.dataset.panel === b.dataset.tab); });
-  });
-});
-
-/* lab cards highlight their room on the floor plan */
-var fp = document.querySelector('.fp');
-document.querySelectorAll('.lab').forEach(function (card) {
-  var n = card.dataset.room, room = fp && fp.querySelector('.fp-room[data-room="' + n + '"]');
-  card.addEventListener('mouseenter', function () { if (room) { fp.classList.add('focus'); room.classList.add('on'); } });
-  card.addEventListener('mouseleave', function () { if (room) { fp.classList.remove('focus'); room.classList.remove('on'); } });
-});
-
-/* reveal on scroll */
-if ('IntersectionObserver' in window) {
-  var io = new IntersectionObserver(function (es) {
-    es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
-  }, { threshold: .12 });
-  document.querySelectorAll('.reveal').forEach(function (el) { io.observe(el); });
-} else {
-  document.querySelectorAll('.reveal').forEach(function (el) { el.classList.add('in'); });
-}
-</script>
-</body>
-</html>
-'''
 
 
 if __name__ == "__main__":

@@ -28,11 +28,21 @@ What happens
 This file contains no database, authentication or email code and needs no
 Supabase or Brevo keys - those stay in the backend.
 
+Every screen is built in Python with Streamlit and keeps the look of the
+original HTML design (the design's stylesheet is in frontend/design.py; shared
+dashboard pieces are in frontend/ui.py). The centrum-laboratory-*.html files
+are no longer needed.
+
 Files that must sit in the same folder as app.py:
-    Teacher.py, Home.py (or frontend/Home.py),
-    centrum-laboratory-admin.html, centrum-laboratory-teacher.html,
-    centrum-laboratory-technician.html
-    (optional) isu.jpg background, assets/logo.png
+    Teacher.py, Home.py (or frontend/Home.py)
+
+Brand files (optional, all included in the project zip):
+    assets/logo.png        Centrum Laboratory logo - dashboard sidebar and login card
+    assets/logo-icon.png   the "C" mark - browser-tab icon
+    assets/logo-stacked.png, assets/logo-white.png   other versions of the logo
+    media/centrum-intro.mp4, media/centrum-intro.gif the logo intro as a video / GIF
+    media/homepage.png, media/homepage-hero.png      pictures of the homepage
+    (optional) isu.jpg campus photo for the login screen
 """
 
 from __future__ import annotations
