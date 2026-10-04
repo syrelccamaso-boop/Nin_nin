@@ -1,0 +1,8354 @@
+{
+ "version": 1,
+ "computers": [
+  {
+   "lab": 1,
+   "pc": 1,
+   "tag": "CL1-PC01",
+   "name": "CL1-PC01",
+   "brand": "Dell",
+   "model": "OptiPlex 3080 Tower",
+   "serial": "2Y0UVUJ",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-10400",
+    "Memory (RAM)": "8 GB DDR4-2666",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Dell E2222H 21.5\" LED",
+    "Keyboard & mouse": "Dell KB216 keyboard & MS116 mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Python",
+     "version": "3.12"
+    },
+    {
+     "name": "Mozilla Firefox",
+     "version": "130"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2021-06-17T09:50:00",
+   "updated": null
+  },
+  {
+   "lab": 1,
+   "pc": 2,
+   "tag": "CL1-PC02",
+   "name": "CL1-PC02",
+   "brand": "Dell",
+   "model": "OptiPlex 3080 Tower",
+   "serial": "BJZE3E9",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-10400",
+    "Memory (RAM)": "16 GB DDR4-2666",
+    "Storage": "256 GB NVMe SSD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Dell E2220H 21.5\" LED",
+    "Keyboard & mouse": "Dell KB216 keyboard & MS116 mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Python",
+     "version": "3.12"
+    },
+    {
+     "name": "Mozilla Firefox",
+     "version": "130"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2021-06-16T08:25:00",
+   "updated": null
+  },
+  {
+   "lab": 1,
+   "pc": 3,
+   "tag": "CL1-PC03",
+   "name": "CL1-PC03",
+   "brand": "Dell",
+   "model": "OptiPlex 3080 Tower",
+   "serial": "CI5E65A",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-10500",
+    "Memory (RAM)": "8 GB DDR4-2666",
+    "Storage": "256 GB NVMe SSD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Dell E2222H 21.5\" LED",
+    "Keyboard & mouse": "Dell KB216 keyboard & MS116 mouse",
+    "Operating system": "Windows 10 Pro 22H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Python",
+     "version": "3.12"
+    },
+    {
+     "name": "Mozilla Firefox",
+     "version": "130"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2021-06-15T13:25:00",
+   "updated": null
+  },
+  {
+   "lab": 1,
+   "pc": 4,
+   "tag": "CL1-PC04",
+   "name": "CL1-PC04",
+   "brand": "Dell",
+   "model": "OptiPlex 3080 Tower",
+   "serial": "P6FISG1",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-10500",
+    "Memory (RAM)": "8 GB DDR4-2666",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Dell E2220H 21.5\" LED",
+    "Keyboard & mouse": "Dell KB216 keyboard & MS116 mouse",
+    "Operating system": "Windows 10 Pro 22H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Python",
+     "version": "3.12"
+    },
+    {
+     "name": "Mozilla Firefox",
+     "version": "130"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2022-01-08T11:00:00",
+   "updated": null
+  },
+  {
+   "lab": 1,
+   "pc": 5,
+   "tag": "CL1-PC05",
+   "name": "CL1-PC05",
+   "brand": "Dell",
+   "model": "OptiPlex 3080 Tower",
+   "serial": "K9J0IDC",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-10500",
+    "Memory (RAM)": "8 GB DDR4-2666",
+    "Storage": "256 GB NVMe SSD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Dell E2220H 21.5\" LED",
+    "Keyboard & mouse": "Dell KB216 keyboard & MS116 mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Python",
+     "version": "3.12"
+    },
+    {
+     "name": "Mozilla Firefox",
+     "version": "130"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2021-06-17T12:08:00",
+   "updated": null
+  },
+  {
+   "lab": 1,
+   "pc": 6,
+   "tag": "CL1-PC06",
+   "name": "CL1-PC06",
+   "brand": "Dell",
+   "model": "OptiPlex 3080 Tower",
+   "serial": "OCMAWHX",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-10400",
+    "Memory (RAM)": "8 GB DDR4-2666",
+    "Storage": "256 GB NVMe SSD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Dell E2220H 21.5\" LED",
+    "Keyboard & mouse": "Dell KB216 keyboard & MS116 mouse",
+    "Operating system": "Windows 10 Pro 22H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Python",
+     "version": "3.12"
+    },
+    {
+     "name": "Mozilla Firefox",
+     "version": "130"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2021-06-18T13:44:00",
+   "updated": null
+  },
+  {
+   "lab": 1,
+   "pc": 7,
+   "tag": "CL1-PC07",
+   "name": "CL1-PC07",
+   "brand": "Dell",
+   "model": "OptiPlex 3080 Tower",
+   "serial": "NB61R8X",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-10400",
+    "Memory (RAM)": "8 GB DDR4-2666",
+    "Storage": "256 GB NVMe SSD + 1 TB HDD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Dell E2220H 21.5\" LED",
+    "Keyboard & mouse": "Dell KB216 keyboard & MS116 mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Python",
+     "version": "3.12"
+    },
+    {
+     "name": "Mozilla Firefox",
+     "version": "130"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2021-06-16T09:27:00",
+   "updated": null
+  },
+  {
+   "lab": 1,
+   "pc": 8,
+   "tag": "CL1-PC08",
+   "name": "CL1-PC08",
+   "brand": "Dell",
+   "model": "OptiPlex 3080 Tower",
+   "serial": "QRNJ1Q6",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-10400",
+    "Memory (RAM)": "8 GB DDR4-2666",
+    "Storage": "256 GB NVMe SSD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Dell E2220H 21.5\" LED",
+    "Keyboard & mouse": "Dell KB216 keyboard & MS116 mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Python",
+     "version": "3.12"
+    },
+    {
+     "name": "Mozilla Firefox",
+     "version": "130"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2021-06-17T13:34:00",
+   "updated": null
+  },
+  {
+   "lab": 1,
+   "pc": 9,
+   "tag": "CL1-PC09",
+   "name": "CL1-PC09",
+   "brand": "Dell",
+   "model": "OptiPlex 3080 Tower",
+   "serial": "4CSUNFD",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-10500",
+    "Memory (RAM)": "8 GB DDR4-2666",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Dell E2220H 21.5\" LED",
+    "Keyboard & mouse": "Dell KB216 keyboard & MS116 mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Python",
+     "version": "3.12"
+    },
+    {
+     "name": "Mozilla Firefox",
+     "version": "130"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2021-06-14T10:35:00",
+   "updated": null
+  },
+  {
+   "lab": 1,
+   "pc": 10,
+   "tag": "CL1-PC10",
+   "name": "CL1-PC10",
+   "brand": "Dell",
+   "model": "OptiPlex 3080 Tower",
+   "serial": "T4IHRQ9",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-10500",
+    "Memory (RAM)": "8 GB DDR4-2666",
+    "Storage": "256 GB NVMe SSD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Dell E2220H 21.5\" LED",
+    "Keyboard & mouse": "Dell KB216 keyboard & MS116 mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Python",
+     "version": "3.12"
+    },
+    {
+     "name": "Mozilla Firefox",
+     "version": "130"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2023-04-06T12:00:00",
+   "updated": null
+  },
+  {
+   "lab": 1,
+   "pc": 11,
+   "tag": "CL1-PC11",
+   "name": "CL1-PC11",
+   "brand": "Dell",
+   "model": "OptiPlex 3080 Tower",
+   "serial": "GXGPXTT",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-10400",
+    "Memory (RAM)": "8 GB DDR4-2666",
+    "Storage": "256 GB NVMe SSD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Dell E2222H 21.5\" LED",
+    "Keyboard & mouse": "Dell KB216 keyboard & MS116 mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Python",
+     "version": "3.12"
+    },
+    {
+     "name": "Mozilla Firefox",
+     "version": "130"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2021-06-18T14:35:00",
+   "updated": null
+  },
+  {
+   "lab": 1,
+   "pc": 12,
+   "tag": "CL1-PC12",
+   "name": "CL1-PC12",
+   "brand": "Dell",
+   "model": "OptiPlex 3080 Tower",
+   "serial": "Z43L9EU",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-10500",
+    "Memory (RAM)": "8 GB DDR4-2666",
+    "Storage": "256 GB NVMe SSD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Dell E2220H 21.5\" LED",
+    "Keyboard & mouse": "Dell KB216 keyboard & MS116 mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Python",
+     "version": "3.12"
+    },
+    {
+     "name": "Mozilla Firefox",
+     "version": "130"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2021-06-15T11:14:00",
+   "updated": null
+  },
+  {
+   "lab": 1,
+   "pc": 13,
+   "tag": "CL1-PC13",
+   "name": "CL1-PC13",
+   "brand": "Dell",
+   "model": "OptiPlex 3080 Tower",
+   "serial": "IUD5XSM",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-10500",
+    "Memory (RAM)": "8 GB DDR4-2666",
+    "Storage": "256 GB NVMe SSD + 1 TB HDD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Dell E2220H 21.5\" LED",
+    "Keyboard & mouse": "Dell KB216 keyboard & MS116 mouse",
+    "Operating system": "Windows 10 Pro 22H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Python",
+     "version": "3.12"
+    },
+    {
+     "name": "Mozilla Firefox",
+     "version": "130"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [
+    {
+     "t": "2026-10-04T20:55:55",
+     "kind": "Status changed",
+     "text": "Under maintenance → Working",
+     "by": "Administrator"
+    }
+   ],
+   "notes": "",
+   "added": "2022-05-30T15:00:00",
+   "updated": "2026-10-04T20:55:55"
+  },
+  {
+   "lab": 1,
+   "pc": 14,
+   "tag": "CL1-PC14",
+   "name": "CL1-PC14",
+   "brand": "Dell",
+   "model": "OptiPlex 3080 Tower",
+   "serial": "B2JVMMU",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-10500",
+    "Memory (RAM)": "8 GB DDR4-2666",
+    "Storage": "256 GB NVMe SSD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Dell E2222H 21.5\" LED",
+    "Keyboard & mouse": "Dell KB216 keyboard & MS116 mouse",
+    "Operating system": "Windows 10 Pro 22H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Python",
+     "version": "3.12"
+    },
+    {
+     "name": "Mozilla Firefox",
+     "version": "130"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2021-06-17T11:33:00",
+   "updated": null
+  },
+  {
+   "lab": 1,
+   "pc": 15,
+   "tag": "CL1-PC15",
+   "name": "CL1-PC15",
+   "brand": "Dell",
+   "model": "OptiPlex 3080 Tower",
+   "serial": "UX13K0N",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-10500",
+    "Memory (RAM)": "8 GB DDR4-2666",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Dell E2220H 21.5\" LED",
+    "Keyboard & mouse": "Dell KB216 keyboard & MS116 mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Python",
+     "version": "3.12"
+    },
+    {
+     "name": "Mozilla Firefox",
+     "version": "130"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2021-06-18T09:37:00",
+   "updated": null
+  },
+  {
+   "lab": 1,
+   "pc": 16,
+   "tag": "CL1-PC16",
+   "name": "CL1-PC16",
+   "brand": "Dell",
+   "model": "OptiPlex 3080 Tower",
+   "serial": "9DJDZEJ",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-10500",
+    "Memory (RAM)": "8 GB DDR4-2666",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Dell E2220H 21.5\" LED",
+    "Keyboard & mouse": "Dell KB216 keyboard & MS116 mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Python",
+     "version": "3.12"
+    },
+    {
+     "name": "Mozilla Firefox",
+     "version": "130"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2021-06-15T15:41:00",
+   "updated": null
+  },
+  {
+   "lab": 1,
+   "pc": 17,
+   "tag": "CL1-PC17",
+   "name": "CL1-PC17",
+   "brand": "Dell",
+   "model": "OptiPlex 3080 Tower",
+   "serial": "AQX2068",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-10400",
+    "Memory (RAM)": "8 GB DDR4-2666",
+    "Storage": "256 GB NVMe SSD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Dell E2222H 21.5\" LED",
+    "Keyboard & mouse": "Dell KB216 keyboard & MS116 mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Python",
+     "version": "3.12"
+    },
+    {
+     "name": "Mozilla Firefox",
+     "version": "130"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2021-06-18T13:25:00",
+   "updated": null
+  },
+  {
+   "lab": 1,
+   "pc": 18,
+   "tag": "CL1-PC18",
+   "name": "CL1-PC18",
+   "brand": "Dell",
+   "model": "OptiPlex 3080 Tower",
+   "serial": "V2CXRLW",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-10500",
+    "Memory (RAM)": "16 GB DDR4-2666",
+    "Storage": "256 GB NVMe SSD + 1 TB HDD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Dell E2220H 21.5\" LED",
+    "Keyboard & mouse": "Dell KB216 keyboard & MS116 mouse",
+    "Operating system": "Windows 10 Pro 22H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Python",
+     "version": "3.12"
+    },
+    {
+     "name": "Mozilla Firefox",
+     "version": "130"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2021-06-18T15:26:00",
+   "updated": null
+  },
+  {
+   "lab": 1,
+   "pc": 19,
+   "tag": "CL1-PC19",
+   "name": "CL1-PC19",
+   "brand": "Dell",
+   "model": "OptiPlex 3080 Tower",
+   "serial": "O9YVJC4",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-10400",
+    "Memory (RAM)": "16 GB DDR4-2666",
+    "Storage": "256 GB NVMe SSD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Dell E2220H 21.5\" LED",
+    "Keyboard & mouse": "Dell KB216 keyboard & MS116 mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Python",
+     "version": "3.12"
+    },
+    {
+     "name": "Mozilla Firefox",
+     "version": "130"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2021-06-16T15:18:00",
+   "updated": null
+  },
+  {
+   "lab": 1,
+   "pc": 20,
+   "tag": "CL1-PC20",
+   "name": "CL1-PC20",
+   "brand": "Dell",
+   "model": "OptiPlex 3080 Tower",
+   "serial": "46QSFKG",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-10400",
+    "Memory (RAM)": "8 GB DDR4-2666",
+    "Storage": "256 GB NVMe SSD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Dell E2220H 21.5\" LED",
+    "Keyboard & mouse": "Dell KB216 keyboard & MS116 mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Python",
+     "version": "3.12"
+    },
+    {
+     "name": "Mozilla Firefox",
+     "version": "130"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2021-06-14T12:04:00",
+   "updated": null
+  },
+  {
+   "lab": 1,
+   "pc": 21,
+   "tag": "CL1-PC21",
+   "name": "CL1-PC21",
+   "brand": "Dell",
+   "model": "OptiPlex 3080 Tower",
+   "serial": "XAUPR4K",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-10500",
+    "Memory (RAM)": "16 GB DDR4-2666",
+    "Storage": "256 GB NVMe SSD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Dell E2220H 21.5\" LED",
+    "Keyboard & mouse": "Dell KB216 keyboard & MS116 mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Python",
+     "version": "3.12"
+    },
+    {
+     "name": "Mozilla Firefox",
+     "version": "130"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2021-06-14T11:25:00",
+   "updated": null
+  },
+  {
+   "lab": 1,
+   "pc": 22,
+   "tag": "CL1-PC22",
+   "name": "CL1-PC22",
+   "brand": "Dell",
+   "model": "OptiPlex 3080 Tower",
+   "serial": "4ZJN2NR",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-10400",
+    "Memory (RAM)": "8 GB DDR4-2666",
+    "Storage": "256 GB NVMe SSD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Dell E2220H 21.5\" LED",
+    "Keyboard & mouse": "Dell KB216 keyboard & MS116 mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Python",
+     "version": "3.12"
+    },
+    {
+     "name": "Mozilla Firefox",
+     "version": "130"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2021-06-16T13:34:00",
+   "updated": null
+  },
+  {
+   "lab": 1,
+   "pc": 23,
+   "tag": "CL1-PC23",
+   "name": "CL1-PC23",
+   "brand": "Dell",
+   "model": "OptiPlex 3080 Tower",
+   "serial": "NHPF7DC",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-10400",
+    "Memory (RAM)": "16 GB DDR4-2666",
+    "Storage": "256 GB NVMe SSD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Dell E2222H 21.5\" LED",
+    "Keyboard & mouse": "Dell KB216 keyboard & MS116 mouse",
+    "Operating system": "Windows 10 Pro 22H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Python",
+     "version": "3.12"
+    },
+    {
+     "name": "Mozilla Firefox",
+     "version": "130"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2021-06-18T11:30:00",
+   "updated": null
+  },
+  {
+   "lab": 1,
+   "pc": 24,
+   "tag": "CL1-PC24",
+   "name": "CL1-PC24",
+   "brand": "Dell",
+   "model": "OptiPlex 3080 Tower",
+   "serial": "8XMZZ16",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-10500",
+    "Memory (RAM)": "8 GB DDR4-2666",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Dell E2220H 21.5\" LED",
+    "Keyboard & mouse": "Dell KB216 keyboard & MS116 mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Python",
+     "version": "3.12"
+    },
+    {
+     "name": "Mozilla Firefox",
+     "version": "130"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2021-06-15T15:01:00",
+   "updated": null
+  },
+  {
+   "lab": 1,
+   "pc": 25,
+   "tag": "CL1-PC25",
+   "name": "CL1-PC25",
+   "brand": "Dell",
+   "model": "OptiPlex 3080 Tower",
+   "serial": "C60TYBS",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-10500",
+    "Memory (RAM)": "16 GB DDR4-2666",
+    "Storage": "256 GB NVMe SSD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Dell E2222H 21.5\" LED",
+    "Keyboard & mouse": "Dell KB216 keyboard & MS116 mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Python",
+     "version": "3.12"
+    },
+    {
+     "name": "Mozilla Firefox",
+     "version": "130"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2021-10-26T16:00:00",
+   "updated": null
+  },
+  {
+   "lab": 1,
+   "pc": 26,
+   "tag": "CL1-PC26",
+   "name": "CL1-PC26",
+   "brand": "Dell",
+   "model": "OptiPlex 3080 Tower",
+   "serial": "P4VHCYG",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-10500",
+    "Memory (RAM)": "16 GB DDR4-2666",
+    "Storage": "256 GB NVMe SSD + 1 TB HDD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Dell E2222H 21.5\" LED",
+    "Keyboard & mouse": "Dell KB216 keyboard & MS116 mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Python",
+     "version": "3.12"
+    },
+    {
+     "name": "Mozilla Firefox",
+     "version": "130"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2021-06-17T11:59:00",
+   "updated": null
+  },
+  {
+   "lab": 1,
+   "pc": 27,
+   "tag": "CL1-PC27",
+   "name": "CL1-PC27",
+   "brand": "Dell",
+   "model": "OptiPlex 3080 Tower",
+   "serial": "8SGPA2M",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-10500",
+    "Memory (RAM)": "16 GB DDR4-2666",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Dell E2222H 21.5\" LED",
+    "Keyboard & mouse": "Dell KB216 keyboard & MS116 mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Python",
+     "version": "3.12"
+    },
+    {
+     "name": "Mozilla Firefox",
+     "version": "130"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2021-06-14T16:12:00",
+   "updated": null
+  },
+  {
+   "lab": 1,
+   "pc": 28,
+   "tag": "CL1-PC28",
+   "name": "CL1-PC28",
+   "brand": "Dell",
+   "model": "OptiPlex 3080 Tower",
+   "serial": "08WP1TB",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-10500",
+    "Memory (RAM)": "8 GB DDR4-2666",
+    "Storage": "256 GB NVMe SSD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Dell E2220H 21.5\" LED",
+    "Keyboard & mouse": "Dell KB216 keyboard & MS116 mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Python",
+     "version": "3.12"
+    },
+    {
+     "name": "Mozilla Firefox",
+     "version": "130"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2021-06-16T09:59:00",
+   "updated": null
+  },
+  {
+   "lab": 1,
+   "pc": 29,
+   "tag": "CL1-PC29",
+   "name": "CL1-PC29",
+   "brand": "Dell",
+   "model": "OptiPlex 3080 Tower",
+   "serial": "NO2U5QC",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-10500",
+    "Memory (RAM)": "8 GB DDR4-2666",
+    "Storage": "256 GB NVMe SSD + 1 TB HDD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Dell E2220H 21.5\" LED",
+    "Keyboard & mouse": "Dell KB216 keyboard & MS116 mouse",
+    "Operating system": "Windows 10 Pro 22H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Python",
+     "version": "3.12"
+    },
+    {
+     "name": "Mozilla Firefox",
+     "version": "130"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2021-06-16T11:34:00",
+   "updated": null
+  },
+  {
+   "lab": 1,
+   "pc": 30,
+   "tag": "CL1-PC30",
+   "name": "CL1-PC30",
+   "brand": "Dell",
+   "model": "OptiPlex 3080 Tower",
+   "serial": "2J9N6CY",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-10500",
+    "Memory (RAM)": "16 GB DDR4-2666",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Dell E2220H 21.5\" LED",
+    "Keyboard & mouse": "Dell KB216 keyboard & MS116 mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Python",
+     "version": "3.12"
+    },
+    {
+     "name": "Mozilla Firefox",
+     "version": "130"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2021-06-18T13:33:00",
+   "updated": null
+  },
+  {
+   "lab": 1,
+   "pc": 31,
+   "tag": "CL1-PC31",
+   "name": "CL1-PC31",
+   "brand": "Dell",
+   "model": "OptiPlex 3080 Tower",
+   "serial": "JZ2H6Y3",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-10400",
+    "Memory (RAM)": "16 GB DDR4-2666",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Dell E2220H 21.5\" LED",
+    "Keyboard & mouse": "Dell KB216 keyboard & MS116 mouse",
+    "Operating system": "Windows 10 Pro 22H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Python",
+     "version": "3.12"
+    },
+    {
+     "name": "Mozilla Firefox",
+     "version": "130"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2021-06-17T12:18:00",
+   "updated": null
+  },
+  {
+   "lab": 1,
+   "pc": 32,
+   "tag": "CL1-PC32",
+   "name": "CL1-PC32",
+   "brand": "Dell",
+   "model": "OptiPlex 3080 Tower",
+   "serial": "8XCUORF",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-10500",
+    "Memory (RAM)": "8 GB DDR4-2666",
+    "Storage": "256 GB NVMe SSD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Dell E2220H 21.5\" LED",
+    "Keyboard & mouse": "Dell KB216 keyboard & MS116 mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Python",
+     "version": "3.12"
+    },
+    {
+     "name": "Mozilla Firefox",
+     "version": "130"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2022-05-28T08:00:00",
+   "updated": null
+  },
+  {
+   "lab": 1,
+   "pc": 33,
+   "tag": "CL1-PC33",
+   "name": "CL1-PC33",
+   "brand": "Dell",
+   "model": "OptiPlex 3080 Tower",
+   "serial": "HBCNWFW",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-10500",
+    "Memory (RAM)": "8 GB DDR4-2666",
+    "Storage": "256 GB NVMe SSD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Dell E2220H 21.5\" LED",
+    "Keyboard & mouse": "Dell KB216 keyboard & MS116 mouse",
+    "Operating system": "Windows 10 Pro 22H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Python",
+     "version": "3.12"
+    },
+    {
+     "name": "Mozilla Firefox",
+     "version": "130"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2021-06-14T15:31:00",
+   "updated": null
+  },
+  {
+   "lab": 1,
+   "pc": 34,
+   "tag": "CL1-PC34",
+   "name": "CL1-PC34",
+   "brand": "Dell",
+   "model": "OptiPlex 3080 Tower",
+   "serial": "KT0M7J3",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-10500",
+    "Memory (RAM)": "16 GB DDR4-2666",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Dell E2222H 21.5\" LED",
+    "Keyboard & mouse": "Dell KB216 keyboard & MS116 mouse",
+    "Operating system": "Windows 10 Pro 22H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Python",
+     "version": "3.12"
+    },
+    {
+     "name": "Mozilla Firefox",
+     "version": "130"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2021-06-18T10:49:00",
+   "updated": null
+  },
+  {
+   "lab": 1,
+   "pc": 35,
+   "tag": "CL1-PC35",
+   "name": "CL1-PC35",
+   "brand": "Dell",
+   "model": "OptiPlex 3080 Tower",
+   "serial": "51B5HWK",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-10400",
+    "Memory (RAM)": "8 GB DDR4-2666",
+    "Storage": "256 GB NVMe SSD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Dell E2222H 21.5\" LED",
+    "Keyboard & mouse": "Dell KB216 keyboard & MS116 mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Python",
+     "version": "3.12"
+    },
+    {
+     "name": "Mozilla Firefox",
+     "version": "130"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2021-06-16T13:40:00",
+   "updated": null
+  },
+  {
+   "lab": 1,
+   "pc": 36,
+   "tag": "CL1-PC36",
+   "name": "CL1-PC36",
+   "brand": "Dell",
+   "model": "OptiPlex 3080 Tower",
+   "serial": "FSC669M",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-10400",
+    "Memory (RAM)": "16 GB DDR4-2666",
+    "Storage": "256 GB NVMe SSD + 1 TB HDD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Dell E2220H 21.5\" LED",
+    "Keyboard & mouse": "Dell KB216 keyboard & MS116 mouse",
+    "Operating system": "Windows 10 Pro 22H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Python",
+     "version": "3.12"
+    },
+    {
+     "name": "Mozilla Firefox",
+     "version": "130"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2021-06-17T16:55:00",
+   "updated": null
+  },
+  {
+   "lab": 1,
+   "pc": 37,
+   "tag": "CL1-PC37",
+   "name": "CL1-PC37",
+   "brand": "Dell",
+   "model": "OptiPlex 3080 Tower",
+   "serial": "YOYMLVW",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-10400",
+    "Memory (RAM)": "16 GB DDR4-2666",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Dell E2222H 21.5\" LED",
+    "Keyboard & mouse": "Dell KB216 keyboard & MS116 mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Python",
+     "version": "3.12"
+    },
+    {
+     "name": "Mozilla Firefox",
+     "version": "130"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2021-06-15T14:38:00",
+   "updated": null
+  },
+  {
+   "lab": 1,
+   "pc": 38,
+   "tag": "CL1-PC38",
+   "name": "CL1-PC38",
+   "brand": "Dell",
+   "model": "OptiPlex 3080 Tower",
+   "serial": "D0S6TEL",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-10500",
+    "Memory (RAM)": "16 GB DDR4-2666",
+    "Storage": "256 GB NVMe SSD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Dell E2220H 21.5\" LED",
+    "Keyboard & mouse": "Dell KB216 keyboard & MS116 mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Python",
+     "version": "3.12"
+    },
+    {
+     "name": "Mozilla Firefox",
+     "version": "130"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2021-06-15T11:16:00",
+   "updated": null
+  },
+  {
+   "lab": 1,
+   "pc": 39,
+   "tag": "CL1-PC39",
+   "name": "CL1-PC39",
+   "brand": "Dell",
+   "model": "OptiPlex 3080 Tower",
+   "serial": "0ZKO45E",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-10500",
+    "Memory (RAM)": "16 GB DDR4-2666",
+    "Storage": "256 GB NVMe SSD + 1 TB HDD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Dell E2222H 21.5\" LED",
+    "Keyboard & mouse": "Dell KB216 keyboard & MS116 mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Python",
+     "version": "3.12"
+    },
+    {
+     "name": "Mozilla Firefox",
+     "version": "130"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2021-06-14T16:12:00",
+   "updated": null
+  },
+  {
+   "lab": 1,
+   "pc": 40,
+   "tag": "CL1-PC40",
+   "name": "Instructor PC",
+   "brand": "Dell",
+   "model": "OptiPlex 3080 Tower",
+   "serial": "J82NL6Z",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i7-12700",
+    "Memory (RAM)": "32 GB DDR4-3200",
+    "Storage": "1 TB NVMe SSD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Dell E2222H 21.5\" LED",
+    "Keyboard & mouse": "Dell KB216 keyboard & MS116 mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Python",
+     "version": "3.12"
+    },
+    {
+     "name": "Mozilla Firefox",
+     "version": "130"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "Instructor station (teacher's desk).",
+   "added": "2021-06-16T10:57:00",
+   "updated": null
+  },
+  {
+   "lab": 2,
+   "pc": 1,
+   "tag": "CL2-PC01",
+   "name": "CL2-PC01",
+   "brand": "Lenovo",
+   "model": "ThinkCentre M75s Gen 2",
+   "serial": "PC2VNWSY",
+   "status": "Working",
+   "hardware": {
+    "Processor": "AMD Ryzen 5 3600",
+    "Memory (RAM)": "16 GB DDR4-3200",
+    "Storage": "256 GB NVMe SSD",
+    "Graphics": "AMD Radeon Graphics (integrated)",
+    "Monitor": "Lenovo ThinkVision T22i-20 21.5\"",
+    "Keyboard & mouse": "Lenovo Calliope USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Python",
+     "version": "3.12"
+    },
+    {
+     "name": "Java JDK",
+     "version": "21"
+    },
+    {
+     "name": "NetBeans",
+     "version": "22"
+    },
+    {
+     "name": "XAMPP",
+     "version": "8.2"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2022-01-27T16:36:00",
+   "updated": null
+  },
+  {
+   "lab": 2,
+   "pc": 2,
+   "tag": "CL2-PC02",
+   "name": "CL2-PC02",
+   "brand": "Lenovo",
+   "model": "ThinkCentre M75s Gen 2",
+   "serial": "PC21UE29",
+   "status": "Under maintenance",
+   "hardware": {
+    "Processor": "AMD Ryzen 5 PRO 4650G",
+    "Memory (RAM)": "8 GB DDR4-3200",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "NVIDIA GeForce GT 1030 2 GB",
+    "Monitor": "Lenovo ThinkVision T22i-20 21.5\"",
+    "Keyboard & mouse": "Lenovo Calliope USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Python",
+     "version": "3.12"
+    },
+    {
+     "name": "Java JDK",
+     "version": "21"
+    },
+    {
+     "name": "NetBeans",
+     "version": "22"
+    },
+    {
+     "name": "XAMPP",
+     "version": "8.2"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2022-01-27T09:00:00",
+   "updated": null
+  },
+  {
+   "lab": 2,
+   "pc": 3,
+   "tag": "CL2-PC03",
+   "name": "CL2-PC03",
+   "brand": "Lenovo",
+   "model": "ThinkCentre M75s Gen 2",
+   "serial": "PC2WT09M",
+   "status": "Working",
+   "hardware": {
+    "Processor": "AMD Ryzen 5 3600",
+    "Memory (RAM)": "16 GB DDR4-3200",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "AMD Radeon Graphics (integrated)",
+    "Monitor": "Lenovo ThinkVision T22i-20 21.5\"",
+    "Keyboard & mouse": "Lenovo Calliope USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Python",
+     "version": "3.12"
+    },
+    {
+     "name": "Java JDK",
+     "version": "21"
+    },
+    {
+     "name": "NetBeans",
+     "version": "22"
+    },
+    {
+     "name": "XAMPP",
+     "version": "8.2"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2022-01-28T11:31:00",
+   "updated": null
+  },
+  {
+   "lab": 2,
+   "pc": 4,
+   "tag": "CL2-PC04",
+   "name": "CL2-PC04",
+   "brand": "Lenovo",
+   "model": "ThinkCentre M75s Gen 2",
+   "serial": "PC2BC6VG",
+   "status": "Working",
+   "hardware": {
+    "Processor": "AMD Ryzen 5 PRO 4650G",
+    "Memory (RAM)": "16 GB DDR4-3200",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "AMD Radeon Graphics (integrated)",
+    "Monitor": "Lenovo ThinkVision T22i-20 21.5\"",
+    "Keyboard & mouse": "Lenovo Calliope USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Python",
+     "version": "3.12"
+    },
+    {
+     "name": "Java JDK",
+     "version": "21"
+    },
+    {
+     "name": "NetBeans",
+     "version": "22"
+    },
+    {
+     "name": "XAMPP",
+     "version": "8.2"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2022-01-26T10:34:00",
+   "updated": null
+  },
+  {
+   "lab": 2,
+   "pc": 5,
+   "tag": "CL2-PC05",
+   "name": "CL2-PC05",
+   "brand": "Lenovo",
+   "model": "ThinkCentre M75s Gen 2",
+   "serial": "PC2Z87PI",
+   "status": "Working",
+   "hardware": {
+    "Processor": "AMD Ryzen 5 3600",
+    "Memory (RAM)": "16 GB DDR4-3200",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "NVIDIA GeForce GT 1030 2 GB",
+    "Monitor": "Lenovo ThinkVision T22i-20 21.5\"",
+    "Keyboard & mouse": "Lenovo Calliope USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Python",
+     "version": "3.12"
+    },
+    {
+     "name": "Java JDK",
+     "version": "21"
+    },
+    {
+     "name": "NetBeans",
+     "version": "22"
+    },
+    {
+     "name": "XAMPP",
+     "version": "8.2"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2022-01-26T11:29:00",
+   "updated": null
+  },
+  {
+   "lab": 2,
+   "pc": 6,
+   "tag": "CL2-PC06",
+   "name": "CL2-PC06",
+   "brand": "Lenovo",
+   "model": "ThinkCentre M75s Gen 2",
+   "serial": "PC23RNCP",
+   "status": "Inactive",
+   "hardware": {
+    "Processor": "AMD Ryzen 5 3600",
+    "Memory (RAM)": "16 GB DDR4-3200",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "AMD Radeon Graphics (integrated)",
+    "Monitor": "Lenovo ThinkVision T22i-20 21.5\"",
+    "Keyboard & mouse": "Lenovo Calliope USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Python",
+     "version": "3.12"
+    },
+    {
+     "name": "Java JDK",
+     "version": "21"
+    },
+    {
+     "name": "NetBeans",
+     "version": "22"
+    },
+    {
+     "name": "XAMPP",
+     "version": "8.2"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "Pulled from service, kept in the Technician Room for parts check.",
+   "added": "2022-01-28T13:17:00",
+   "updated": null
+  },
+  {
+   "lab": 2,
+   "pc": 7,
+   "tag": "CL2-PC07",
+   "name": "CL2-PC07",
+   "brand": "Lenovo",
+   "model": "ThinkCentre M75s Gen 2",
+   "serial": "PC2LGQMY",
+   "status": "Working",
+   "hardware": {
+    "Processor": "AMD Ryzen 5 PRO 4650G",
+    "Memory (RAM)": "8 GB DDR4-3200",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "AMD Radeon Graphics (integrated)",
+    "Monitor": "Lenovo ThinkVision T22i-20 21.5\"",
+    "Keyboard & mouse": "Lenovo Calliope USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Python",
+     "version": "3.12"
+    },
+    {
+     "name": "Java JDK",
+     "version": "21"
+    },
+    {
+     "name": "NetBeans",
+     "version": "22"
+    },
+    {
+     "name": "XAMPP",
+     "version": "8.2"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2022-01-28T14:38:00",
+   "updated": null
+  },
+  {
+   "lab": 2,
+   "pc": 8,
+   "tag": "CL2-PC08",
+   "name": "CL2-PC08",
+   "brand": "Lenovo",
+   "model": "ThinkCentre M75s Gen 2",
+   "serial": "PC2RLVJG",
+   "status": "Working",
+   "hardware": {
+    "Processor": "AMD Ryzen 5 3600",
+    "Memory (RAM)": "16 GB DDR4-3200",
+    "Storage": "256 GB NVMe SSD",
+    "Graphics": "NVIDIA GeForce GT 1030 2 GB",
+    "Monitor": "Lenovo ThinkVision T22i-20 21.5\"",
+    "Keyboard & mouse": "Lenovo Calliope USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Python",
+     "version": "3.12"
+    },
+    {
+     "name": "Java JDK",
+     "version": "21"
+    },
+    {
+     "name": "NetBeans",
+     "version": "22"
+    },
+    {
+     "name": "XAMPP",
+     "version": "8.2"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2022-01-28T16:55:00",
+   "updated": null
+  },
+  {
+   "lab": 2,
+   "pc": 9,
+   "tag": "CL2-PC09",
+   "name": "CL2-PC09",
+   "brand": "Lenovo",
+   "model": "ThinkCentre M75s Gen 2",
+   "serial": "PC28T26P",
+   "status": "Working",
+   "hardware": {
+    "Processor": "AMD Ryzen 5 3600",
+    "Memory (RAM)": "16 GB DDR4-3200",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "NVIDIA GeForce GT 1030 2 GB",
+    "Monitor": "Lenovo ThinkVision T22i-20 21.5\"",
+    "Keyboard & mouse": "Lenovo Calliope USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Python",
+     "version": "3.12"
+    },
+    {
+     "name": "Java JDK",
+     "version": "21"
+    },
+    {
+     "name": "NetBeans",
+     "version": "22"
+    },
+    {
+     "name": "XAMPP",
+     "version": "8.2"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2022-01-24T09:34:00",
+   "updated": null
+  },
+  {
+   "lab": 2,
+   "pc": 10,
+   "tag": "CL2-PC10",
+   "name": "CL2-PC10",
+   "brand": "Lenovo",
+   "model": "ThinkCentre M75s Gen 2",
+   "serial": "PC26PYDC",
+   "status": "Working",
+   "hardware": {
+    "Processor": "AMD Ryzen 5 PRO 4650G",
+    "Memory (RAM)": "16 GB DDR4-3200",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "NVIDIA GeForce GT 1030 2 GB",
+    "Monitor": "Lenovo ThinkVision T22i-20 21.5\"",
+    "Keyboard & mouse": "Lenovo Calliope USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Python",
+     "version": "3.12"
+    },
+    {
+     "name": "Java JDK",
+     "version": "21"
+    },
+    {
+     "name": "NetBeans",
+     "version": "22"
+    },
+    {
+     "name": "XAMPP",
+     "version": "8.2"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2022-01-26T16:12:00",
+   "updated": null
+  },
+  {
+   "lab": 2,
+   "pc": 11,
+   "tag": "CL2-PC11",
+   "name": "CL2-PC11",
+   "brand": "Lenovo",
+   "model": "ThinkCentre M75s Gen 2",
+   "serial": "PC2E2AUH",
+   "status": "Working",
+   "hardware": {
+    "Processor": "AMD Ryzen 5 PRO 4650G",
+    "Memory (RAM)": "16 GB DDR4-3200",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "NVIDIA GeForce GT 1030 2 GB",
+    "Monitor": "Lenovo ThinkVision T22i-20 21.5\"",
+    "Keyboard & mouse": "Lenovo Calliope USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Python",
+     "version": "3.12"
+    },
+    {
+     "name": "Java JDK",
+     "version": "21"
+    },
+    {
+     "name": "NetBeans",
+     "version": "22"
+    },
+    {
+     "name": "XAMPP",
+     "version": "8.2"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2022-01-24T11:58:00",
+   "updated": null
+  },
+  {
+   "lab": 2,
+   "pc": 12,
+   "tag": "CL2-PC12",
+   "name": "CL2-PC12",
+   "brand": "Lenovo",
+   "model": "ThinkCentre M75s Gen 2",
+   "serial": "PC27SJBW",
+   "status": "Working",
+   "hardware": {
+    "Processor": "AMD Ryzen 5 3600",
+    "Memory (RAM)": "16 GB DDR4-3200",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "AMD Radeon Graphics (integrated)",
+    "Monitor": "Lenovo ThinkVision T22i-20 21.5\"",
+    "Keyboard & mouse": "Lenovo Calliope USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Python",
+     "version": "3.12"
+    },
+    {
+     "name": "Java JDK",
+     "version": "21"
+    },
+    {
+     "name": "NetBeans",
+     "version": "22"
+    },
+    {
+     "name": "XAMPP",
+     "version": "8.2"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2022-01-25T11:40:00",
+   "updated": null
+  },
+  {
+   "lab": 2,
+   "pc": 13,
+   "tag": "CL2-PC13",
+   "name": "CL2-PC13",
+   "brand": "Lenovo",
+   "model": "ThinkCentre M75s Gen 2",
+   "serial": "PC2WKI9N",
+   "status": "Working",
+   "hardware": {
+    "Processor": "AMD Ryzen 5 3600",
+    "Memory (RAM)": "16 GB DDR4-3200",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "AMD Radeon Graphics (integrated)",
+    "Monitor": "Lenovo ThinkVision T22i-20 21.5\"",
+    "Keyboard & mouse": "Lenovo Calliope USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Python",
+     "version": "3.12"
+    },
+    {
+     "name": "Java JDK",
+     "version": "21"
+    },
+    {
+     "name": "NetBeans",
+     "version": "22"
+    },
+    {
+     "name": "XAMPP",
+     "version": "8.2"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2022-01-24T08:21:00",
+   "updated": null
+  },
+  {
+   "lab": 2,
+   "pc": 14,
+   "tag": "CL2-PC14",
+   "name": "CL2-PC14",
+   "brand": "Lenovo",
+   "model": "ThinkCentre M75s Gen 2",
+   "serial": "PC24WY5G",
+   "status": "Working",
+   "hardware": {
+    "Processor": "AMD Ryzen 5 3600",
+    "Memory (RAM)": "8 GB DDR4-3200",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "AMD Radeon Graphics (integrated)",
+    "Monitor": "Lenovo ThinkVision T22i-20 21.5\"",
+    "Keyboard & mouse": "Lenovo Calliope USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Python",
+     "version": "3.12"
+    },
+    {
+     "name": "Java JDK",
+     "version": "21"
+    },
+    {
+     "name": "NetBeans",
+     "version": "22"
+    },
+    {
+     "name": "XAMPP",
+     "version": "8.2"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2022-06-23T13:00:00",
+   "updated": null
+  },
+  {
+   "lab": 2,
+   "pc": 15,
+   "tag": "CL2-PC15",
+   "name": "CL2-PC15",
+   "brand": "Lenovo",
+   "model": "ThinkCentre M75s Gen 2",
+   "serial": "PC2IT4H5",
+   "status": "Working",
+   "hardware": {
+    "Processor": "AMD Ryzen 5 3600",
+    "Memory (RAM)": "16 GB DDR4-3200",
+    "Storage": "256 GB NVMe SSD",
+    "Graphics": "AMD Radeon Graphics (integrated)",
+    "Monitor": "Lenovo ThinkVision T22i-20 21.5\"",
+    "Keyboard & mouse": "Lenovo Calliope USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Python",
+     "version": "3.12"
+    },
+    {
+     "name": "Java JDK",
+     "version": "21"
+    },
+    {
+     "name": "NetBeans",
+     "version": "22"
+    },
+    {
+     "name": "XAMPP",
+     "version": "8.2"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2022-01-26T11:51:00",
+   "updated": null
+  },
+  {
+   "lab": 2,
+   "pc": 16,
+   "tag": "CL2-PC16",
+   "name": "CL2-PC16",
+   "brand": "Lenovo",
+   "model": "ThinkCentre M75s Gen 2",
+   "serial": "PC27X6B1",
+   "status": "Working",
+   "hardware": {
+    "Processor": "AMD Ryzen 5 PRO 4650G",
+    "Memory (RAM)": "16 GB DDR4-3200",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "NVIDIA GeForce GT 1030 2 GB",
+    "Monitor": "Lenovo ThinkVision T22i-20 21.5\"",
+    "Keyboard & mouse": "Lenovo Calliope USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Python",
+     "version": "3.12"
+    },
+    {
+     "name": "Java JDK",
+     "version": "21"
+    },
+    {
+     "name": "NetBeans",
+     "version": "22"
+    },
+    {
+     "name": "XAMPP",
+     "version": "8.2"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2022-01-25T12:11:00",
+   "updated": null
+  },
+  {
+   "lab": 2,
+   "pc": 17,
+   "tag": "CL2-PC17",
+   "name": "CL2-PC17",
+   "brand": "Lenovo",
+   "model": "ThinkCentre M75s Gen 2",
+   "serial": "PC2KQ8OQ",
+   "status": "Working",
+   "hardware": {
+    "Processor": "AMD Ryzen 5 3600",
+    "Memory (RAM)": "16 GB DDR4-3200",
+    "Storage": "256 GB NVMe SSD",
+    "Graphics": "AMD Radeon Graphics (integrated)",
+    "Monitor": "Lenovo ThinkVision T22i-20 21.5\"",
+    "Keyboard & mouse": "Lenovo Calliope USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Python",
+     "version": "3.12"
+    },
+    {
+     "name": "Java JDK",
+     "version": "21"
+    },
+    {
+     "name": "NetBeans",
+     "version": "22"
+    },
+    {
+     "name": "XAMPP",
+     "version": "8.2"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2022-01-26T11:39:00",
+   "updated": null
+  },
+  {
+   "lab": 2,
+   "pc": 18,
+   "tag": "CL2-PC18",
+   "name": "CL2-PC18",
+   "brand": "Lenovo",
+   "model": "ThinkCentre M75s Gen 2",
+   "serial": "PC2N4P28",
+   "status": "Working",
+   "hardware": {
+    "Processor": "AMD Ryzen 5 3600",
+    "Memory (RAM)": "16 GB DDR4-3200",
+    "Storage": "256 GB NVMe SSD",
+    "Graphics": "NVIDIA GeForce GT 1030 2 GB",
+    "Monitor": "Lenovo ThinkVision T22i-20 21.5\"",
+    "Keyboard & mouse": "Lenovo Calliope USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Python",
+     "version": "3.12"
+    },
+    {
+     "name": "Java JDK",
+     "version": "21"
+    },
+    {
+     "name": "NetBeans",
+     "version": "22"
+    },
+    {
+     "name": "XAMPP",
+     "version": "8.2"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2022-01-28T09:21:00",
+   "updated": null
+  },
+  {
+   "lab": 2,
+   "pc": 19,
+   "tag": "CL2-PC19",
+   "name": "CL2-PC19",
+   "brand": "Lenovo",
+   "model": "ThinkCentre M75s Gen 2",
+   "serial": "PC26E7P3",
+   "status": "Working",
+   "hardware": {
+    "Processor": "AMD Ryzen 5 3600",
+    "Memory (RAM)": "16 GB DDR4-3200",
+    "Storage": "256 GB NVMe SSD",
+    "Graphics": "AMD Radeon Graphics (integrated)",
+    "Monitor": "Lenovo ThinkVision T22i-20 21.5\"",
+    "Keyboard & mouse": "Lenovo Calliope USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Python",
+     "version": "3.12"
+    },
+    {
+     "name": "Java JDK",
+     "version": "21"
+    },
+    {
+     "name": "NetBeans",
+     "version": "22"
+    },
+    {
+     "name": "XAMPP",
+     "version": "8.2"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2022-01-28T10:56:00",
+   "updated": null
+  },
+  {
+   "lab": 2,
+   "pc": 20,
+   "tag": "CL2-PC20",
+   "name": "CL2-PC20",
+   "brand": "Lenovo",
+   "model": "ThinkCentre M75s Gen 2",
+   "serial": "PC2IFB36",
+   "status": "Working",
+   "hardware": {
+    "Processor": "AMD Ryzen 5 PRO 4650G",
+    "Memory (RAM)": "16 GB DDR4-3200",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "NVIDIA GeForce GT 1030 2 GB",
+    "Monitor": "Lenovo ThinkVision T22i-20 21.5\"",
+    "Keyboard & mouse": "Lenovo Calliope USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Python",
+     "version": "3.12"
+    },
+    {
+     "name": "Java JDK",
+     "version": "21"
+    },
+    {
+     "name": "NetBeans",
+     "version": "22"
+    },
+    {
+     "name": "XAMPP",
+     "version": "8.2"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2022-01-26T08:30:00",
+   "updated": null
+  },
+  {
+   "lab": 2,
+   "pc": 21,
+   "tag": "CL2-PC21",
+   "name": "CL2-PC21",
+   "brand": "Lenovo",
+   "model": "ThinkCentre M75s Gen 2",
+   "serial": "PC2JAP1Z",
+   "status": "Under maintenance",
+   "hardware": {
+    "Processor": "AMD Ryzen 5 PRO 4650G",
+    "Memory (RAM)": "16 GB DDR4-3200",
+    "Storage": "256 GB NVMe SSD",
+    "Graphics": "AMD Radeon Graphics (integrated)",
+    "Monitor": "Lenovo ThinkVision T22i-20 21.5\"",
+    "Keyboard & mouse": "Lenovo Calliope USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Python",
+     "version": "3.12"
+    },
+    {
+     "name": "Java JDK",
+     "version": "21"
+    },
+    {
+     "name": "NetBeans",
+     "version": "22"
+    },
+    {
+     "name": "XAMPP",
+     "version": "8.2"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2022-01-28T12:58:00",
+   "updated": null
+  },
+  {
+   "lab": 2,
+   "pc": 22,
+   "tag": "CL2-PC22",
+   "name": "CL2-PC22",
+   "brand": "Lenovo",
+   "model": "ThinkCentre M75s Gen 2",
+   "serial": "PC2XBFH5",
+   "status": "Working",
+   "hardware": {
+    "Processor": "AMD Ryzen 5 PRO 4650G",
+    "Memory (RAM)": "16 GB DDR4-3200",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "AMD Radeon Graphics (integrated)",
+    "Monitor": "Lenovo ThinkVision T22i-20 21.5\"",
+    "Keyboard & mouse": "Lenovo Calliope USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Python",
+     "version": "3.12"
+    },
+    {
+     "name": "Java JDK",
+     "version": "21"
+    },
+    {
+     "name": "NetBeans",
+     "version": "22"
+    },
+    {
+     "name": "XAMPP",
+     "version": "8.2"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2023-06-28T16:00:00",
+   "updated": null
+  },
+  {
+   "lab": 2,
+   "pc": 23,
+   "tag": "CL2-PC23",
+   "name": "CL2-PC23",
+   "brand": "Lenovo",
+   "model": "ThinkCentre M75s Gen 2",
+   "serial": "PC2GK3DD",
+   "status": "Working",
+   "hardware": {
+    "Processor": "AMD Ryzen 5 PRO 4650G",
+    "Memory (RAM)": "16 GB DDR4-3200",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "NVIDIA GeForce GT 1030 2 GB",
+    "Monitor": "Lenovo ThinkVision T22i-20 21.5\"",
+    "Keyboard & mouse": "Lenovo Calliope USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Python",
+     "version": "3.12"
+    },
+    {
+     "name": "Java JDK",
+     "version": "21"
+    },
+    {
+     "name": "NetBeans",
+     "version": "22"
+    },
+    {
+     "name": "XAMPP",
+     "version": "8.2"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2022-01-27T09:52:00",
+   "updated": null
+  },
+  {
+   "lab": 2,
+   "pc": 24,
+   "tag": "CL2-PC24",
+   "name": "CL2-PC24",
+   "brand": "Lenovo",
+   "model": "ThinkCentre M75s Gen 2",
+   "serial": "PC24ZMQK",
+   "status": "Working",
+   "hardware": {
+    "Processor": "AMD Ryzen 5 PRO 4650G",
+    "Memory (RAM)": "16 GB DDR4-3200",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "NVIDIA GeForce GT 1030 2 GB",
+    "Monitor": "Lenovo ThinkVision T22i-20 21.5\"",
+    "Keyboard & mouse": "Lenovo Calliope USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Python",
+     "version": "3.12"
+    },
+    {
+     "name": "Java JDK",
+     "version": "21"
+    },
+    {
+     "name": "NetBeans",
+     "version": "22"
+    },
+    {
+     "name": "XAMPP",
+     "version": "8.2"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2022-01-26T16:57:00",
+   "updated": null
+  },
+  {
+   "lab": 2,
+   "pc": 25,
+   "tag": "CL2-PC25",
+   "name": "CL2-PC25",
+   "brand": "Lenovo",
+   "model": "ThinkCentre M75s Gen 2",
+   "serial": "PC2KPNLT",
+   "status": "Working",
+   "hardware": {
+    "Processor": "AMD Ryzen 5 PRO 4650G",
+    "Memory (RAM)": "8 GB DDR4-3200",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "AMD Radeon Graphics (integrated)",
+    "Monitor": "Lenovo ThinkVision T22i-20 21.5\"",
+    "Keyboard & mouse": "Lenovo Calliope USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Python",
+     "version": "3.12"
+    },
+    {
+     "name": "Java JDK",
+     "version": "21"
+    },
+    {
+     "name": "NetBeans",
+     "version": "22"
+    },
+    {
+     "name": "XAMPP",
+     "version": "8.2"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2022-01-25T14:38:00",
+   "updated": null
+  },
+  {
+   "lab": 2,
+   "pc": 26,
+   "tag": "CL2-PC26",
+   "name": "CL2-PC26",
+   "brand": "Lenovo",
+   "model": "ThinkCentre M75s Gen 2",
+   "serial": "PC2J2WP1",
+   "status": "Working",
+   "hardware": {
+    "Processor": "AMD Ryzen 5 PRO 4650G",
+    "Memory (RAM)": "16 GB DDR4-3200",
+    "Storage": "256 GB NVMe SSD",
+    "Graphics": "AMD Radeon Graphics (integrated)",
+    "Monitor": "Lenovo ThinkVision T22i-20 21.5\"",
+    "Keyboard & mouse": "Lenovo Calliope USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Python",
+     "version": "3.12"
+    },
+    {
+     "name": "Java JDK",
+     "version": "21"
+    },
+    {
+     "name": "NetBeans",
+     "version": "22"
+    },
+    {
+     "name": "XAMPP",
+     "version": "8.2"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2023-10-09T09:00:00",
+   "updated": null
+  },
+  {
+   "lab": 2,
+   "pc": 27,
+   "tag": "CL2-PC27",
+   "name": "CL2-PC27",
+   "brand": "Lenovo",
+   "model": "ThinkCentre M75s Gen 2",
+   "serial": "PC27NZVO",
+   "status": "Working",
+   "hardware": {
+    "Processor": "AMD Ryzen 5 PRO 4650G",
+    "Memory (RAM)": "8 GB DDR4-3200",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "AMD Radeon Graphics (integrated)",
+    "Monitor": "Lenovo ThinkVision T22i-20 21.5\"",
+    "Keyboard & mouse": "Lenovo Calliope USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Python",
+     "version": "3.12"
+    },
+    {
+     "name": "Java JDK",
+     "version": "21"
+    },
+    {
+     "name": "NetBeans",
+     "version": "22"
+    },
+    {
+     "name": "XAMPP",
+     "version": "8.2"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2022-01-27T14:56:00",
+   "updated": null
+  },
+  {
+   "lab": 2,
+   "pc": 28,
+   "tag": "CL2-PC28",
+   "name": "CL2-PC28",
+   "brand": "Lenovo",
+   "model": "ThinkCentre M75s Gen 2",
+   "serial": "PC2SQG2F",
+   "status": "Working",
+   "hardware": {
+    "Processor": "AMD Ryzen 5 PRO 4650G",
+    "Memory (RAM)": "16 GB DDR4-3200",
+    "Storage": "256 GB NVMe SSD",
+    "Graphics": "AMD Radeon Graphics (integrated)",
+    "Monitor": "Lenovo ThinkVision T22i-20 21.5\"",
+    "Keyboard & mouse": "Lenovo Calliope USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Python",
+     "version": "3.12"
+    },
+    {
+     "name": "Java JDK",
+     "version": "21"
+    },
+    {
+     "name": "NetBeans",
+     "version": "22"
+    },
+    {
+     "name": "XAMPP",
+     "version": "8.2"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2023-07-26T13:00:00",
+   "updated": null
+  },
+  {
+   "lab": 2,
+   "pc": 29,
+   "tag": "CL2-PC29",
+   "name": "CL2-PC29",
+   "brand": "Lenovo",
+   "model": "ThinkCentre M75s Gen 2",
+   "serial": "PC2DNQHO",
+   "status": "Inactive",
+   "hardware": {
+    "Processor": "AMD Ryzen 5 3600",
+    "Memory (RAM)": "16 GB DDR4-3200",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "AMD Radeon Graphics (integrated)",
+    "Monitor": "Lenovo ThinkVision T22i-20 21.5\"",
+    "Keyboard & mouse": "Lenovo Calliope USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Python",
+     "version": "3.12"
+    },
+    {
+     "name": "Java JDK",
+     "version": "21"
+    },
+    {
+     "name": "NetBeans",
+     "version": "22"
+    },
+    {
+     "name": "XAMPP",
+     "version": "8.2"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "Pulled from service, kept in the Technician Room for parts check.",
+   "added": "2022-01-26T14:02:00",
+   "updated": null
+  },
+  {
+   "lab": 2,
+   "pc": 30,
+   "tag": "CL2-PC30",
+   "name": "CL2-PC30",
+   "brand": "Lenovo",
+   "model": "ThinkCentre M75s Gen 2",
+   "serial": "PC2W5VG5",
+   "status": "Working",
+   "hardware": {
+    "Processor": "AMD Ryzen 5 PRO 4650G",
+    "Memory (RAM)": "16 GB DDR4-3200",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "NVIDIA GeForce GT 1030 2 GB",
+    "Monitor": "Lenovo ThinkVision T22i-20 21.5\"",
+    "Keyboard & mouse": "Lenovo Calliope USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Python",
+     "version": "3.12"
+    },
+    {
+     "name": "Java JDK",
+     "version": "21"
+    },
+    {
+     "name": "NetBeans",
+     "version": "22"
+    },
+    {
+     "name": "XAMPP",
+     "version": "8.2"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2022-01-28T08:21:00",
+   "updated": null
+  },
+  {
+   "lab": 2,
+   "pc": 31,
+   "tag": "CL2-PC31",
+   "name": "CL2-PC31",
+   "brand": "Lenovo",
+   "model": "ThinkCentre M75s Gen 2",
+   "serial": "PC2D3NHJ",
+   "status": "Under maintenance",
+   "hardware": {
+    "Processor": "AMD Ryzen 5 3600",
+    "Memory (RAM)": "16 GB DDR4-3200",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "AMD Radeon Graphics (integrated)",
+    "Monitor": "Lenovo ThinkVision T22i-20 21.5\"",
+    "Keyboard & mouse": "Lenovo Calliope USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Python",
+     "version": "3.12"
+    },
+    {
+     "name": "Java JDK",
+     "version": "21"
+    },
+    {
+     "name": "NetBeans",
+     "version": "22"
+    },
+    {
+     "name": "XAMPP",
+     "version": "8.2"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2022-01-27T08:31:00",
+   "updated": null
+  },
+  {
+   "lab": 2,
+   "pc": 32,
+   "tag": "CL2-PC32",
+   "name": "CL2-PC32",
+   "brand": "Lenovo",
+   "model": "ThinkCentre M75s Gen 2",
+   "serial": "PC2RHFML",
+   "status": "Working",
+   "hardware": {
+    "Processor": "AMD Ryzen 5 PRO 4650G",
+    "Memory (RAM)": "16 GB DDR4-3200",
+    "Storage": "256 GB NVMe SSD",
+    "Graphics": "NVIDIA GeForce GT 1030 2 GB",
+    "Monitor": "Lenovo ThinkVision T22i-20 21.5\"",
+    "Keyboard & mouse": "Lenovo Calliope USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Python",
+     "version": "3.12"
+    },
+    {
+     "name": "Java JDK",
+     "version": "21"
+    },
+    {
+     "name": "NetBeans",
+     "version": "22"
+    },
+    {
+     "name": "XAMPP",
+     "version": "8.2"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2023-10-13T08:00:00",
+   "updated": null
+  },
+  {
+   "lab": 2,
+   "pc": 33,
+   "tag": "CL2-PC33",
+   "name": "CL2-PC33",
+   "brand": "Lenovo",
+   "model": "ThinkCentre M75s Gen 2",
+   "serial": "PC2F5P6M",
+   "status": "Working",
+   "hardware": {
+    "Processor": "AMD Ryzen 5 PRO 4650G",
+    "Memory (RAM)": "16 GB DDR4-3200",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "AMD Radeon Graphics (integrated)",
+    "Monitor": "Lenovo ThinkVision T22i-20 21.5\"",
+    "Keyboard & mouse": "Lenovo Calliope USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Python",
+     "version": "3.12"
+    },
+    {
+     "name": "Java JDK",
+     "version": "21"
+    },
+    {
+     "name": "NetBeans",
+     "version": "22"
+    },
+    {
+     "name": "XAMPP",
+     "version": "8.2"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2022-01-28T12:00:00",
+   "updated": null
+  },
+  {
+   "lab": 2,
+   "pc": 34,
+   "tag": "CL2-PC34",
+   "name": "CL2-PC34",
+   "brand": "Lenovo",
+   "model": "ThinkCentre M75s Gen 2",
+   "serial": "PC2H5X58",
+   "status": "Working",
+   "hardware": {
+    "Processor": "AMD Ryzen 5 PRO 4650G",
+    "Memory (RAM)": "16 GB DDR4-3200",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "AMD Radeon Graphics (integrated)",
+    "Monitor": "Lenovo ThinkVision T22i-20 21.5\"",
+    "Keyboard & mouse": "Lenovo Calliope USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Python",
+     "version": "3.12"
+    },
+    {
+     "name": "Java JDK",
+     "version": "21"
+    },
+    {
+     "name": "NetBeans",
+     "version": "22"
+    },
+    {
+     "name": "XAMPP",
+     "version": "8.2"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2022-01-27T16:36:00",
+   "updated": null
+  },
+  {
+   "lab": 2,
+   "pc": 35,
+   "tag": "CL2-PC35",
+   "name": "CL2-PC35",
+   "brand": "Lenovo",
+   "model": "ThinkCentre M75s Gen 2",
+   "serial": "PC293E9Y",
+   "status": "Working",
+   "hardware": {
+    "Processor": "AMD Ryzen 5 PRO 4650G",
+    "Memory (RAM)": "8 GB DDR4-3200",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "AMD Radeon Graphics (integrated)",
+    "Monitor": "Lenovo ThinkVision T22i-20 21.5\"",
+    "Keyboard & mouse": "Lenovo Calliope USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Python",
+     "version": "3.12"
+    },
+    {
+     "name": "Java JDK",
+     "version": "21"
+    },
+    {
+     "name": "NetBeans",
+     "version": "22"
+    },
+    {
+     "name": "XAMPP",
+     "version": "8.2"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2022-01-25T16:03:00",
+   "updated": null
+  },
+  {
+   "lab": 2,
+   "pc": 36,
+   "tag": "CL2-PC36",
+   "name": "CL2-PC36",
+   "brand": "Lenovo",
+   "model": "ThinkCentre M75s Gen 2",
+   "serial": "PC2C3O6R",
+   "status": "Working",
+   "hardware": {
+    "Processor": "AMD Ryzen 5 PRO 4650G",
+    "Memory (RAM)": "16 GB DDR4-3200",
+    "Storage": "256 GB NVMe SSD",
+    "Graphics": "AMD Radeon Graphics (integrated)",
+    "Monitor": "Lenovo ThinkVision T22i-20 21.5\"",
+    "Keyboard & mouse": "Lenovo Calliope USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Python",
+     "version": "3.12"
+    },
+    {
+     "name": "Java JDK",
+     "version": "21"
+    },
+    {
+     "name": "NetBeans",
+     "version": "22"
+    },
+    {
+     "name": "XAMPP",
+     "version": "8.2"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2022-01-24T08:05:00",
+   "updated": null
+  },
+  {
+   "lab": 2,
+   "pc": 37,
+   "tag": "CL2-PC37",
+   "name": "CL2-PC37",
+   "brand": "Lenovo",
+   "model": "ThinkCentre M75s Gen 2",
+   "serial": "PC295AHJ",
+   "status": "Working",
+   "hardware": {
+    "Processor": "AMD Ryzen 5 3600",
+    "Memory (RAM)": "16 GB DDR4-3200",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "NVIDIA GeForce GT 1030 2 GB",
+    "Monitor": "Lenovo ThinkVision T22i-20 21.5\"",
+    "Keyboard & mouse": "Lenovo Calliope USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Python",
+     "version": "3.12"
+    },
+    {
+     "name": "Java JDK",
+     "version": "21"
+    },
+    {
+     "name": "NetBeans",
+     "version": "22"
+    },
+    {
+     "name": "XAMPP",
+     "version": "8.2"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2022-01-26T15:37:00",
+   "updated": null
+  },
+  {
+   "lab": 2,
+   "pc": 38,
+   "tag": "CL2-PC38",
+   "name": "CL2-PC38",
+   "brand": "Lenovo",
+   "model": "ThinkCentre M75s Gen 2",
+   "serial": "PC23LZHI",
+   "status": "Working",
+   "hardware": {
+    "Processor": "AMD Ryzen 5 PRO 4650G",
+    "Memory (RAM)": "16 GB DDR4-3200",
+    "Storage": "256 GB NVMe SSD",
+    "Graphics": "NVIDIA GeForce GT 1030 2 GB",
+    "Monitor": "Lenovo ThinkVision T22i-20 21.5\"",
+    "Keyboard & mouse": "Lenovo Calliope USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Python",
+     "version": "3.12"
+    },
+    {
+     "name": "Java JDK",
+     "version": "21"
+    },
+    {
+     "name": "NetBeans",
+     "version": "22"
+    },
+    {
+     "name": "XAMPP",
+     "version": "8.2"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2022-01-25T09:27:00",
+   "updated": null
+  },
+  {
+   "lab": 2,
+   "pc": 39,
+   "tag": "CL2-PC39",
+   "name": "CL2-PC39",
+   "brand": "Lenovo",
+   "model": "ThinkCentre M75s Gen 2",
+   "serial": "PC22GB0J",
+   "status": "Working",
+   "hardware": {
+    "Processor": "AMD Ryzen 5 3600",
+    "Memory (RAM)": "16 GB DDR4-3200",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "AMD Radeon Graphics (integrated)",
+    "Monitor": "Lenovo ThinkVision T22i-20 21.5\"",
+    "Keyboard & mouse": "Lenovo Calliope USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Python",
+     "version": "3.12"
+    },
+    {
+     "name": "Java JDK",
+     "version": "21"
+    },
+    {
+     "name": "NetBeans",
+     "version": "22"
+    },
+    {
+     "name": "XAMPP",
+     "version": "8.2"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2022-01-27T09:46:00",
+   "updated": null
+  },
+  {
+   "lab": 2,
+   "pc": 40,
+   "tag": "CL2-PC40",
+   "name": "Instructor PC",
+   "brand": "Lenovo",
+   "model": "ThinkCentre M75s Gen 2",
+   "serial": "PC2XFCJ6",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i7-12700",
+    "Memory (RAM)": "32 GB DDR4-3200",
+    "Storage": "1 TB NVMe SSD",
+    "Graphics": "AMD Radeon Graphics (integrated)",
+    "Monitor": "Lenovo ThinkVision T22i-20 21.5\"",
+    "Keyboard & mouse": "Lenovo Calliope USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Python",
+     "version": "3.12"
+    },
+    {
+     "name": "Java JDK",
+     "version": "21"
+    },
+    {
+     "name": "NetBeans",
+     "version": "22"
+    },
+    {
+     "name": "XAMPP",
+     "version": "8.2"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "Instructor station (teacher's desk).",
+   "added": "2022-01-27T11:56:00",
+   "updated": null
+  },
+  {
+   "lab": 3,
+   "pc": 1,
+   "tag": "CL3-PC01",
+   "name": "CL3-PC01",
+   "brand": "Acer",
+   "model": "Veriton X2690G",
+   "serial": "DTVX2SP0328045366287",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i3-12100",
+    "Memory (RAM)": "16 GB DDR4-2666",
+    "Storage": "1 TB HDD",
+    "Graphics": "Intel UHD 730",
+    "Monitor": "Acer V226HQL 21.5\"",
+    "Keyboard & mouse": "Acer USB keyboard & mouse",
+    "Operating system": "Windows 10 Pro 22H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2019"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Packet Tracer",
+     "version": "8.2.2"
+    },
+    {
+     "name": "Wireshark",
+     "version": "4.2"
+    },
+    {
+     "name": "PuTTY",
+     "version": "0.81"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2020-08-03T14:42:00",
+   "updated": null
+  },
+  {
+   "lab": 3,
+   "pc": 2,
+   "tag": "CL3-PC02",
+   "name": "CL3-PC02",
+   "brand": "Acer",
+   "model": "Veriton X2690G",
+   "serial": "DTVX2SP7163454336080",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i3-12100",
+    "Memory (RAM)": "8 GB DDR4-2666",
+    "Storage": "1 TB HDD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Acer V226HQL 21.5\"",
+    "Keyboard & mouse": "Acer USB keyboard & mouse",
+    "Operating system": "Windows 10 Pro 22H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2019"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Packet Tracer",
+     "version": "8.2.2"
+    },
+    {
+     "name": "Wireshark",
+     "version": "4.2"
+    },
+    {
+     "name": "PuTTY",
+     "version": "0.81"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2020-08-04T12:04:00",
+   "updated": null
+  },
+  {
+   "lab": 3,
+   "pc": 3,
+   "tag": "CL3-PC03",
+   "name": "CL3-PC03",
+   "brand": "Acer",
+   "model": "Veriton X2690G",
+   "serial": "DTVX2SP6738872601525",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i3-12100",
+    "Memory (RAM)": "8 GB DDR4-2666",
+    "Storage": "1 TB HDD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Acer V226HQL 21.5\"",
+    "Keyboard & mouse": "Acer USB keyboard & mouse",
+    "Operating system": "Windows 10 Pro 22H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2019"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Packet Tracer",
+     "version": "8.2.2"
+    },
+    {
+     "name": "Wireshark",
+     "version": "4.2"
+    },
+    {
+     "name": "PuTTY",
+     "version": "0.81"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2020-08-04T14:56:00",
+   "updated": null
+  },
+  {
+   "lab": 3,
+   "pc": 4,
+   "tag": "CL3-PC04",
+   "name": "CL3-PC04",
+   "brand": "Acer",
+   "model": "Veriton X2690G",
+   "serial": "DTVX2SP7384053922356",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i3-10100",
+    "Memory (RAM)": "8 GB DDR4-2666",
+    "Storage": "1 TB HDD",
+    "Graphics": "Intel UHD 730",
+    "Monitor": "Acer V226HQL 21.5\"",
+    "Keyboard & mouse": "Acer USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2019"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Packet Tracer",
+     "version": "8.2.2"
+    },
+    {
+     "name": "Wireshark",
+     "version": "4.2"
+    },
+    {
+     "name": "PuTTY",
+     "version": "0.81"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2020-08-05T12:07:00",
+   "updated": null
+  },
+  {
+   "lab": 3,
+   "pc": 5,
+   "tag": "CL3-PC05",
+   "name": "CL3-PC05",
+   "brand": "Acer",
+   "model": "Veriton X2690G",
+   "serial": "DTVX2SP0393077156298",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i3-10100",
+    "Memory (RAM)": "8 GB DDR4-2666",
+    "Storage": "256 GB SATA SSD",
+    "Graphics": "Intel UHD 730",
+    "Monitor": "Acer V226HQL 21.5\"",
+    "Keyboard & mouse": "Acer USB keyboard & mouse",
+    "Operating system": "Windows 10 Pro 22H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2019"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Packet Tracer",
+     "version": "8.2.2"
+    },
+    {
+     "name": "Wireshark",
+     "version": "4.2"
+    },
+    {
+     "name": "PuTTY",
+     "version": "0.81"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2020-08-07T09:56:00",
+   "updated": null
+  },
+  {
+   "lab": 3,
+   "pc": 6,
+   "tag": "CL3-PC06",
+   "name": "CL3-PC06",
+   "brand": "Acer",
+   "model": "Veriton X2690G",
+   "serial": "DTVX2SP2020250850076",
+   "status": "Inactive",
+   "hardware": {
+    "Processor": "Intel Core i3-10100",
+    "Memory (RAM)": "16 GB DDR4-2666",
+    "Storage": "256 GB SATA SSD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Acer V226HQL 21.5\"",
+    "Keyboard & mouse": "Acer USB keyboard & mouse",
+    "Operating system": "Windows 10 Pro 22H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2019"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Packet Tracer",
+     "version": "8.2.2"
+    },
+    {
+     "name": "Wireshark",
+     "version": "4.2"
+    },
+    {
+     "name": "PuTTY",
+     "version": "0.81"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "Pulled from service, kept in the Technician Room for parts check.",
+   "added": "2020-08-03T12:45:00",
+   "updated": null
+  },
+  {
+   "lab": 3,
+   "pc": 7,
+   "tag": "CL3-PC07",
+   "name": "CL3-PC07",
+   "brand": "Acer",
+   "model": "Veriton X2690G",
+   "serial": "DTVX2SP5684798165007",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i3-10100",
+    "Memory (RAM)": "16 GB DDR4-2666",
+    "Storage": "1 TB HDD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Acer V226HQL 21.5\"",
+    "Keyboard & mouse": "Acer USB keyboard & mouse",
+    "Operating system": "Windows 10 Pro 22H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2019"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Packet Tracer",
+     "version": "8.2.2"
+    },
+    {
+     "name": "Wireshark",
+     "version": "4.2"
+    },
+    {
+     "name": "PuTTY",
+     "version": "0.81"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2020-08-06T16:18:00",
+   "updated": null
+  },
+  {
+   "lab": 3,
+   "pc": 8,
+   "tag": "CL3-PC08",
+   "name": "CL3-PC08",
+   "brand": "Acer",
+   "model": "Veriton X2690G",
+   "serial": "DTVX2SP1851400751639",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i3-10100",
+    "Memory (RAM)": "8 GB DDR4-2666",
+    "Storage": "1 TB HDD",
+    "Graphics": "Intel UHD 730",
+    "Monitor": "Acer V226HQL 21.5\"",
+    "Keyboard & mouse": "Acer USB keyboard & mouse",
+    "Operating system": "Windows 10 Pro 22H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2019"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Packet Tracer",
+     "version": "8.2.2"
+    },
+    {
+     "name": "Wireshark",
+     "version": "4.2"
+    },
+    {
+     "name": "PuTTY",
+     "version": "0.81"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2020-08-07T15:11:00",
+   "updated": null
+  },
+  {
+   "lab": 3,
+   "pc": 9,
+   "tag": "CL3-PC09",
+   "name": "CL3-PC09",
+   "brand": "Acer",
+   "model": "Veriton X2690G",
+   "serial": "DTVX2SP3547562284304",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i3-10100",
+    "Memory (RAM)": "8 GB DDR4-2666",
+    "Storage": "1 TB HDD",
+    "Graphics": "Intel UHD 730",
+    "Monitor": "Acer V226HQL 21.5\"",
+    "Keyboard & mouse": "Acer USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2019"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Packet Tracer",
+     "version": "8.2.2"
+    },
+    {
+     "name": "Wireshark",
+     "version": "4.2"
+    },
+    {
+     "name": "PuTTY",
+     "version": "0.81"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2020-08-04T16:36:00",
+   "updated": null
+  },
+  {
+   "lab": 3,
+   "pc": 10,
+   "tag": "CL3-PC10",
+   "name": "CL3-PC10",
+   "brand": "Acer",
+   "model": "Veriton X2690G",
+   "serial": "DTVX2SP8073288973013",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i3-12100",
+    "Memory (RAM)": "8 GB DDR4-2666",
+    "Storage": "1 TB HDD",
+    "Graphics": "Intel UHD 730",
+    "Monitor": "Acer V226HQL 21.5\"",
+    "Keyboard & mouse": "Acer USB keyboard & mouse",
+    "Operating system": "Windows 10 Pro 22H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2019"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Packet Tracer",
+     "version": "8.2.2"
+    },
+    {
+     "name": "Wireshark",
+     "version": "4.2"
+    },
+    {
+     "name": "PuTTY",
+     "version": "0.81"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2020-08-04T13:13:00",
+   "updated": null
+  },
+  {
+   "lab": 3,
+   "pc": 11,
+   "tag": "CL3-PC11",
+   "name": "CL3-PC11",
+   "brand": "Acer",
+   "model": "Veriton X2690G",
+   "serial": "DTVX2SP9441462511705",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i3-12100",
+    "Memory (RAM)": "16 GB DDR4-2666",
+    "Storage": "1 TB HDD",
+    "Graphics": "Intel UHD 730",
+    "Monitor": "Acer V226HQL 21.5\"",
+    "Keyboard & mouse": "Acer USB keyboard & mouse",
+    "Operating system": "Windows 10 Pro 22H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2019"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Packet Tracer",
+     "version": "8.2.2"
+    },
+    {
+     "name": "Wireshark",
+     "version": "4.2"
+    },
+    {
+     "name": "PuTTY",
+     "version": "0.81"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2020-08-07T14:25:00",
+   "updated": null
+  },
+  {
+   "lab": 3,
+   "pc": 12,
+   "tag": "CL3-PC12",
+   "name": "CL3-PC12",
+   "brand": "Acer",
+   "model": "Veriton X2690G",
+   "serial": "DTVX2SP6870806991939",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i3-10100",
+    "Memory (RAM)": "8 GB DDR4-2666",
+    "Storage": "256 GB SATA SSD + 1 TB HDD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Acer V226HQL 21.5\"",
+    "Keyboard & mouse": "Acer USB keyboard & mouse",
+    "Operating system": "Windows 10 Pro 22H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2019"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Packet Tracer",
+     "version": "8.2.2"
+    },
+    {
+     "name": "Wireshark",
+     "version": "4.2"
+    },
+    {
+     "name": "PuTTY",
+     "version": "0.81"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2020-08-07T08:45:00",
+   "updated": null
+  },
+  {
+   "lab": 3,
+   "pc": 13,
+   "tag": "CL3-PC13",
+   "name": "CL3-PC13",
+   "brand": "Acer",
+   "model": "Veriton X2690G",
+   "serial": "DTVX2SP8373028352482",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i3-10100",
+    "Memory (RAM)": "16 GB DDR4-2666",
+    "Storage": "256 GB SATA SSD + 1 TB HDD",
+    "Graphics": "Intel UHD 730",
+    "Monitor": "Acer V226HQL 21.5\"",
+    "Keyboard & mouse": "Acer USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2019"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Packet Tracer",
+     "version": "8.2.2"
+    },
+    {
+     "name": "Wireshark",
+     "version": "4.2"
+    },
+    {
+     "name": "PuTTY",
+     "version": "0.81"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2020-08-06T08:00:00",
+   "updated": null
+  },
+  {
+   "lab": 3,
+   "pc": 14,
+   "tag": "CL3-PC14",
+   "name": "CL3-PC14",
+   "brand": "Acer",
+   "model": "Veriton X2690G",
+   "serial": "DTVX2SP7157856239238",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i3-10100",
+    "Memory (RAM)": "16 GB DDR4-2666",
+    "Storage": "256 GB SATA SSD + 1 TB HDD",
+    "Graphics": "Intel UHD 730",
+    "Monitor": "Acer V226HQL 21.5\"",
+    "Keyboard & mouse": "Acer USB keyboard & mouse",
+    "Operating system": "Windows 10 Pro 22H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2019"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Packet Tracer",
+     "version": "8.2.2"
+    },
+    {
+     "name": "Wireshark",
+     "version": "4.2"
+    },
+    {
+     "name": "PuTTY",
+     "version": "0.81"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2021-03-17T09:00:00",
+   "updated": null
+  },
+  {
+   "lab": 3,
+   "pc": 15,
+   "tag": "CL3-PC15",
+   "name": "CL3-PC15",
+   "brand": "Acer",
+   "model": "Veriton X2690G",
+   "serial": "DTVX2SP9662662590951",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i3-12100",
+    "Memory (RAM)": "16 GB DDR4-2666",
+    "Storage": "1 TB HDD",
+    "Graphics": "Intel UHD 730",
+    "Monitor": "Acer V226HQL 21.5\"",
+    "Keyboard & mouse": "Acer USB keyboard & mouse",
+    "Operating system": "Windows 10 Pro 22H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2019"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Packet Tracer",
+     "version": "8.2.2"
+    },
+    {
+     "name": "Wireshark",
+     "version": "4.2"
+    },
+    {
+     "name": "PuTTY",
+     "version": "0.81"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2020-08-03T12:39:00",
+   "updated": null
+  },
+  {
+   "lab": 3,
+   "pc": 16,
+   "tag": "CL3-PC16",
+   "name": "CL3-PC16",
+   "brand": "Acer",
+   "model": "Veriton X2690G",
+   "serial": "DTVX2SP6140200447207",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i3-10100",
+    "Memory (RAM)": "16 GB DDR4-2666",
+    "Storage": "1 TB HDD",
+    "Graphics": "Intel UHD 730",
+    "Monitor": "Acer V226HQL 21.5\"",
+    "Keyboard & mouse": "Acer USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2019"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Packet Tracer",
+     "version": "8.2.2"
+    },
+    {
+     "name": "Wireshark",
+     "version": "4.2"
+    },
+    {
+     "name": "PuTTY",
+     "version": "0.81"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2020-08-06T16:38:00",
+   "updated": null
+  },
+  {
+   "lab": 3,
+   "pc": 17,
+   "tag": "CL3-PC17",
+   "name": "CL3-PC17",
+   "brand": "Acer",
+   "model": "Veriton X2690G",
+   "serial": "DTVX2SP9477599452602",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i3-12100",
+    "Memory (RAM)": "16 GB DDR4-2666",
+    "Storage": "1 TB HDD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Acer V226HQL 21.5\"",
+    "Keyboard & mouse": "Acer USB keyboard & mouse",
+    "Operating system": "Windows 10 Pro 22H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2019"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Packet Tracer",
+     "version": "8.2.2"
+    },
+    {
+     "name": "Wireshark",
+     "version": "4.2"
+    },
+    {
+     "name": "PuTTY",
+     "version": "0.81"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2020-08-04T12:16:00",
+   "updated": null
+  },
+  {
+   "lab": 3,
+   "pc": 18,
+   "tag": "CL3-PC18",
+   "name": "CL3-PC18",
+   "brand": "Acer",
+   "model": "Veriton X2690G",
+   "serial": "DTVX2SP6105644292253",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i3-12100",
+    "Memory (RAM)": "8 GB DDR4-2666",
+    "Storage": "1 TB HDD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Acer V226HQL 21.5\"",
+    "Keyboard & mouse": "Acer USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2019"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Packet Tracer",
+     "version": "8.2.2"
+    },
+    {
+     "name": "Wireshark",
+     "version": "4.2"
+    },
+    {
+     "name": "PuTTY",
+     "version": "0.81"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2020-08-04T16:48:00",
+   "updated": null
+  },
+  {
+   "lab": 3,
+   "pc": 19,
+   "tag": "CL3-PC19",
+   "name": "CL3-PC19",
+   "brand": "Acer",
+   "model": "Veriton X2690G",
+   "serial": "DTVX2SP4587361403509",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i3-12100",
+    "Memory (RAM)": "8 GB DDR4-2666",
+    "Storage": "1 TB HDD",
+    "Graphics": "Intel UHD 730",
+    "Monitor": "Acer V226HQL 21.5\"",
+    "Keyboard & mouse": "Acer USB keyboard & mouse",
+    "Operating system": "Windows 10 Pro 22H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2019"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Packet Tracer",
+     "version": "8.2.2"
+    },
+    {
+     "name": "Wireshark",
+     "version": "4.2"
+    },
+    {
+     "name": "PuTTY",
+     "version": "0.81"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2020-08-07T16:29:00",
+   "updated": null
+  },
+  {
+   "lab": 3,
+   "pc": 20,
+   "tag": "CL3-PC20",
+   "name": "CL3-PC20",
+   "brand": "Acer",
+   "model": "Veriton X2690G",
+   "serial": "DTVX2SP7650315926676",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i3-10100",
+    "Memory (RAM)": "8 GB DDR4-2666",
+    "Storage": "256 GB SATA SSD + 1 TB HDD",
+    "Graphics": "Intel UHD 730",
+    "Monitor": "Acer V226HQL 21.5\"",
+    "Keyboard & mouse": "Acer USB keyboard & mouse",
+    "Operating system": "Windows 10 Pro 22H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2019"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Packet Tracer",
+     "version": "8.2.2"
+    },
+    {
+     "name": "Wireshark",
+     "version": "4.2"
+    },
+    {
+     "name": "PuTTY",
+     "version": "0.81"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2020-08-06T13:06:00",
+   "updated": null
+  },
+  {
+   "lab": 3,
+   "pc": 21,
+   "tag": "CL3-PC21",
+   "name": "CL3-PC21",
+   "brand": "Acer",
+   "model": "Veriton X2690G",
+   "serial": "DTVX2SP3405857725844",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i3-10100",
+    "Memory (RAM)": "16 GB DDR4-2666",
+    "Storage": "1 TB HDD",
+    "Graphics": "Intel UHD 730",
+    "Monitor": "Acer V226HQL 21.5\"",
+    "Keyboard & mouse": "Acer USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2019"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Packet Tracer",
+     "version": "8.2.2"
+    },
+    {
+     "name": "Wireshark",
+     "version": "4.2"
+    },
+    {
+     "name": "PuTTY",
+     "version": "0.81"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2020-08-04T14:01:00",
+   "updated": null
+  },
+  {
+   "lab": 3,
+   "pc": 22,
+   "tag": "CL3-PC22",
+   "name": "CL3-PC22",
+   "brand": "Acer",
+   "model": "Veriton X2690G",
+   "serial": "DTVX2SP1334013569278",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i3-10100",
+    "Memory (RAM)": "8 GB DDR4-2666",
+    "Storage": "256 GB SATA SSD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Acer V226HQL 21.5\"",
+    "Keyboard & mouse": "Acer USB keyboard & mouse",
+    "Operating system": "Windows 10 Pro 22H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2019"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Packet Tracer",
+     "version": "8.2.2"
+    },
+    {
+     "name": "Wireshark",
+     "version": "4.2"
+    },
+    {
+     "name": "PuTTY",
+     "version": "0.81"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2020-08-04T14:59:00",
+   "updated": null
+  },
+  {
+   "lab": 3,
+   "pc": 23,
+   "tag": "CL3-PC23",
+   "name": "CL3-PC23",
+   "brand": "Acer",
+   "model": "Veriton X2690G",
+   "serial": "DTVX2SP4841133952206",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i3-12100",
+    "Memory (RAM)": "16 GB DDR4-2666",
+    "Storage": "1 TB HDD",
+    "Graphics": "Intel UHD 730",
+    "Monitor": "Acer V226HQL 21.5\"",
+    "Keyboard & mouse": "Acer USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2019"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Packet Tracer",
+     "version": "8.2.2"
+    },
+    {
+     "name": "Wireshark",
+     "version": "4.2"
+    },
+    {
+     "name": "PuTTY",
+     "version": "0.81"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2020-08-04T14:22:00",
+   "updated": null
+  },
+  {
+   "lab": 3,
+   "pc": 24,
+   "tag": "CL3-PC24",
+   "name": "CL3-PC24",
+   "brand": "Acer",
+   "model": "Veriton X2690G",
+   "serial": "DTVX2SP0367445942356",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i3-10100",
+    "Memory (RAM)": "16 GB DDR4-2666",
+    "Storage": "1 TB HDD",
+    "Graphics": "Intel UHD 730",
+    "Monitor": "Acer V226HQL 21.5\"",
+    "Keyboard & mouse": "Acer USB keyboard & mouse",
+    "Operating system": "Windows 10 Pro 22H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2019"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Packet Tracer",
+     "version": "8.2.2"
+    },
+    {
+     "name": "Wireshark",
+     "version": "4.2"
+    },
+    {
+     "name": "PuTTY",
+     "version": "0.81"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2020-08-05T11:06:00",
+   "updated": null
+  },
+  {
+   "lab": 3,
+   "pc": 25,
+   "tag": "CL3-PC25",
+   "name": "CL3-PC25",
+   "brand": "Acer",
+   "model": "Veriton X2690G",
+   "serial": "DTVX2SP9243369154166",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i3-10100",
+    "Memory (RAM)": "16 GB DDR4-2666",
+    "Storage": "256 GB SATA SSD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Acer V226HQL 21.5\"",
+    "Keyboard & mouse": "Acer USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2019"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Packet Tracer",
+     "version": "8.2.2"
+    },
+    {
+     "name": "Wireshark",
+     "version": "4.2"
+    },
+    {
+     "name": "PuTTY",
+     "version": "0.81"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2020-08-05T14:15:00",
+   "updated": null
+  },
+  {
+   "lab": 3,
+   "pc": 26,
+   "tag": "CL3-PC26",
+   "name": "CL3-PC26",
+   "brand": "Acer",
+   "model": "Veriton X2690G",
+   "serial": "DTVX2SP4568734907109",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i3-10100",
+    "Memory (RAM)": "8 GB DDR4-2666",
+    "Storage": "1 TB HDD",
+    "Graphics": "Intel UHD 730",
+    "Monitor": "Acer V226HQL 21.5\"",
+    "Keyboard & mouse": "Acer USB keyboard & mouse",
+    "Operating system": "Windows 10 Pro 22H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2019"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Packet Tracer",
+     "version": "8.2.2"
+    },
+    {
+     "name": "Wireshark",
+     "version": "4.2"
+    },
+    {
+     "name": "PuTTY",
+     "version": "0.81"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2021-03-23T13:00:00",
+   "updated": null
+  },
+  {
+   "lab": 3,
+   "pc": 27,
+   "tag": "CL3-PC27",
+   "name": "CL3-PC27",
+   "brand": "Acer",
+   "model": "Veriton X2690G",
+   "serial": "DTVX2SP2553444594778",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i3-12100",
+    "Memory (RAM)": "8 GB DDR4-2666",
+    "Storage": "1 TB HDD",
+    "Graphics": "Intel UHD 730",
+    "Monitor": "Acer V226HQL 21.5\"",
+    "Keyboard & mouse": "Acer USB keyboard & mouse",
+    "Operating system": "Windows 10 Pro 22H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2019"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Packet Tracer",
+     "version": "8.2.2"
+    },
+    {
+     "name": "Wireshark",
+     "version": "4.2"
+    },
+    {
+     "name": "PuTTY",
+     "version": "0.81"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2020-08-03T16:19:00",
+   "updated": null
+  },
+  {
+   "lab": 3,
+   "pc": 28,
+   "tag": "CL3-PC28",
+   "name": "CL3-PC28",
+   "brand": "Acer",
+   "model": "Veriton X2690G",
+   "serial": "DTVX2SP0246031742372",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i3-10100",
+    "Memory (RAM)": "16 GB DDR4-2666",
+    "Storage": "1 TB HDD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Acer V226HQL 21.5\"",
+    "Keyboard & mouse": "Acer USB keyboard & mouse",
+    "Operating system": "Windows 10 Pro 22H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2019"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Packet Tracer",
+     "version": "8.2.2"
+    },
+    {
+     "name": "Wireshark",
+     "version": "4.2"
+    },
+    {
+     "name": "PuTTY",
+     "version": "0.81"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2020-08-07T08:02:00",
+   "updated": null
+  },
+  {
+   "lab": 3,
+   "pc": 29,
+   "tag": "CL3-PC29",
+   "name": "CL3-PC29",
+   "brand": "Acer",
+   "model": "Veriton X2690G",
+   "serial": "DTVX2SP0934597317339",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i3-12100",
+    "Memory (RAM)": "16 GB DDR4-2666",
+    "Storage": "1 TB HDD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Acer V226HQL 21.5\"",
+    "Keyboard & mouse": "Acer USB keyboard & mouse",
+    "Operating system": "Windows 10 Pro 22H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2019"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Packet Tracer",
+     "version": "8.2.2"
+    },
+    {
+     "name": "Wireshark",
+     "version": "4.2"
+    },
+    {
+     "name": "PuTTY",
+     "version": "0.81"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2020-08-05T08:00:00",
+   "updated": null
+  },
+  {
+   "lab": 3,
+   "pc": 30,
+   "tag": "CL3-PC30",
+   "name": "CL3-PC30",
+   "brand": "Acer",
+   "model": "Veriton X2690G",
+   "serial": "DTVX2SP8570458872348",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i3-12100",
+    "Memory (RAM)": "8 GB DDR4-2666",
+    "Storage": "256 GB SATA SSD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Acer V226HQL 21.5\"",
+    "Keyboard & mouse": "Acer USB keyboard & mouse",
+    "Operating system": "Windows 10 Pro 22H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2019"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Packet Tracer",
+     "version": "8.2.2"
+    },
+    {
+     "name": "Wireshark",
+     "version": "4.2"
+    },
+    {
+     "name": "PuTTY",
+     "version": "0.81"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2020-08-03T15:41:00",
+   "updated": null
+  },
+  {
+   "lab": 3,
+   "pc": 31,
+   "tag": "CL3-PC31",
+   "name": "CL3-PC31",
+   "brand": "Acer",
+   "model": "Veriton X2690G",
+   "serial": "DTVX2SP9253304098247",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i3-10100",
+    "Memory (RAM)": "8 GB DDR4-2666",
+    "Storage": "256 GB SATA SSD",
+    "Graphics": "Intel UHD 730",
+    "Monitor": "Acer V226HQL 21.5\"",
+    "Keyboard & mouse": "Acer USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2019"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Packet Tracer",
+     "version": "8.2.2"
+    },
+    {
+     "name": "Wireshark",
+     "version": "4.2"
+    },
+    {
+     "name": "PuTTY",
+     "version": "0.81"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2020-08-07T15:00:00",
+   "updated": null
+  },
+  {
+   "lab": 3,
+   "pc": 32,
+   "tag": "CL3-PC32",
+   "name": "CL3-PC32",
+   "brand": "Acer",
+   "model": "Veriton X2690G",
+   "serial": "DTVX2SP0673308681974",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i3-10100",
+    "Memory (RAM)": "8 GB DDR4-2666",
+    "Storage": "256 GB SATA SSD + 1 TB HDD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Acer V226HQL 21.5\"",
+    "Keyboard & mouse": "Acer USB keyboard & mouse",
+    "Operating system": "Windows 10 Pro 22H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2019"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Packet Tracer",
+     "version": "8.2.2"
+    },
+    {
+     "name": "Wireshark",
+     "version": "4.2"
+    },
+    {
+     "name": "PuTTY",
+     "version": "0.81"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2020-08-04T14:33:00",
+   "updated": null
+  },
+  {
+   "lab": 3,
+   "pc": 33,
+   "tag": "CL3-PC33",
+   "name": "CL3-PC33",
+   "brand": "Acer",
+   "model": "Veriton X2690G",
+   "serial": "DTVX2SP0725954318248",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i3-10100",
+    "Memory (RAM)": "8 GB DDR4-2666",
+    "Storage": "256 GB SATA SSD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Acer V226HQL 21.5\"",
+    "Keyboard & mouse": "Acer USB keyboard & mouse",
+    "Operating system": "Windows 10 Pro 22H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2019"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Packet Tracer",
+     "version": "8.2.2"
+    },
+    {
+     "name": "Wireshark",
+     "version": "4.2"
+    },
+    {
+     "name": "PuTTY",
+     "version": "0.81"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2020-08-04T12:22:00",
+   "updated": null
+  },
+  {
+   "lab": 3,
+   "pc": 34,
+   "tag": "CL3-PC34",
+   "name": "CL3-PC34",
+   "brand": "Acer",
+   "model": "Veriton X2690G",
+   "serial": "DTVX2SP2198965579132",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i3-12100",
+    "Memory (RAM)": "8 GB DDR4-2666",
+    "Storage": "1 TB HDD",
+    "Graphics": "Intel UHD 730",
+    "Monitor": "Acer V226HQL 21.5\"",
+    "Keyboard & mouse": "Acer USB keyboard & mouse",
+    "Operating system": "Windows 10 Pro 22H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2019"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Packet Tracer",
+     "version": "8.2.2"
+    },
+    {
+     "name": "Wireshark",
+     "version": "4.2"
+    },
+    {
+     "name": "PuTTY",
+     "version": "0.81"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2020-08-03T09:39:00",
+   "updated": null
+  },
+  {
+   "lab": 3,
+   "pc": 35,
+   "tag": "CL3-PC35",
+   "name": "CL3-PC35",
+   "brand": "Acer",
+   "model": "Veriton X2690G",
+   "serial": "DTVX2SP7348910682860",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i3-10100",
+    "Memory (RAM)": "8 GB DDR4-2666",
+    "Storage": "1 TB HDD",
+    "Graphics": "Intel UHD 730",
+    "Monitor": "Acer V226HQL 21.5\"",
+    "Keyboard & mouse": "Acer USB keyboard & mouse",
+    "Operating system": "Windows 10 Pro 22H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2019"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Packet Tracer",
+     "version": "8.2.2"
+    },
+    {
+     "name": "Wireshark",
+     "version": "4.2"
+    },
+    {
+     "name": "PuTTY",
+     "version": "0.81"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2020-08-06T12:43:00",
+   "updated": null
+  },
+  {
+   "lab": 3,
+   "pc": 36,
+   "tag": "CL3-PC36",
+   "name": "CL3-PC36",
+   "brand": "Acer",
+   "model": "Veriton X2690G",
+   "serial": "DTVX2SP1278580409675",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i3-10100",
+    "Memory (RAM)": "16 GB DDR4-2666",
+    "Storage": "1 TB HDD",
+    "Graphics": "Intel UHD 730",
+    "Monitor": "Acer V226HQL 21.5\"",
+    "Keyboard & mouse": "Acer USB keyboard & mouse",
+    "Operating system": "Windows 10 Pro 22H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2019"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Packet Tracer",
+     "version": "8.2.2"
+    },
+    {
+     "name": "Wireshark",
+     "version": "4.2"
+    },
+    {
+     "name": "PuTTY",
+     "version": "0.81"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2020-08-07T08:00:00",
+   "updated": null
+  },
+  {
+   "lab": 3,
+   "pc": 37,
+   "tag": "CL3-PC37",
+   "name": "CL3-PC37",
+   "brand": "Acer",
+   "model": "Veriton X2690G",
+   "serial": "DTVX2SP4084113540612",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i3-10100",
+    "Memory (RAM)": "8 GB DDR4-2666",
+    "Storage": "256 GB SATA SSD + 1 TB HDD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Acer V226HQL 21.5\"",
+    "Keyboard & mouse": "Acer USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2019"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Packet Tracer",
+     "version": "8.2.2"
+    },
+    {
+     "name": "Wireshark",
+     "version": "4.2"
+    },
+    {
+     "name": "PuTTY",
+     "version": "0.81"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2020-08-06T14:59:00",
+   "updated": null
+  },
+  {
+   "lab": 3,
+   "pc": 38,
+   "tag": "CL3-PC38",
+   "name": "CL3-PC38",
+   "brand": "Acer",
+   "model": "Veriton X2690G",
+   "serial": "DTVX2SP1532841393868",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i3-10100",
+    "Memory (RAM)": "8 GB DDR4-2666",
+    "Storage": "1 TB HDD",
+    "Graphics": "Intel UHD 730",
+    "Monitor": "Acer V226HQL 21.5\"",
+    "Keyboard & mouse": "Acer USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2019"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Packet Tracer",
+     "version": "8.2.2"
+    },
+    {
+     "name": "Wireshark",
+     "version": "4.2"
+    },
+    {
+     "name": "PuTTY",
+     "version": "0.81"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2020-08-07T10:11:00",
+   "updated": null
+  },
+  {
+   "lab": 3,
+   "pc": 39,
+   "tag": "CL3-PC39",
+   "name": "CL3-PC39",
+   "brand": "Acer",
+   "model": "Veriton X2690G",
+   "serial": "DTVX2SP6695531603393",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i3-10100",
+    "Memory (RAM)": "8 GB DDR4-2666",
+    "Storage": "1 TB HDD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Acer V226HQL 21.5\"",
+    "Keyboard & mouse": "Acer USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2019"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Packet Tracer",
+     "version": "8.2.2"
+    },
+    {
+     "name": "Wireshark",
+     "version": "4.2"
+    },
+    {
+     "name": "PuTTY",
+     "version": "0.81"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2021-01-02T12:00:00",
+   "updated": null
+  },
+  {
+   "lab": 3,
+   "pc": 40,
+   "tag": "CL3-PC40",
+   "name": "Instructor PC",
+   "brand": "Acer",
+   "model": "Veriton X2690G",
+   "serial": "DTVX2SP5663220796624",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i7-12700",
+    "Memory (RAM)": "32 GB DDR4-3200",
+    "Storage": "1 TB NVMe SSD",
+    "Graphics": "Intel UHD 730",
+    "Monitor": "Acer V226HQL 21.5\"",
+    "Keyboard & mouse": "Acer USB keyboard & mouse",
+    "Operating system": "Windows 10 Pro 22H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2019"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Packet Tracer",
+     "version": "8.2.2"
+    },
+    {
+     "name": "Wireshark",
+     "version": "4.2"
+    },
+    {
+     "name": "PuTTY",
+     "version": "0.81"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "Instructor station (teacher's desk).",
+   "added": "2020-08-07T10:08:00",
+   "updated": null
+  },
+  {
+   "lab": 4,
+   "pc": 1,
+   "tag": "CL4-PC01",
+   "name": "CL4-PC01",
+   "brand": "HP",
+   "model": "ProDesk 400 G9 SFF",
+   "serial": "4CE9056N21",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-12500",
+    "Memory (RAM)": "16 GB DDR4-3200",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "Intel UHD 770",
+    "Monitor": "HP P24 G5 23.8\" IPS",
+    "Keyboard & mouse": "HP 125 USB keyboard & 128 mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Adobe Photoshop",
+     "version": "2024"
+    },
+    {
+     "name": "AutoCAD",
+     "version": "2024"
+    },
+    {
+     "name": "Blender",
+     "version": "4.1"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2023-07-12T08:42:00",
+   "updated": null
+  },
+  {
+   "lab": 4,
+   "pc": 2,
+   "tag": "CL4-PC02",
+   "name": "CL4-PC02",
+   "brand": "HP",
+   "model": "ProDesk 400 G9 SFF",
+   "serial": "4CE232O8BQ",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-12500",
+    "Memory (RAM)": "16 GB DDR4-3200",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "Intel UHD 770",
+    "Monitor": "HP P24 G5 23.8\" IPS",
+    "Keyboard & mouse": "HP 125 USB keyboard & 128 mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Adobe Photoshop",
+     "version": "2024"
+    },
+    {
+     "name": "AutoCAD",
+     "version": "2024"
+    },
+    {
+     "name": "Blender",
+     "version": "4.1"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2023-07-11T09:59:00",
+   "updated": null
+  },
+  {
+   "lab": 4,
+   "pc": 3,
+   "tag": "CL4-PC03",
+   "name": "CL4-PC03",
+   "brand": "HP",
+   "model": "ProDesk 400 G9 SFF",
+   "serial": "4CE449ICIK",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-12500",
+    "Memory (RAM)": "16 GB DDR4-3200",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "Intel UHD 770",
+    "Monitor": "HP P24 G5 23.8\" IPS",
+    "Keyboard & mouse": "HP 125 USB keyboard & 128 mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Adobe Photoshop",
+     "version": "2024"
+    },
+    {
+     "name": "AutoCAD",
+     "version": "2024"
+    },
+    {
+     "name": "Blender",
+     "version": "4.1"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2023-07-11T15:14:00",
+   "updated": null
+  },
+  {
+   "lab": 4,
+   "pc": 4,
+   "tag": "CL4-PC04",
+   "name": "CL4-PC04",
+   "brand": "HP",
+   "model": "ProDesk 400 G9 SFF",
+   "serial": "4CE357HJAU",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-12500",
+    "Memory (RAM)": "32 GB DDR4-3200",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "Intel UHD 770",
+    "Monitor": "HP P24 G5 23.8\" IPS",
+    "Keyboard & mouse": "HP 125 USB keyboard & 128 mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Adobe Photoshop",
+     "version": "2024"
+    },
+    {
+     "name": "AutoCAD",
+     "version": "2024"
+    },
+    {
+     "name": "Blender",
+     "version": "4.1"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2023-07-11T12:15:00",
+   "updated": null
+  },
+  {
+   "lab": 4,
+   "pc": 5,
+   "tag": "CL4-PC05",
+   "name": "CL4-PC05",
+   "brand": "HP",
+   "model": "ProDesk 400 G9 SFF",
+   "serial": "4CE5191XS7",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-12500",
+    "Memory (RAM)": "16 GB DDR4-3200",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "Intel UHD 770",
+    "Monitor": "HP P24 G5 23.8\" IPS",
+    "Keyboard & mouse": "HP 125 USB keyboard & 128 mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Adobe Photoshop",
+     "version": "2024"
+    },
+    {
+     "name": "AutoCAD",
+     "version": "2024"
+    },
+    {
+     "name": "Blender",
+     "version": "4.1"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2023-07-11T12:54:00",
+   "updated": null
+  },
+  {
+   "lab": 4,
+   "pc": 6,
+   "tag": "CL4-PC06",
+   "name": "CL4-PC06",
+   "brand": "HP",
+   "model": "ProDesk 400 G9 SFF",
+   "serial": "4CE431IAY9",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-12400",
+    "Memory (RAM)": "16 GB DDR4-3200",
+    "Storage": "1 TB NVMe SSD",
+    "Graphics": "Intel UHD 770",
+    "Monitor": "HP P24 G5 23.8\" IPS",
+    "Keyboard & mouse": "HP 125 USB keyboard & 128 mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Adobe Photoshop",
+     "version": "2024"
+    },
+    {
+     "name": "AutoCAD",
+     "version": "2024"
+    },
+    {
+     "name": "Blender",
+     "version": "4.1"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2023-07-11T14:40:00",
+   "updated": null
+  },
+  {
+   "lab": 4,
+   "pc": 7,
+   "tag": "CL4-PC07",
+   "name": "CL4-PC07",
+   "brand": "HP",
+   "model": "ProDesk 400 G9 SFF",
+   "serial": "4CE380VGS5",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-12500",
+    "Memory (RAM)": "16 GB DDR4-3200",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "Intel UHD 770",
+    "Monitor": "HP P24 G5 23.8\" IPS",
+    "Keyboard & mouse": "HP 125 USB keyboard & 128 mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Adobe Photoshop",
+     "version": "2024"
+    },
+    {
+     "name": "AutoCAD",
+     "version": "2024"
+    },
+    {
+     "name": "Blender",
+     "version": "4.1"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2023-07-11T14:08:00",
+   "updated": null
+  },
+  {
+   "lab": 4,
+   "pc": 8,
+   "tag": "CL4-PC08",
+   "name": "CL4-PC08",
+   "brand": "HP",
+   "model": "ProDesk 400 G9 SFF",
+   "serial": "4CE492MS12",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-12400",
+    "Memory (RAM)": "16 GB DDR4-3200",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "Intel UHD 770",
+    "Monitor": "HP P24 G5 23.8\" IPS",
+    "Keyboard & mouse": "HP 125 USB keyboard & 128 mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Adobe Photoshop",
+     "version": "2024"
+    },
+    {
+     "name": "AutoCAD",
+     "version": "2024"
+    },
+    {
+     "name": "Blender",
+     "version": "4.1"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2023-07-14T16:28:00",
+   "updated": null
+  },
+  {
+   "lab": 4,
+   "pc": 9,
+   "tag": "CL4-PC09",
+   "name": "CL4-PC09",
+   "brand": "HP",
+   "model": "ProDesk 400 G9 SFF",
+   "serial": "4CE1026RAT",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-12400",
+    "Memory (RAM)": "16 GB DDR4-3200",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "Intel UHD 770",
+    "Monitor": "HP P24 G5 23.8\" IPS",
+    "Keyboard & mouse": "HP 125 USB keyboard & 128 mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Adobe Photoshop",
+     "version": "2024"
+    },
+    {
+     "name": "AutoCAD",
+     "version": "2024"
+    },
+    {
+     "name": "Blender",
+     "version": "4.1"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2023-07-10T14:27:00",
+   "updated": null
+  },
+  {
+   "lab": 4,
+   "pc": 10,
+   "tag": "CL4-PC10",
+   "name": "CL4-PC10",
+   "brand": "HP",
+   "model": "ProDesk 400 G9 SFF",
+   "serial": "4CE240CM2D",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-12500",
+    "Memory (RAM)": "16 GB DDR4-3200",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "Intel UHD 770",
+    "Monitor": "HP P24 G5 23.8\" IPS",
+    "Keyboard & mouse": "HP 125 USB keyboard & 128 mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Adobe Photoshop",
+     "version": "2024"
+    },
+    {
+     "name": "AutoCAD",
+     "version": "2024"
+    },
+    {
+     "name": "Blender",
+     "version": "4.1"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2023-07-13T10:08:00",
+   "updated": null
+  },
+  {
+   "lab": 4,
+   "pc": 11,
+   "tag": "CL4-PC11",
+   "name": "CL4-PC11",
+   "brand": "HP",
+   "model": "ProDesk 400 G9 SFF",
+   "serial": "4CE8709JVY",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-12400",
+    "Memory (RAM)": "16 GB DDR4-3200",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "Intel UHD 770",
+    "Monitor": "HP P24 G5 23.8\" IPS",
+    "Keyboard & mouse": "HP 125 USB keyboard & 128 mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Adobe Photoshop",
+     "version": "2024"
+    },
+    {
+     "name": "AutoCAD",
+     "version": "2024"
+    },
+    {
+     "name": "Blender",
+     "version": "4.1"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2023-07-13T15:10:00",
+   "updated": null
+  },
+  {
+   "lab": 4,
+   "pc": 12,
+   "tag": "CL4-PC12",
+   "name": "CL4-PC12",
+   "brand": "HP",
+   "model": "ProDesk 400 G9 SFF",
+   "serial": "4CE113QUV4",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-12400",
+    "Memory (RAM)": "16 GB DDR4-3200",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "Intel UHD 770",
+    "Monitor": "HP P24 G5 23.8\" IPS",
+    "Keyboard & mouse": "HP 125 USB keyboard & 128 mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Adobe Photoshop",
+     "version": "2024"
+    },
+    {
+     "name": "AutoCAD",
+     "version": "2024"
+    },
+    {
+     "name": "Blender",
+     "version": "4.1"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2023-07-11T16:10:00",
+   "updated": null
+  },
+  {
+   "lab": 4,
+   "pc": 13,
+   "tag": "CL4-PC13",
+   "name": "CL4-PC13",
+   "brand": "HP",
+   "model": "ProDesk 400 G9 SFF",
+   "serial": "4CE287F1IN",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-12500",
+    "Memory (RAM)": "32 GB DDR4-3200",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "Intel UHD 770",
+    "Monitor": "HP P24 G5 23.8\" IPS",
+    "Keyboard & mouse": "HP 125 USB keyboard & 128 mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Adobe Photoshop",
+     "version": "2024"
+    },
+    {
+     "name": "AutoCAD",
+     "version": "2024"
+    },
+    {
+     "name": "Blender",
+     "version": "4.1"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2023-07-12T10:54:00",
+   "updated": null
+  },
+  {
+   "lab": 4,
+   "pc": 14,
+   "tag": "CL4-PC14",
+   "name": "CL4-PC14",
+   "brand": "HP",
+   "model": "ProDesk 400 G9 SFF",
+   "serial": "4CE816V5X5",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-12500",
+    "Memory (RAM)": "16 GB DDR4-3200",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "Intel UHD 770",
+    "Monitor": "HP P24 G5 23.8\" IPS",
+    "Keyboard & mouse": "HP 125 USB keyboard & 128 mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Adobe Photoshop",
+     "version": "2024"
+    },
+    {
+     "name": "AutoCAD",
+     "version": "2024"
+    },
+    {
+     "name": "Blender",
+     "version": "4.1"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2023-07-11T14:12:00",
+   "updated": null
+  },
+  {
+   "lab": 4,
+   "pc": 15,
+   "tag": "CL4-PC15",
+   "name": "CL4-PC15",
+   "brand": "HP",
+   "model": "ProDesk 400 G9 SFF",
+   "serial": "4CE166T84A",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-12500",
+    "Memory (RAM)": "16 GB DDR4-3200",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "Intel UHD 770",
+    "Monitor": "HP P24 G5 23.8\" IPS",
+    "Keyboard & mouse": "HP 125 USB keyboard & 128 mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Adobe Photoshop",
+     "version": "2024"
+    },
+    {
+     "name": "AutoCAD",
+     "version": "2024"
+    },
+    {
+     "name": "Blender",
+     "version": "4.1"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2023-07-10T14:03:00",
+   "updated": null
+  },
+  {
+   "lab": 4,
+   "pc": 16,
+   "tag": "CL4-PC16",
+   "name": "CL4-PC16",
+   "brand": "HP",
+   "model": "ProDesk 400 G9 SFF",
+   "serial": "4CE405PYXS",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-12500",
+    "Memory (RAM)": "16 GB DDR4-3200",
+    "Storage": "1 TB NVMe SSD",
+    "Graphics": "Intel UHD 770",
+    "Monitor": "HP P24 G5 23.8\" IPS",
+    "Keyboard & mouse": "HP 125 USB keyboard & 128 mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Adobe Photoshop",
+     "version": "2024"
+    },
+    {
+     "name": "AutoCAD",
+     "version": "2024"
+    },
+    {
+     "name": "Blender",
+     "version": "4.1"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2023-07-14T10:24:00",
+   "updated": null
+  },
+  {
+   "lab": 4,
+   "pc": 17,
+   "tag": "CL4-PC17",
+   "name": "CL4-PC17",
+   "brand": "HP",
+   "model": "ProDesk 400 G9 SFF",
+   "serial": "4CE69450S1",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-12500",
+    "Memory (RAM)": "16 GB DDR4-3200",
+    "Storage": "1 TB NVMe SSD",
+    "Graphics": "Intel UHD 770",
+    "Monitor": "HP P24 G5 23.8\" IPS",
+    "Keyboard & mouse": "HP 125 USB keyboard & 128 mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Adobe Photoshop",
+     "version": "2024"
+    },
+    {
+     "name": "AutoCAD",
+     "version": "2024"
+    },
+    {
+     "name": "Blender",
+     "version": "4.1"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2023-07-14T16:21:00",
+   "updated": null
+  },
+  {
+   "lab": 4,
+   "pc": 18,
+   "tag": "CL4-PC18",
+   "name": "CL4-PC18",
+   "brand": "HP",
+   "model": "ProDesk 400 G9 SFF",
+   "serial": "4CE13652WY",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-12500",
+    "Memory (RAM)": "16 GB DDR4-3200",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "Intel UHD 770",
+    "Monitor": "HP P24 G5 23.8\" IPS",
+    "Keyboard & mouse": "HP 125 USB keyboard & 128 mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Adobe Photoshop",
+     "version": "2024"
+    },
+    {
+     "name": "AutoCAD",
+     "version": "2024"
+    },
+    {
+     "name": "Blender",
+     "version": "4.1"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2023-07-12T09:50:00",
+   "updated": null
+  },
+  {
+   "lab": 4,
+   "pc": 19,
+   "tag": "CL4-PC19",
+   "name": "CL4-PC19",
+   "brand": "HP",
+   "model": "ProDesk 400 G9 SFF",
+   "serial": "4CE789BD3T",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-12500",
+    "Memory (RAM)": "16 GB DDR4-3200",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "Intel UHD 770",
+    "Monitor": "HP P24 G5 23.8\" IPS",
+    "Keyboard & mouse": "HP 125 USB keyboard & 128 mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Adobe Photoshop",
+     "version": "2024"
+    },
+    {
+     "name": "AutoCAD",
+     "version": "2024"
+    },
+    {
+     "name": "Blender",
+     "version": "4.1"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2023-07-14T09:37:00",
+   "updated": null
+  },
+  {
+   "lab": 4,
+   "pc": 20,
+   "tag": "CL4-PC20",
+   "name": "CL4-PC20",
+   "brand": "HP",
+   "model": "ProDesk 400 G9 SFF",
+   "serial": "4CE327SO05",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-12500",
+    "Memory (RAM)": "32 GB DDR4-3200",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "Intel UHD 770",
+    "Monitor": "HP P24 G5 23.8\" IPS",
+    "Keyboard & mouse": "HP 125 USB keyboard & 128 mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Adobe Photoshop",
+     "version": "2024"
+    },
+    {
+     "name": "AutoCAD",
+     "version": "2024"
+    },
+    {
+     "name": "Blender",
+     "version": "4.1"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2023-07-11T13:46:00",
+   "updated": null
+  },
+  {
+   "lab": 4,
+   "pc": 21,
+   "tag": "CL4-PC21",
+   "name": "CL4-PC21",
+   "brand": "HP",
+   "model": "ProDesk 400 G9 SFF",
+   "serial": "4CE3083MR4",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-12400",
+    "Memory (RAM)": "16 GB DDR4-3200",
+    "Storage": "1 TB NVMe SSD",
+    "Graphics": "Intel UHD 770",
+    "Monitor": "HP P24 G5 23.8\" IPS",
+    "Keyboard & mouse": "HP 125 USB keyboard & 128 mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Adobe Photoshop",
+     "version": "2024"
+    },
+    {
+     "name": "AutoCAD",
+     "version": "2024"
+    },
+    {
+     "name": "Blender",
+     "version": "4.1"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2023-07-12T10:20:00",
+   "updated": null
+  },
+  {
+   "lab": 4,
+   "pc": 22,
+   "tag": "CL4-PC22",
+   "name": "CL4-PC22",
+   "brand": "HP",
+   "model": "ProDesk 400 G9 SFF",
+   "serial": "4CE804DIVX",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-12500",
+    "Memory (RAM)": "16 GB DDR4-3200",
+    "Storage": "1 TB NVMe SSD",
+    "Graphics": "Intel UHD 770",
+    "Monitor": "HP P24 G5 23.8\" IPS",
+    "Keyboard & mouse": "HP 125 USB keyboard & 128 mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Adobe Photoshop",
+     "version": "2024"
+    },
+    {
+     "name": "AutoCAD",
+     "version": "2024"
+    },
+    {
+     "name": "Blender",
+     "version": "4.1"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2023-07-13T13:54:00",
+   "updated": null
+  },
+  {
+   "lab": 4,
+   "pc": 23,
+   "tag": "CL4-PC23",
+   "name": "CL4-PC23",
+   "brand": "HP",
+   "model": "ProDesk 400 G9 SFF",
+   "serial": "4CE8055NFF",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-12500",
+    "Memory (RAM)": "16 GB DDR4-3200",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "Intel UHD 770",
+    "Monitor": "HP P24 G5 23.8\" IPS",
+    "Keyboard & mouse": "HP 125 USB keyboard & 128 mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Adobe Photoshop",
+     "version": "2024"
+    },
+    {
+     "name": "AutoCAD",
+     "version": "2024"
+    },
+    {
+     "name": "Blender",
+     "version": "4.1"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2023-07-11T10:38:00",
+   "updated": null
+  },
+  {
+   "lab": 4,
+   "pc": 24,
+   "tag": "CL4-PC24",
+   "name": "CL4-PC24",
+   "brand": "HP",
+   "model": "ProDesk 400 G9 SFF",
+   "serial": "4CE544OTV5",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-12500",
+    "Memory (RAM)": "16 GB DDR4-3200",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "Intel UHD 770",
+    "Monitor": "HP P24 G5 23.8\" IPS",
+    "Keyboard & mouse": "HP 125 USB keyboard & 128 mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Adobe Photoshop",
+     "version": "2024"
+    },
+    {
+     "name": "AutoCAD",
+     "version": "2024"
+    },
+    {
+     "name": "Blender",
+     "version": "4.1"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2023-07-11T14:44:00",
+   "updated": null
+  },
+  {
+   "lab": 4,
+   "pc": 25,
+   "tag": "CL4-PC25",
+   "name": "CL4-PC25",
+   "brand": "HP",
+   "model": "ProDesk 400 G9 SFF",
+   "serial": "4CE566YKIP",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-12500",
+    "Memory (RAM)": "16 GB DDR4-3200",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "Intel UHD 770",
+    "Monitor": "HP P24 G5 23.8\" IPS",
+    "Keyboard & mouse": "HP 125 USB keyboard & 128 mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Adobe Photoshop",
+     "version": "2024"
+    },
+    {
+     "name": "AutoCAD",
+     "version": "2024"
+    },
+    {
+     "name": "Blender",
+     "version": "4.1"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2023-07-14T09:51:00",
+   "updated": null
+  },
+  {
+   "lab": 4,
+   "pc": 26,
+   "tag": "CL4-PC26",
+   "name": "CL4-PC26",
+   "brand": "HP",
+   "model": "ProDesk 400 G9 SFF",
+   "serial": "4CE254Z96V",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-12400",
+    "Memory (RAM)": "16 GB DDR4-3200",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "Intel UHD 770",
+    "Monitor": "HP P24 G5 23.8\" IPS",
+    "Keyboard & mouse": "HP 125 USB keyboard & 128 mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Adobe Photoshop",
+     "version": "2024"
+    },
+    {
+     "name": "AutoCAD",
+     "version": "2024"
+    },
+    {
+     "name": "Blender",
+     "version": "4.1"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2023-07-13T12:40:00",
+   "updated": null
+  },
+  {
+   "lab": 4,
+   "pc": 27,
+   "tag": "CL4-PC27",
+   "name": "CL4-PC27",
+   "brand": "HP",
+   "model": "ProDesk 400 G9 SFF",
+   "serial": "4CE411TJUC",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-12400",
+    "Memory (RAM)": "16 GB DDR4-3200",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "Intel UHD 770",
+    "Monitor": "HP P24 G5 23.8\" IPS",
+    "Keyboard & mouse": "HP 125 USB keyboard & 128 mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Adobe Photoshop",
+     "version": "2024"
+    },
+    {
+     "name": "AutoCAD",
+     "version": "2024"
+    },
+    {
+     "name": "Blender",
+     "version": "4.1"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2023-07-13T14:54:00",
+   "updated": null
+  },
+  {
+   "lab": 4,
+   "pc": 28,
+   "tag": "CL4-PC28",
+   "name": "CL4-PC28",
+   "brand": "HP",
+   "model": "ProDesk 400 G9 SFF",
+   "serial": "4CE199FDUT",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-12500",
+    "Memory (RAM)": "16 GB DDR4-3200",
+    "Storage": "1 TB NVMe SSD",
+    "Graphics": "Intel UHD 770",
+    "Monitor": "HP P24 G5 23.8\" IPS",
+    "Keyboard & mouse": "HP 125 USB keyboard & 128 mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Adobe Photoshop",
+     "version": "2024"
+    },
+    {
+     "name": "AutoCAD",
+     "version": "2024"
+    },
+    {
+     "name": "Blender",
+     "version": "4.1"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2023-07-13T14:17:00",
+   "updated": null
+  },
+  {
+   "lab": 4,
+   "pc": 29,
+   "tag": "CL4-PC29",
+   "name": "CL4-PC29",
+   "brand": "HP",
+   "model": "ProDesk 400 G9 SFF",
+   "serial": "4CE59328KQ",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-12500",
+    "Memory (RAM)": "16 GB DDR4-3200",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "Intel UHD 770",
+    "Monitor": "HP P24 G5 23.8\" IPS",
+    "Keyboard & mouse": "HP 125 USB keyboard & 128 mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Adobe Photoshop",
+     "version": "2024"
+    },
+    {
+     "name": "AutoCAD",
+     "version": "2024"
+    },
+    {
+     "name": "Blender",
+     "version": "4.1"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2023-07-13T12:29:00",
+   "updated": null
+  },
+  {
+   "lab": 4,
+   "pc": 30,
+   "tag": "CL4-PC30",
+   "name": "CL4-PC30",
+   "brand": "HP",
+   "model": "ProDesk 400 G9 SFF",
+   "serial": "4CE636LROJ",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-12500",
+    "Memory (RAM)": "32 GB DDR4-3200",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "Intel UHD 770",
+    "Monitor": "HP P24 G5 23.8\" IPS",
+    "Keyboard & mouse": "HP 125 USB keyboard & 128 mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Adobe Photoshop",
+     "version": "2024"
+    },
+    {
+     "name": "AutoCAD",
+     "version": "2024"
+    },
+    {
+     "name": "Blender",
+     "version": "4.1"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2023-07-13T16:27:00",
+   "updated": null
+  },
+  {
+   "lab": 4,
+   "pc": 31,
+   "tag": "CL4-PC31",
+   "name": "CL4-PC31",
+   "brand": "HP",
+   "model": "ProDesk 400 G9 SFF",
+   "serial": "4CE3209M6I",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-12500",
+    "Memory (RAM)": "16 GB DDR4-3200",
+    "Storage": "1 TB NVMe SSD",
+    "Graphics": "Intel UHD 770",
+    "Monitor": "HP P24 G5 23.8\" IPS",
+    "Keyboard & mouse": "HP 125 USB keyboard & 128 mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Adobe Photoshop",
+     "version": "2024"
+    },
+    {
+     "name": "AutoCAD",
+     "version": "2024"
+    },
+    {
+     "name": "Blender",
+     "version": "4.1"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2023-07-11T11:54:00",
+   "updated": null
+  },
+  {
+   "lab": 4,
+   "pc": 32,
+   "tag": "CL4-PC32",
+   "name": "CL4-PC32",
+   "brand": "HP",
+   "model": "ProDesk 400 G9 SFF",
+   "serial": "4CE667XKNO",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-12500",
+    "Memory (RAM)": "32 GB DDR4-3200",
+    "Storage": "1 TB NVMe SSD",
+    "Graphics": "Intel UHD 770",
+    "Monitor": "HP P24 G5 23.8\" IPS",
+    "Keyboard & mouse": "HP 125 USB keyboard & 128 mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Adobe Photoshop",
+     "version": "2024"
+    },
+    {
+     "name": "AutoCAD",
+     "version": "2024"
+    },
+    {
+     "name": "Blender",
+     "version": "4.1"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2023-07-10T09:11:00",
+   "updated": null
+  },
+  {
+   "lab": 4,
+   "pc": 33,
+   "tag": "CL4-PC33",
+   "name": "CL4-PC33",
+   "brand": "HP",
+   "model": "ProDesk 400 G9 SFF",
+   "serial": "4CE5068WSW",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-12500",
+    "Memory (RAM)": "16 GB DDR4-3200",
+    "Storage": "1 TB NVMe SSD",
+    "Graphics": "Intel UHD 770",
+    "Monitor": "HP P24 G5 23.8\" IPS",
+    "Keyboard & mouse": "HP 125 USB keyboard & 128 mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Adobe Photoshop",
+     "version": "2024"
+    },
+    {
+     "name": "AutoCAD",
+     "version": "2024"
+    },
+    {
+     "name": "Blender",
+     "version": "4.1"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2023-07-14T12:59:00",
+   "updated": null
+  },
+  {
+   "lab": 4,
+   "pc": 34,
+   "tag": "CL4-PC34",
+   "name": "CL4-PC34",
+   "brand": "HP",
+   "model": "ProDesk 400 G9 SFF",
+   "serial": "4CE90878SE",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-12500",
+    "Memory (RAM)": "16 GB DDR4-3200",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "Intel UHD 770",
+    "Monitor": "HP P24 G5 23.8\" IPS",
+    "Keyboard & mouse": "HP 125 USB keyboard & 128 mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Adobe Photoshop",
+     "version": "2024"
+    },
+    {
+     "name": "AutoCAD",
+     "version": "2024"
+    },
+    {
+     "name": "Blender",
+     "version": "4.1"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2023-07-12T16:11:00",
+   "updated": null
+  },
+  {
+   "lab": 4,
+   "pc": 35,
+   "tag": "CL4-PC35",
+   "name": "CL4-PC35",
+   "brand": "HP",
+   "model": "ProDesk 400 G9 SFF",
+   "serial": "4CE669IC1N",
+   "status": "Under maintenance",
+   "hardware": {
+    "Processor": "Intel Core i5-12500",
+    "Memory (RAM)": "16 GB DDR4-3200",
+    "Storage": "1 TB NVMe SSD",
+    "Graphics": "Intel UHD 770",
+    "Monitor": "HP P24 G5 23.8\" IPS",
+    "Keyboard & mouse": "HP 125 USB keyboard & 128 mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Adobe Photoshop",
+     "version": "2024"
+    },
+    {
+     "name": "AutoCAD",
+     "version": "2024"
+    },
+    {
+     "name": "Blender",
+     "version": "4.1"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2023-07-10T14:00:00",
+   "updated": null
+  },
+  {
+   "lab": 4,
+   "pc": 36,
+   "tag": "CL4-PC36",
+   "name": "CL4-PC36",
+   "brand": "HP",
+   "model": "ProDesk 400 G9 SFF",
+   "serial": "4CE229F6TW",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-12500",
+    "Memory (RAM)": "32 GB DDR4-3200",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "Intel UHD 770",
+    "Monitor": "HP P24 G5 23.8\" IPS",
+    "Keyboard & mouse": "HP 125 USB keyboard & 128 mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Adobe Photoshop",
+     "version": "2024"
+    },
+    {
+     "name": "AutoCAD",
+     "version": "2024"
+    },
+    {
+     "name": "Blender",
+     "version": "4.1"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2023-07-11T09:08:00",
+   "updated": null
+  },
+  {
+   "lab": 4,
+   "pc": 37,
+   "tag": "CL4-PC37",
+   "name": "CL4-PC37",
+   "brand": "HP",
+   "model": "ProDesk 400 G9 SFF",
+   "serial": "4CE859HZBH",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-12400",
+    "Memory (RAM)": "32 GB DDR4-3200",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "Intel UHD 770",
+    "Monitor": "HP P24 G5 23.8\" IPS",
+    "Keyboard & mouse": "HP 125 USB keyboard & 128 mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Adobe Photoshop",
+     "version": "2024"
+    },
+    {
+     "name": "AutoCAD",
+     "version": "2024"
+    },
+    {
+     "name": "Blender",
+     "version": "4.1"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2023-07-13T09:13:00",
+   "updated": null
+  },
+  {
+   "lab": 4,
+   "pc": 38,
+   "tag": "CL4-PC38",
+   "name": "CL4-PC38",
+   "brand": "HP",
+   "model": "ProDesk 400 G9 SFF",
+   "serial": "4CE759Q99H",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-12400",
+    "Memory (RAM)": "32 GB DDR4-3200",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "Intel UHD 770",
+    "Monitor": "HP P24 G5 23.8\" IPS",
+    "Keyboard & mouse": "HP 125 USB keyboard & 128 mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Adobe Photoshop",
+     "version": "2024"
+    },
+    {
+     "name": "AutoCAD",
+     "version": "2024"
+    },
+    {
+     "name": "Blender",
+     "version": "4.1"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2023-07-13T10:33:00",
+   "updated": null
+  },
+  {
+   "lab": 4,
+   "pc": 39,
+   "tag": "CL4-PC39",
+   "name": "CL4-PC39",
+   "brand": "HP",
+   "model": "ProDesk 400 G9 SFF",
+   "serial": "4CE8306LVF",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-12400",
+    "Memory (RAM)": "32 GB DDR4-3200",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "Intel UHD 770",
+    "Monitor": "HP P24 G5 23.8\" IPS",
+    "Keyboard & mouse": "HP 125 USB keyboard & 128 mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Adobe Photoshop",
+     "version": "2024"
+    },
+    {
+     "name": "AutoCAD",
+     "version": "2024"
+    },
+    {
+     "name": "Blender",
+     "version": "4.1"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2023-07-13T16:57:00",
+   "updated": null
+  },
+  {
+   "lab": 4,
+   "pc": 40,
+   "tag": "CL4-PC40",
+   "name": "Instructor PC",
+   "brand": "HP",
+   "model": "ProDesk 400 G9 SFF",
+   "serial": "4CE513CTUL",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i7-12700",
+    "Memory (RAM)": "32 GB DDR4-3200",
+    "Storage": "1 TB NVMe SSD",
+    "Graphics": "Intel UHD 770",
+    "Monitor": "HP P24 G5 23.8\" IPS",
+    "Keyboard & mouse": "HP 125 USB keyboard & 128 mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Adobe Photoshop",
+     "version": "2024"
+    },
+    {
+     "name": "AutoCAD",
+     "version": "2024"
+    },
+    {
+     "name": "Blender",
+     "version": "4.1"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [],
+   "notes": "Instructor station (teacher's desk).",
+   "added": "2023-07-10T12:52:00",
+   "updated": null
+  }
+ ],
+ "reports": [],
+ "events": [
+  {
+   "id": "d0077b55ab57",
+   "t": "2026-10-04T20:55:55",
+   "kind": "inventory",
+   "title": "CL1-PC13 · details updated",
+   "sub": "Centrum 1 PC 13 · by Administrator",
+   "roles": [
+    "admin",
+    "technician"
+   ],
+   "actor": "Administrator",
+   "to": "",
+   "ref": [
+    "pc",
+    1,
+    13
+   ]
+  }
+ ],
+ "read": {}
+}
