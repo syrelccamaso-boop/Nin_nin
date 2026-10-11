@@ -1,0 +1,12 @@
+# Centrum Laboratory - Streamlit settings
+# Keeps the app in light mode even when the computer / browser is in dark mode,
+# so text boxes, dropdowns, calendars and pop-ups match the light design.
+# Streamlit reads this file from the folder you start it in:
+#     <that folder>/.streamlit/config.toml
+
+[theme]
+base = "light"
+primaryColor = "#2d6fe3"
+backgroundColor = "#f3f5f9"
+secondaryBackgroundColor = "#ffffff"
+textColor = "#111827"
