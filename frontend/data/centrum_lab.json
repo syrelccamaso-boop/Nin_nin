@@ -1,0 +1,3672 @@
+{
+ "version": 1,
+ "computers": [
+  {
+   "lab": 1,
+   "pc": 1,
+   "tag": "CL1-PC01",
+   "name": "CL1-PC01",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i3-10100",
+    "Ram": "16GB DDR4",
+    "Storage": "500GB SSD",
+    "Peripherals": "Keyboard, Mouse",
+    "Memory (RAM)": "16 GB DDR4",
+    "Monitor": "21.5-inch monitor",
+    "Operating system": "Windows 11"
+   },
+   "software": [
+    {
+     "name": "Microsoft Windows",
+     "version": "11 Pro 24H2"
+    },
+    {
+     "name": "Microsoft Office",
+     "version": "2024"
+    }
+   ],
+   "log": [
+    {
+     "t": "2026-10-10T00:03:06",
+     "kind": "Hardware replacement",
+     "text": "Memory (RAM): none → 16 GB DDR4",
+     "by": "Ailyn Agustin"
+    },
+    {
+     "t": "2026-10-10T00:03:06",
+     "kind": "Hardware replacement",
+     "text": "Monitor: none → 21.5-inch monitor",
+     "by": "Ailyn Agustin"
+    },
+    {
+     "t": "2026-10-10T00:03:06",
+     "kind": "Hardware replacement",
+     "text": "Operating system: none → Windows 11",
+     "by": "Ailyn Agustin"
+    },
+    {
+     "t": "2026-10-10T00:03:06",
+     "kind": "Hardware replacement",
+     "text": "Peripherals: Keyboard, Mouse, 21.5-inch Monitor → Keyboard, Mouse",
+     "by": "Ailyn Agustin"
+    }
+   ],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": "2026-10-10T00:03:06"
+  },
+  {
+   "lab": 1,
+   "pc": 2,
+   "tag": "CL1-PC02",
+   "name": "CL1-PC02",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-10400",
+    "Ram": "16GB DDR4",
+    "Storage": "1TB SSD",
+    "Peripherals": "Keyboard, Mouse, 22-inch Monitor"
+   },
+   "software": [
+    {
+     "name": "Visual Studio Code",
+     "version": "1.105.1"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "140.0"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 1,
+   "pc": 3,
+   "tag": "CL1-PC03",
+   "name": "CL1-PC03",
+   "brand": "Dell",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "AMD Ryzen 3 3200G",
+    "Ram": "8GB DDR4",
+    "Storage": "500GB SSD",
+    "Peripherals": "Keyboard, Mouse, 21.5-inch Monitor",
+    "Memory (RAM)": "16GB",
+    "Graphics": "intel iris graphics",
+    "Monitor": "21.5 inch",
+    "Keyboard & mouse": "Keyboard, mouse",
+    "Operating system": "Windows 11"
+   },
+   "software": [
+    {
+     "name": "Microsoft Windows",
+     "version": "10 Pro 22H2"
+    },
+    {
+     "name": "Mozilla Firefox",
+     "version": "142.0"
+    }
+   ],
+   "log": [
+    {
+     "t": "2026-10-07T01:33:21",
+     "kind": "Details updated",
+     "text": "Brand: none → Dell",
+     "by": "Administrator"
+    },
+    {
+     "t": "2026-10-07T01:33:21",
+     "kind": "Hardware replacement",
+     "text": "Memory (RAM): none → 16GB",
+     "by": "Administrator"
+    },
+    {
+     "t": "2026-10-07T01:33:21",
+     "kind": "Hardware replacement",
+     "text": "Graphics: none → intel iris graphics",
+     "by": "Administrator"
+    },
+    {
+     "t": "2026-10-07T01:33:21",
+     "kind": "Hardware replacement",
+     "text": "Monitor: none → 21.5 inch",
+     "by": "Administrator"
+    },
+    {
+     "t": "2026-10-07T01:33:21",
+     "kind": "Hardware replacement",
+     "text": "Keyboard & mouse: none → Keyboard, mouse",
+     "by": "Administrator"
+    },
+    {
+     "t": "2026-10-07T01:33:21",
+     "kind": "Hardware replacement",
+     "text": "Operating system: none → Windows 11",
+     "by": "Administrator"
+    }
+   ],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": "2026-10-07T01:33:21"
+  },
+  {
+   "lab": 1,
+   "pc": 4,
+   "tag": "CL1-PC04",
+   "name": "CL1-PC04",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-11400",
+    "Ram": "32GB DDR4",
+    "Storage": "1TB SSD",
+    "Peripherals": "Keyboard, Mouse, 24-inch Monitor"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2024"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.105.1"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 1,
+   "pc": 5,
+   "tag": "CL1-PC05",
+   "name": "CL1-PC05",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "AMD Ryzen 5 3600",
+    "Ram": "16GB DDR4",
+    "Storage": "1TB SSD",
+    "Peripherals": "Keyboard, Mouse, 22-inch Monitor"
+   },
+   "software": [
+    {
+     "name": "Google Chrome",
+     "version": "140.0"
+    },
+    {
+     "name": "7-Zip",
+     "version": "25.01"
+    }
+   ],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 1,
+   "pc": 6,
+   "tag": "CL1-PC06",
+   "name": "CL1-PC06",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-10500",
+    "Memory (RAM)": "8 GB DDR4",
+    "Storage": "256 GB NVMe SSD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Dell E2220H 21.5\"",
+    "Keyboard & mouse": "Dell USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 1,
+   "pc": 7,
+   "tag": "CL1-PC07",
+   "name": "CL1-PC07",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-10500",
+    "Memory (RAM)": "8 GB DDR4",
+    "Storage": "256 GB NVMe SSD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Dell E2220H 21.5\"",
+    "Keyboard & mouse": "Dell USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 1,
+   "pc": 8,
+   "tag": "CL1-PC08",
+   "name": "CL1-PC08",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-10500",
+    "Memory (RAM)": "8 GB DDR4",
+    "Storage": "256 GB NVMe SSD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Dell E2220H 21.5\"",
+    "Keyboard & mouse": "Dell USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 1,
+   "pc": 9,
+   "tag": "CL1-PC09",
+   "name": "CL1-PC09",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-10500",
+    "Memory (RAM)": "8 GB DDR4",
+    "Storage": "256 GB NVMe SSD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Dell E2220H 21.5\"",
+    "Keyboard & mouse": "Dell USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 1,
+   "pc": 10,
+   "tag": "CL1-PC10",
+   "name": "CL1-PC10",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-10500",
+    "Memory (RAM)": "8 GB DDR4",
+    "Storage": "256 GB NVMe SSD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Dell E2220H 21.5\"",
+    "Keyboard & mouse": "Dell USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 1,
+   "pc": 11,
+   "tag": "CL1-PC11",
+   "name": "CL1-PC11",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-10500",
+    "Memory (RAM)": "8 GB DDR4",
+    "Storage": "256 GB NVMe SSD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Dell E2220H 21.5\"",
+    "Keyboard & mouse": "Dell USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 1,
+   "pc": 12,
+   "tag": "CL1-PC12",
+   "name": "CL1-PC12",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-10500",
+    "Memory (RAM)": "8 GB DDR4",
+    "Storage": "256 GB NVMe SSD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Dell E2220H 21.5\"",
+    "Keyboard & mouse": "Dell USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 1,
+   "pc": 13,
+   "tag": "CL1-PC13",
+   "name": "CL1-PC13",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-10500",
+    "Memory (RAM)": "8 GB DDR4",
+    "Storage": "256 GB NVMe SSD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Dell E2220H 21.5\"",
+    "Keyboard & mouse": "Dell USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 1,
+   "pc": 14,
+   "tag": "CL1-PC14",
+   "name": "CL1-PC14",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-10500",
+    "Memory (RAM)": "8 GB DDR4",
+    "Storage": "256 GB NVMe SSD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Dell E2220H 21.5\"",
+    "Keyboard & mouse": "Dell USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 1,
+   "pc": 15,
+   "tag": "CL1-PC15",
+   "name": "CL1-PC15",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-10500",
+    "Memory (RAM)": "8 GB DDR4",
+    "Storage": "256 GB NVMe SSD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Dell E2220H 21.5\"",
+    "Keyboard & mouse": "Dell USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 1,
+   "pc": 16,
+   "tag": "CL1-PC16",
+   "name": "CL1-PC16",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-10500",
+    "Memory (RAM)": "8 GB DDR4",
+    "Storage": "256 GB NVMe SSD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Dell E2220H 21.5\"",
+    "Keyboard & mouse": "Dell USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 1,
+   "pc": 17,
+   "tag": "CL1-PC17",
+   "name": "CL1-PC17",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-10500",
+    "Memory (RAM)": "8 GB DDR4",
+    "Storage": "256 GB NVMe SSD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Dell E2220H 21.5\"",
+    "Keyboard & mouse": "Dell USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 1,
+   "pc": 18,
+   "tag": "CL1-PC18",
+   "name": "CL1-PC18",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-10500",
+    "Memory (RAM)": "8 GB DDR4",
+    "Storage": "256 GB NVMe SSD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Dell E2220H 21.5\"",
+    "Keyboard & mouse": "Dell USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 1,
+   "pc": 19,
+   "tag": "CL1-PC19",
+   "name": "CL1-PC19",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-10500",
+    "Memory (RAM)": "8 GB DDR4",
+    "Storage": "256 GB NVMe SSD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Dell E2220H 21.5\"",
+    "Keyboard & mouse": "Dell USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 1,
+   "pc": 20,
+   "tag": "CL1-PC20",
+   "name": "CL1-PC20",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-10500",
+    "Memory (RAM)": "8 GB DDR4",
+    "Storage": "256 GB NVMe SSD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Dell E2220H 21.5\"",
+    "Keyboard & mouse": "Dell USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 1,
+   "pc": 21,
+   "tag": "CL1-PC21",
+   "name": "CL1-PC21",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-10500",
+    "Memory (RAM)": "8 GB DDR4",
+    "Storage": "256 GB NVMe SSD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Dell E2220H 21.5\"",
+    "Keyboard & mouse": "Dell USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 1,
+   "pc": 22,
+   "tag": "CL1-PC22",
+   "name": "CL1-PC22",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-10500",
+    "Memory (RAM)": "8 GB DDR4",
+    "Storage": "256 GB NVMe SSD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Dell E2220H 21.5\"",
+    "Keyboard & mouse": "Dell USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 1,
+   "pc": 23,
+   "tag": "CL1-PC23",
+   "name": "CL1-PC23",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-10500",
+    "Memory (RAM)": "8 GB DDR4",
+    "Storage": "256 GB NVMe SSD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Dell E2220H 21.5\"",
+    "Keyboard & mouse": "Dell USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 1,
+   "pc": 24,
+   "tag": "CL1-PC24",
+   "name": "CL1-PC24",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-10500",
+    "Memory (RAM)": "8 GB DDR4",
+    "Storage": "256 GB NVMe SSD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Dell E2220H 21.5\"",
+    "Keyboard & mouse": "Dell USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 1,
+   "pc": 25,
+   "tag": "CL1-PC25",
+   "name": "CL1-PC25",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-10500",
+    "Memory (RAM)": "8 GB DDR4",
+    "Storage": "256 GB NVMe SSD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Dell E2220H 21.5\"",
+    "Keyboard & mouse": "Dell USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 1,
+   "pc": 26,
+   "tag": "CL1-PC26",
+   "name": "CL1-PC26",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-10500",
+    "Memory (RAM)": "8 GB DDR4",
+    "Storage": "256 GB NVMe SSD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Dell E2220H 21.5\"",
+    "Keyboard & mouse": "Dell USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 1,
+   "pc": 27,
+   "tag": "CL1-PC27",
+   "name": "CL1-PC27",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-10500",
+    "Memory (RAM)": "8 GB DDR4",
+    "Storage": "256 GB NVMe SSD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Dell E2220H 21.5\"",
+    "Keyboard & mouse": "Dell USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 1,
+   "pc": 28,
+   "tag": "CL1-PC28",
+   "name": "CL1-PC28",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-10500",
+    "Memory (RAM)": "8 GB DDR4",
+    "Storage": "256 GB NVMe SSD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Dell E2220H 21.5\"",
+    "Keyboard & mouse": "Dell USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 1,
+   "pc": 29,
+   "tag": "CL1-PC29",
+   "name": "CL1-PC29",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-10500",
+    "Memory (RAM)": "8 GB DDR4",
+    "Storage": "256 GB NVMe SSD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Dell E2220H 21.5\"",
+    "Keyboard & mouse": "Dell USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 1,
+   "pc": 30,
+   "tag": "CL1-PC30",
+   "name": "CL1-PC30",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-10500",
+    "Memory (RAM)": "8 GB DDR4",
+    "Storage": "256 GB NVMe SSD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Dell E2220H 21.5\"",
+    "Keyboard & mouse": "Dell USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 1,
+   "pc": 31,
+   "tag": "CL1-PC31",
+   "name": "CL1-PC31",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-10500",
+    "Memory (RAM)": "8 GB DDR4",
+    "Storage": "256 GB NVMe SSD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Dell E2220H 21.5\"",
+    "Keyboard & mouse": "Dell USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 1,
+   "pc": 32,
+   "tag": "CL1-PC32",
+   "name": "CL1-PC32",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-10500",
+    "Memory (RAM)": "8 GB DDR4",
+    "Storage": "256 GB NVMe SSD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Dell E2220H 21.5\"",
+    "Keyboard & mouse": "Dell USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 1,
+   "pc": 33,
+   "tag": "CL1-PC33",
+   "name": "CL1-PC33",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-10500",
+    "Memory (RAM)": "8 GB DDR4",
+    "Storage": "256 GB NVMe SSD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Dell E2220H 21.5\"",
+    "Keyboard & mouse": "Dell USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 1,
+   "pc": 34,
+   "tag": "CL1-PC34",
+   "name": "CL1-PC34",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-10500",
+    "Memory (RAM)": "8 GB DDR4",
+    "Storage": "256 GB NVMe SSD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Dell E2220H 21.5\"",
+    "Keyboard & mouse": "Dell USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 1,
+   "pc": 35,
+   "tag": "CL1-PC35",
+   "name": "CL1-PC35",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-10500",
+    "Memory (RAM)": "8 GB DDR4",
+    "Storage": "256 GB NVMe SSD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Dell E2220H 21.5\"",
+    "Keyboard & mouse": "Dell USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 1,
+   "pc": 36,
+   "tag": "CL1-PC36",
+   "name": "LG computer",
+   "brand": "LG",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-10500",
+    "Memory (RAM)": "8 GB DDR4",
+    "Storage": "256 GB NVMe SSD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Dell E2220H 21.5\"",
+    "Keyboard & mouse": "Dell USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [
+    {
+     "name": "Microsoft Office",
+     "version": "2021"
+    },
+    {
+     "name": "Google Chrome",
+     "version": "129"
+    },
+    {
+     "name": "Visual Studio Code",
+     "version": "1.93"
+    },
+    {
+     "name": "Python",
+     "version": "3.12"
+    },
+    {
+     "name": "Windows Defender",
+     "version": "Active"
+    }
+   ],
+   "log": [
+    {
+     "t": "2026-10-07T12:41:35",
+     "kind": "Added",
+     "text": "Registered in Centrum 1 as CL1-PC36 with 5 program(s)",
+     "by": "Ailyn Agustin"
+    }
+   ],
+   "notes": "",
+   "added": "2026-10-07T12:41:35",
+   "updated": "2026-10-07T12:41:35"
+  },
+  {
+   "lab": 2,
+   "pc": 1,
+   "tag": "CL2-PC01",
+   "name": "CL2-PC01",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "AMD Ryzen 5 PRO 4650G",
+    "Memory (RAM)": "16 GB DDR4",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "AMD Radeon (integrated)",
+    "Monitor": "Lenovo T22i-20 21.5\"",
+    "Keyboard & mouse": "Lenovo USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 2,
+   "pc": 2,
+   "tag": "CL2-PC02",
+   "name": "CL2-PC02",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "AMD Ryzen 5 PRO 4650G",
+    "Memory (RAM)": "16 GB DDR4",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "AMD Radeon (integrated)",
+    "Monitor": "Lenovo T22i-20 21.5\"",
+    "Keyboard & mouse": "Lenovo USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 2,
+   "pc": 3,
+   "tag": "CL2-PC03",
+   "name": "CL2-PC03",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "AMD Ryzen 5 PRO 4650G",
+    "Memory (RAM)": "16 GB DDR4",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "AMD Radeon (integrated)",
+    "Monitor": "Lenovo T22i-20 21.5\"",
+    "Keyboard & mouse": "Lenovo USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 2,
+   "pc": 4,
+   "tag": "CL2-PC04",
+   "name": "CL2-PC04",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "AMD Ryzen 5 PRO 4650G",
+    "Memory (RAM)": "16 GB DDR4",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "AMD Radeon (integrated)",
+    "Monitor": "Lenovo T22i-20 21.5\"",
+    "Keyboard & mouse": "Lenovo USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 2,
+   "pc": 5,
+   "tag": "CL2-PC05",
+   "name": "CL2-PC05",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "AMD Ryzen 5 PRO 4650G",
+    "Memory (RAM)": "16 GB DDR4",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "AMD Radeon (integrated)",
+    "Monitor": "Lenovo T22i-20 21.5\"",
+    "Keyboard & mouse": "Lenovo USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 2,
+   "pc": 6,
+   "tag": "CL2-PC06",
+   "name": "CL2-PC06",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "AMD Ryzen 5 PRO 4650G",
+    "Memory (RAM)": "16 GB DDR4",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "AMD Radeon (integrated)",
+    "Monitor": "Lenovo T22i-20 21.5\"",
+    "Keyboard & mouse": "Lenovo USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 2,
+   "pc": 7,
+   "tag": "CL2-PC07",
+   "name": "CL2-PC07",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "AMD Ryzen 5 PRO 4650G",
+    "Memory (RAM)": "16 GB DDR4",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "AMD Radeon (integrated)",
+    "Monitor": "Lenovo T22i-20 21.5\"",
+    "Keyboard & mouse": "Lenovo USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 2,
+   "pc": 8,
+   "tag": "CL2-PC08",
+   "name": "CL2-PC08",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "AMD Ryzen 5 PRO 4650G",
+    "Memory (RAM)": "16 GB DDR4",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "AMD Radeon (integrated)",
+    "Monitor": "Lenovo T22i-20 21.5\"",
+    "Keyboard & mouse": "Lenovo USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 2,
+   "pc": 9,
+   "tag": "CL2-PC09",
+   "name": "CL2-PC09",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "AMD Ryzen 5 PRO 4650G",
+    "Memory (RAM)": "16 GB DDR4",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "AMD Radeon (integrated)",
+    "Monitor": "Lenovo T22i-20 21.5\"",
+    "Keyboard & mouse": "Lenovo USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 2,
+   "pc": 10,
+   "tag": "CL2-PC10",
+   "name": "CL2-PC10",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "AMD Ryzen 5 PRO 4650G",
+    "Memory (RAM)": "16 GB DDR4",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "AMD Radeon (integrated)",
+    "Monitor": "Lenovo T22i-20 21.5\"",
+    "Keyboard & mouse": "Lenovo USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 2,
+   "pc": 11,
+   "tag": "CL2-PC11",
+   "name": "CL2-PC11",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "AMD Ryzen 5 PRO 4650G",
+    "Memory (RAM)": "16 GB DDR4",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "AMD Radeon (integrated)",
+    "Monitor": "Lenovo T22i-20 21.5\"",
+    "Keyboard & mouse": "Lenovo USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 2,
+   "pc": 12,
+   "tag": "CL2-PC12",
+   "name": "CL2-PC12",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "AMD Ryzen 5 PRO 4650G",
+    "Memory (RAM)": "16 GB DDR4",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "AMD Radeon (integrated)",
+    "Monitor": "Lenovo T22i-20 21.5\"",
+    "Keyboard & mouse": "Lenovo USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 2,
+   "pc": 13,
+   "tag": "CL2-PC13",
+   "name": "CL2-PC13",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "AMD Ryzen 5 PRO 4650G",
+    "Memory (RAM)": "16 GB DDR4",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "AMD Radeon (integrated)",
+    "Monitor": "Lenovo T22i-20 21.5\"",
+    "Keyboard & mouse": "Lenovo USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 2,
+   "pc": 14,
+   "tag": "CL2-PC14",
+   "name": "CL2-PC14",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "AMD Ryzen 5 PRO 4650G",
+    "Memory (RAM)": "16 GB DDR4",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "AMD Radeon (integrated)",
+    "Monitor": "Lenovo T22i-20 21.5\"",
+    "Keyboard & mouse": "Lenovo USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 2,
+   "pc": 15,
+   "tag": "CL2-PC15",
+   "name": "CL2-PC15",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "AMD Ryzen 5 PRO 4650G",
+    "Memory (RAM)": "16 GB DDR4",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "AMD Radeon (integrated)",
+    "Monitor": "Lenovo T22i-20 21.5\"",
+    "Keyboard & mouse": "Lenovo USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 2,
+   "pc": 16,
+   "tag": "CL2-PC16",
+   "name": "CL2-PC16",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "AMD Ryzen 5 PRO 4650G",
+    "Memory (RAM)": "16 GB DDR4",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "AMD Radeon (integrated)",
+    "Monitor": "Lenovo T22i-20 21.5\"",
+    "Keyboard & mouse": "Lenovo USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 2,
+   "pc": 17,
+   "tag": "CL2-PC17",
+   "name": "CL2-PC17",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "AMD Ryzen 5 PRO 4650G",
+    "Memory (RAM)": "16 GB DDR4",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "AMD Radeon (integrated)",
+    "Monitor": "Lenovo T22i-20 21.5\"",
+    "Keyboard & mouse": "Lenovo USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 2,
+   "pc": 18,
+   "tag": "CL2-PC18",
+   "name": "CL2-PC18",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "AMD Ryzen 5 PRO 4650G",
+    "Memory (RAM)": "16 GB DDR4",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "AMD Radeon (integrated)",
+    "Monitor": "Lenovo T22i-20 21.5\"",
+    "Keyboard & mouse": "Lenovo USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 2,
+   "pc": 19,
+   "tag": "CL2-PC19",
+   "name": "CL2-PC19",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "AMD Ryzen 5 PRO 4650G",
+    "Memory (RAM)": "16 GB DDR4",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "AMD Radeon (integrated)",
+    "Monitor": "Lenovo T22i-20 21.5\"",
+    "Keyboard & mouse": "Lenovo USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 2,
+   "pc": 20,
+   "tag": "CL2-PC20",
+   "name": "CL2-PC20",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "AMD Ryzen 5 PRO 4650G",
+    "Memory (RAM)": "16 GB DDR4",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "AMD Radeon (integrated)",
+    "Monitor": "Lenovo T22i-20 21.5\"",
+    "Keyboard & mouse": "Lenovo USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 2,
+   "pc": 21,
+   "tag": "CL2-PC21",
+   "name": "CL2-PC21",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "AMD Ryzen 5 PRO 4650G",
+    "Memory (RAM)": "16 GB DDR4",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "AMD Radeon (integrated)",
+    "Monitor": "Lenovo T22i-20 21.5\"",
+    "Keyboard & mouse": "Lenovo USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 2,
+   "pc": 22,
+   "tag": "CL2-PC22",
+   "name": "CL2-PC22",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "AMD Ryzen 5 PRO 4650G",
+    "Memory (RAM)": "16 GB DDR4",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "AMD Radeon (integrated)",
+    "Monitor": "Lenovo T22i-20 21.5\"",
+    "Keyboard & mouse": "Lenovo USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 2,
+   "pc": 23,
+   "tag": "CL2-PC23",
+   "name": "CL2-PC23",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "AMD Ryzen 5 PRO 4650G",
+    "Memory (RAM)": "16 GB DDR4",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "AMD Radeon (integrated)",
+    "Monitor": "Lenovo T22i-20 21.5\"",
+    "Keyboard & mouse": "Lenovo USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 2,
+   "pc": 24,
+   "tag": "CL2-PC24",
+   "name": "CL2-PC24",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "AMD Ryzen 5 PRO 4650G",
+    "Memory (RAM)": "16 GB DDR4",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "AMD Radeon (integrated)",
+    "Monitor": "Lenovo T22i-20 21.5\"",
+    "Keyboard & mouse": "Lenovo USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 2,
+   "pc": 25,
+   "tag": "CL2-PC25",
+   "name": "CL2-PC25",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "AMD Ryzen 5 PRO 4650G",
+    "Memory (RAM)": "16 GB DDR4",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "AMD Radeon (integrated)",
+    "Monitor": "Lenovo T22i-20 21.5\"",
+    "Keyboard & mouse": "Lenovo USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 2,
+   "pc": 26,
+   "tag": "CL2-PC26",
+   "name": "CL2-PC26",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "AMD Ryzen 5 PRO 4650G",
+    "Memory (RAM)": "16 GB DDR4",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "AMD Radeon (integrated)",
+    "Monitor": "Lenovo T22i-20 21.5\"",
+    "Keyboard & mouse": "Lenovo USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 2,
+   "pc": 27,
+   "tag": "CL2-PC27",
+   "name": "CL2-PC27",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "AMD Ryzen 5 PRO 4650G",
+    "Memory (RAM)": "16 GB DDR4",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "AMD Radeon (integrated)",
+    "Monitor": "Lenovo T22i-20 21.5\"",
+    "Keyboard & mouse": "Lenovo USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 2,
+   "pc": 28,
+   "tag": "CL2-PC28",
+   "name": "CL2-PC28",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "AMD Ryzen 5 PRO 4650G",
+    "Memory (RAM)": "16 GB DDR4",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "AMD Radeon (integrated)",
+    "Monitor": "Lenovo T22i-20 21.5\"",
+    "Keyboard & mouse": "Lenovo USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 3,
+   "pc": 1,
+   "tag": "CL3-PC01",
+   "name": "CL3-PC01",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i3-10100",
+    "Memory (RAM)": "8 GB DDR4",
+    "Storage": "1 TB HDD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Acer V226HQL 21.5\"",
+    "Keyboard & mouse": "Acer USB keyboard & mouse",
+    "Operating system": "Windows 10 Pro 22H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 3,
+   "pc": 2,
+   "tag": "CL3-PC02",
+   "name": "CL3-PC02",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i3-10100",
+    "Memory (RAM)": "8 GB DDR4",
+    "Storage": "1 TB HDD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Acer V226HQL 21.5\"",
+    "Keyboard & mouse": "Acer USB keyboard & mouse",
+    "Operating system": "Windows 10 Pro 22H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 3,
+   "pc": 3,
+   "tag": "CL3-PC03",
+   "name": "CL3-PC03",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i3-10100",
+    "Memory (RAM)": "8 GB DDR4",
+    "Storage": "1 TB HDD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Acer V226HQL 21.5\"",
+    "Keyboard & mouse": "Acer USB keyboard & mouse",
+    "Operating system": "Windows 10 Pro 22H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 3,
+   "pc": 4,
+   "tag": "CL3-PC04",
+   "name": "CL3-PC04",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i3-10100",
+    "Memory (RAM)": "8 GB DDR4",
+    "Storage": "1 TB HDD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Acer V226HQL 21.5\"",
+    "Keyboard & mouse": "Acer USB keyboard & mouse",
+    "Operating system": "Windows 10 Pro 22H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 3,
+   "pc": 5,
+   "tag": "CL3-PC05",
+   "name": "CL3-PC05",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i3-10100",
+    "Memory (RAM)": "8 GB DDR4",
+    "Storage": "1 TB HDD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Acer V226HQL 21.5\"",
+    "Keyboard & mouse": "Acer USB keyboard & mouse",
+    "Operating system": "Windows 10 Pro 22H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 3,
+   "pc": 6,
+   "tag": "CL3-PC06",
+   "name": "CL3-PC06",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i3-10100",
+    "Memory (RAM)": "8 GB DDR4",
+    "Storage": "1 TB HDD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Acer V226HQL 21.5\"",
+    "Keyboard & mouse": "Acer USB keyboard & mouse",
+    "Operating system": "Windows 10 Pro 22H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 3,
+   "pc": 7,
+   "tag": "CL3-PC07",
+   "name": "CL3-PC07",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i3-10100",
+    "Memory (RAM)": "8 GB DDR4",
+    "Storage": "1 TB HDD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Acer V226HQL 21.5\"",
+    "Keyboard & mouse": "Acer USB keyboard & mouse",
+    "Operating system": "Windows 10 Pro 22H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 3,
+   "pc": 8,
+   "tag": "CL3-PC08",
+   "name": "CL3-PC08",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i3-10100",
+    "Memory (RAM)": "8 GB DDR4",
+    "Storage": "1 TB HDD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Acer V226HQL 21.5\"",
+    "Keyboard & mouse": "Acer USB keyboard & mouse",
+    "Operating system": "Windows 10 Pro 22H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 3,
+   "pc": 9,
+   "tag": "CL3-PC09",
+   "name": "CL3-PC09",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i3-10100",
+    "Memory (RAM)": "8 GB DDR4",
+    "Storage": "1 TB HDD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Acer V226HQL 21.5\"",
+    "Keyboard & mouse": "Acer USB keyboard & mouse",
+    "Operating system": "Windows 10 Pro 22H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 3,
+   "pc": 10,
+   "tag": "CL3-PC10",
+   "name": "CL3-PC10",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i3-10100",
+    "Memory (RAM)": "8 GB DDR4",
+    "Storage": "1 TB HDD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Acer V226HQL 21.5\"",
+    "Keyboard & mouse": "Acer USB keyboard & mouse",
+    "Operating system": "Windows 10 Pro 22H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 3,
+   "pc": 11,
+   "tag": "CL3-PC11",
+   "name": "CL3-PC11",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i3-10100",
+    "Memory (RAM)": "8 GB DDR4",
+    "Storage": "1 TB HDD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Acer V226HQL 21.5\"",
+    "Keyboard & mouse": "Acer USB keyboard & mouse",
+    "Operating system": "Windows 10 Pro 22H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 3,
+   "pc": 12,
+   "tag": "CL3-PC12",
+   "name": "CL3-PC12",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i3-10100",
+    "Memory (RAM)": "8 GB DDR4",
+    "Storage": "1 TB HDD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Acer V226HQL 21.5\"",
+    "Keyboard & mouse": "Acer USB keyboard & mouse",
+    "Operating system": "Windows 10 Pro 22H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 3,
+   "pc": 13,
+   "tag": "CL3-PC13",
+   "name": "CL3-PC13",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i3-10100",
+    "Memory (RAM)": "8 GB DDR4",
+    "Storage": "1 TB HDD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Acer V226HQL 21.5\"",
+    "Keyboard & mouse": "Acer USB keyboard & mouse",
+    "Operating system": "Windows 10 Pro 22H2"
+   },
+   "software": [],
+   "log": [
+    {
+     "t": "2026-10-04T22:16:55",
+     "kind": "Hardware replacement",
+     "text": "replaced HDD to 1TB SDD",
+     "by": "Ailyn Agustin"
+    }
+   ],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": "2026-10-04T22:16:55"
+  },
+  {
+   "lab": 3,
+   "pc": 14,
+   "tag": "CL3-PC14",
+   "name": "CL3-PC14",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i3-10100",
+    "Memory (RAM)": "8 GB DDR4",
+    "Storage": "1 TB HDD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Acer V226HQL 21.5\"",
+    "Keyboard & mouse": "Acer USB keyboard & mouse",
+    "Operating system": "Windows 10 Pro 22H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 3,
+   "pc": 15,
+   "tag": "CL3-PC15",
+   "name": "CL3-PC15",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i3-10100",
+    "Memory (RAM)": "8 GB DDR4",
+    "Storage": "1 TB HDD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Acer V226HQL 21.5\"",
+    "Keyboard & mouse": "Acer USB keyboard & mouse",
+    "Operating system": "Windows 10 Pro 22H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 3,
+   "pc": 16,
+   "tag": "CL3-PC16",
+   "name": "CL3-PC16",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i3-10100",
+    "Memory (RAM)": "8 GB DDR4",
+    "Storage": "1 TB HDD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Acer V226HQL 21.5\"",
+    "Keyboard & mouse": "Acer USB keyboard & mouse",
+    "Operating system": "Windows 10 Pro 22H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 3,
+   "pc": 17,
+   "tag": "CL3-PC17",
+   "name": "CL3-PC17",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i3-10100",
+    "Memory (RAM)": "8 GB DDR4",
+    "Storage": "1 TB HDD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Acer V226HQL 21.5\"",
+    "Keyboard & mouse": "Acer USB keyboard & mouse",
+    "Operating system": "Windows 10 Pro 22H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 3,
+   "pc": 18,
+   "tag": "CL3-PC18",
+   "name": "CL3-PC18",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i3-10100",
+    "Memory (RAM)": "8 GB DDR4",
+    "Storage": "1 TB HDD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Acer V226HQL 21.5\"",
+    "Keyboard & mouse": "Acer USB keyboard & mouse",
+    "Operating system": "Windows 10 Pro 22H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 3,
+   "pc": 19,
+   "tag": "CL3-PC19",
+   "name": "CL3-PC19",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i3-10100",
+    "Memory (RAM)": "8 GB DDR4",
+    "Storage": "1 TB HDD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Acer V226HQL 21.5\"",
+    "Keyboard & mouse": "Acer USB keyboard & mouse",
+    "Operating system": "Windows 10 Pro 22H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 3,
+   "pc": 20,
+   "tag": "CL3-PC20",
+   "name": "CL3-PC20",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i3-10100",
+    "Memory (RAM)": "8 GB DDR4",
+    "Storage": "1 TB HDD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Acer V226HQL 21.5\"",
+    "Keyboard & mouse": "Acer USB keyboard & mouse",
+    "Operating system": "Windows 10 Pro 22H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 3,
+   "pc": 21,
+   "tag": "CL3-PC21",
+   "name": "CL3-PC21",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i3-10100",
+    "Memory (RAM)": "8 GB DDR4",
+    "Storage": "1 TB HDD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Acer V226HQL 21.5\"",
+    "Keyboard & mouse": "Acer USB keyboard & mouse",
+    "Operating system": "Windows 10 Pro 22H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 3,
+   "pc": 22,
+   "tag": "CL3-PC22",
+   "name": "CL3-PC22",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i3-10100",
+    "Memory (RAM)": "8 GB DDR4",
+    "Storage": "1 TB HDD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Acer V226HQL 21.5\"",
+    "Keyboard & mouse": "Acer USB keyboard & mouse",
+    "Operating system": "Windows 10 Pro 22H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 3,
+   "pc": 23,
+   "tag": "CL3-PC23",
+   "name": "CL3-PC23",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i3-10100",
+    "Memory (RAM)": "8 GB DDR4",
+    "Storage": "1 TB HDD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Acer V226HQL 21.5\"",
+    "Keyboard & mouse": "Acer USB keyboard & mouse",
+    "Operating system": "Windows 10 Pro 22H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 3,
+   "pc": 24,
+   "tag": "CL3-PC24",
+   "name": "CL3-PC24",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i3-10100",
+    "Memory (RAM)": "8 GB DDR4",
+    "Storage": "1 TB HDD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Acer V226HQL 21.5\"",
+    "Keyboard & mouse": "Acer USB keyboard & mouse",
+    "Operating system": "Windows 10 Pro 22H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 3,
+   "pc": 25,
+   "tag": "CL3-PC25",
+   "name": "CL3-PC25",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i3-10100",
+    "Memory (RAM)": "8 GB DDR4",
+    "Storage": "1 TB HDD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Acer V226HQL 21.5\"",
+    "Keyboard & mouse": "Acer USB keyboard & mouse",
+    "Operating system": "Windows 10 Pro 22H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 3,
+   "pc": 26,
+   "tag": "CL3-PC26",
+   "name": "CL3-PC26",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i3-10100",
+    "Memory (RAM)": "8 GB DDR4",
+    "Storage": "1 TB HDD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Acer V226HQL 21.5\"",
+    "Keyboard & mouse": "Acer USB keyboard & mouse",
+    "Operating system": "Windows 10 Pro 22H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 3,
+   "pc": 27,
+   "tag": "CL3-PC27",
+   "name": "CL3-PC27",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i3-10100",
+    "Memory (RAM)": "8 GB DDR4",
+    "Storage": "1 TB HDD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Acer V226HQL 21.5\"",
+    "Keyboard & mouse": "Acer USB keyboard & mouse",
+    "Operating system": "Windows 10 Pro 22H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 3,
+   "pc": 28,
+   "tag": "CL3-PC28",
+   "name": "CL3-PC28",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i3-10100",
+    "Memory (RAM)": "8 GB DDR4",
+    "Storage": "1 TB HDD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Acer V226HQL 21.5\"",
+    "Keyboard & mouse": "Acer USB keyboard & mouse",
+    "Operating system": "Windows 10 Pro 22H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 3,
+   "pc": 29,
+   "tag": "CL3-PC29",
+   "name": "CL3-PC29",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i3-10100",
+    "Memory (RAM)": "8 GB DDR4",
+    "Storage": "1 TB HDD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Acer V226HQL 21.5\"",
+    "Keyboard & mouse": "Acer USB keyboard & mouse",
+    "Operating system": "Windows 10 Pro 22H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 3,
+   "pc": 30,
+   "tag": "CL3-PC30",
+   "name": "CL3-PC30",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i3-10100",
+    "Memory (RAM)": "8 GB DDR4",
+    "Storage": "1 TB HDD",
+    "Graphics": "Intel UHD 630",
+    "Monitor": "Acer V226HQL 21.5\"",
+    "Keyboard & mouse": "Acer USB keyboard & mouse",
+    "Operating system": "Windows 10 Pro 22H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 4,
+   "pc": 1,
+   "tag": "CL4-PC01",
+   "name": "CL4-PC01",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-12500",
+    "Memory (RAM)": "16 GB DDR4",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "Intel UHD 770",
+    "Monitor": "HP P24 G5 23.8\"",
+    "Keyboard & mouse": "HP USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 4,
+   "pc": 2,
+   "tag": "CL4-PC02",
+   "name": "CL4-PC02",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-12500",
+    "Memory (RAM)": "16 GB DDR4",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "Intel UHD 770",
+    "Monitor": "HP P24 G5 23.8\"",
+    "Keyboard & mouse": "HP USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 4,
+   "pc": 3,
+   "tag": "CL4-PC03",
+   "name": "CL4-PC03",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-12500",
+    "Memory (RAM)": "16 GB DDR4",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "Intel UHD 770",
+    "Monitor": "HP P24 G5 23.8\"",
+    "Keyboard & mouse": "HP USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 4,
+   "pc": 4,
+   "tag": "CL4-PC04",
+   "name": "CL4-PC04",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-12500",
+    "Memory (RAM)": "16 GB DDR4",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "Intel UHD 770",
+    "Monitor": "HP P24 G5 23.8\"",
+    "Keyboard & mouse": "HP USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 4,
+   "pc": 5,
+   "tag": "CL4-PC05",
+   "name": "CL4-PC05",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-12500",
+    "Memory (RAM)": "16 GB DDR4",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "Intel UHD 770",
+    "Monitor": "HP P24 G5 23.8\"",
+    "Keyboard & mouse": "HP USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 4,
+   "pc": 6,
+   "tag": "CL4-PC06",
+   "name": "CL4-PC06",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-12500",
+    "Memory (RAM)": "16 GB DDR4",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "Intel UHD 770",
+    "Monitor": "HP P24 G5 23.8\"",
+    "Keyboard & mouse": "HP USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 4,
+   "pc": 7,
+   "tag": "CL4-PC07",
+   "name": "CL4-PC07",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-12500",
+    "Memory (RAM)": "16 GB DDR4",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "Intel UHD 770",
+    "Monitor": "HP P24 G5 23.8\"",
+    "Keyboard & mouse": "HP USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 4,
+   "pc": 8,
+   "tag": "CL4-PC08",
+   "name": "CL4-PC08",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-12500",
+    "Memory (RAM)": "16 GB DDR4",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "Intel UHD 770",
+    "Monitor": "HP P24 G5 23.8\"",
+    "Keyboard & mouse": "HP USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 4,
+   "pc": 9,
+   "tag": "CL4-PC09",
+   "name": "CL4-PC09",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-12500",
+    "Memory (RAM)": "16 GB DDR4",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "Intel UHD 770",
+    "Monitor": "HP P24 G5 23.8\"",
+    "Keyboard & mouse": "HP USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 4,
+   "pc": 10,
+   "tag": "CL4-PC10",
+   "name": "CL4-PC10",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-12500",
+    "Memory (RAM)": "16 GB DDR4",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "Intel UHD 770",
+    "Monitor": "HP P24 G5 23.8\"",
+    "Keyboard & mouse": "HP USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 4,
+   "pc": 11,
+   "tag": "CL4-PC11",
+   "name": "CL4-PC11",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-12500",
+    "Memory (RAM)": "16 GB DDR4",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "Intel UHD 770",
+    "Monitor": "HP P24 G5 23.8\"",
+    "Keyboard & mouse": "HP USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 4,
+   "pc": 12,
+   "tag": "CL4-PC12",
+   "name": "CL4-PC12",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-12500",
+    "Memory (RAM)": "16 GB DDR4",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "Intel UHD 770",
+    "Monitor": "HP P24 G5 23.8\"",
+    "Keyboard & mouse": "HP USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 4,
+   "pc": 13,
+   "tag": "CL4-PC13",
+   "name": "CL4-PC13",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-12500",
+    "Memory (RAM)": "16 GB DDR4",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "Intel UHD 770",
+    "Monitor": "HP P24 G5 23.8\"",
+    "Keyboard & mouse": "HP USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 4,
+   "pc": 14,
+   "tag": "CL4-PC14",
+   "name": "CL4-PC14",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-12500",
+    "Memory (RAM)": "16 GB DDR4",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "Intel UHD 770",
+    "Monitor": "HP P24 G5 23.8\"",
+    "Keyboard & mouse": "HP USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 4,
+   "pc": 15,
+   "tag": "CL4-PC15",
+   "name": "CL4-PC15",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-12500",
+    "Memory (RAM)": "16 GB DDR4",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "Intel UHD 770",
+    "Monitor": "HP P24 G5 23.8\"",
+    "Keyboard & mouse": "HP USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 4,
+   "pc": 16,
+   "tag": "CL4-PC16",
+   "name": "CL4-PC16",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-12500",
+    "Memory (RAM)": "16 GB DDR4",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "Intel UHD 770",
+    "Monitor": "HP P24 G5 23.8\"",
+    "Keyboard & mouse": "HP USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 4,
+   "pc": 17,
+   "tag": "CL4-PC17",
+   "name": "CL4-PC17",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-12500",
+    "Memory (RAM)": "16 GB DDR4",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "Intel UHD 770",
+    "Monitor": "HP P24 G5 23.8\"",
+    "Keyboard & mouse": "HP USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 4,
+   "pc": 18,
+   "tag": "CL4-PC18",
+   "name": "CL4-PC18",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-12500",
+    "Memory (RAM)": "16 GB DDR4",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "Intel UHD 770",
+    "Monitor": "HP P24 G5 23.8\"",
+    "Keyboard & mouse": "HP USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 4,
+   "pc": 19,
+   "tag": "CL4-PC19",
+   "name": "CL4-PC19",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-12500",
+    "Memory (RAM)": "16 GB DDR4",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "Intel UHD 770",
+    "Monitor": "HP P24 G5 23.8\"",
+    "Keyboard & mouse": "HP USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 4,
+   "pc": 20,
+   "tag": "CL4-PC20",
+   "name": "CL4-PC20",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-12500",
+    "Memory (RAM)": "16 GB DDR4",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "Intel UHD 770",
+    "Monitor": "HP P24 G5 23.8\"",
+    "Keyboard & mouse": "HP USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 4,
+   "pc": 21,
+   "tag": "CL4-PC21",
+   "name": "CL4-PC21",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-12500",
+    "Memory (RAM)": "16 GB DDR4",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "Intel UHD 770",
+    "Monitor": "HP P24 G5 23.8\"",
+    "Keyboard & mouse": "HP USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 4,
+   "pc": 22,
+   "tag": "CL4-PC22",
+   "name": "CL4-PC22",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-12500",
+    "Memory (RAM)": "16 GB DDR4",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "Intel UHD 770",
+    "Monitor": "HP P24 G5 23.8\"",
+    "Keyboard & mouse": "HP USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 4,
+   "pc": 23,
+   "tag": "CL4-PC23",
+   "name": "CL4-PC23",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-12500",
+    "Memory (RAM)": "16 GB DDR4",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "Intel UHD 770",
+    "Monitor": "HP P24 G5 23.8\"",
+    "Keyboard & mouse": "HP USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 4,
+   "pc": 24,
+   "tag": "CL4-PC24",
+   "name": "CL4-PC24",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-12500",
+    "Memory (RAM)": "16 GB DDR4",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "Intel UHD 770",
+    "Monitor": "HP P24 G5 23.8\"",
+    "Keyboard & mouse": "HP USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 4,
+   "pc": 25,
+   "tag": "CL4-PC25",
+   "name": "CL4-PC25",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-12500",
+    "Memory (RAM)": "16 GB DDR4",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "Intel UHD 770",
+    "Monitor": "HP P24 G5 23.8\"",
+    "Keyboard & mouse": "HP USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 4,
+   "pc": 26,
+   "tag": "CL4-PC26",
+   "name": "CL4-PC26",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-12500",
+    "Memory (RAM)": "16 GB DDR4",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "Intel UHD 770",
+    "Monitor": "HP P24 G5 23.8\"",
+    "Keyboard & mouse": "HP USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 4,
+   "pc": 27,
+   "tag": "CL4-PC27",
+   "name": "CL4-PC27",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-12500",
+    "Memory (RAM)": "16 GB DDR4",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "Intel UHD 770",
+    "Monitor": "HP P24 G5 23.8\"",
+    "Keyboard & mouse": "HP USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 4,
+   "pc": 28,
+   "tag": "CL4-PC28",
+   "name": "CL4-PC28",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-12500",
+    "Memory (RAM)": "16 GB DDR4",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "Intel UHD 770",
+    "Monitor": "HP P24 G5 23.8\"",
+    "Keyboard & mouse": "HP USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 4,
+   "pc": 29,
+   "tag": "CL4-PC29",
+   "name": "CL4-PC29",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-12500",
+    "Memory (RAM)": "16 GB DDR4",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "Intel UHD 770",
+    "Monitor": "HP P24 G5 23.8\"",
+    "Keyboard & mouse": "HP USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 4,
+   "pc": 30,
+   "tag": "CL4-PC30",
+   "name": "CL4-PC30",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-12500",
+    "Memory (RAM)": "16 GB DDR4",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "Intel UHD 770",
+    "Monitor": "HP P24 G5 23.8\"",
+    "Keyboard & mouse": "HP USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 4,
+   "pc": 31,
+   "tag": "CL4-PC31",
+   "name": "CL4-PC31",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-12500",
+    "Memory (RAM)": "16 GB DDR4",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "Intel UHD 770",
+    "Monitor": "HP P24 G5 23.8\"",
+    "Keyboard & mouse": "HP USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  },
+  {
+   "lab": 4,
+   "pc": 32,
+   "tag": "CL4-PC32",
+   "name": "CL4-PC32",
+   "brand": "",
+   "model": "",
+   "serial": "",
+   "status": "Working",
+   "hardware": {
+    "Processor": "Intel Core i5-12500",
+    "Memory (RAM)": "16 GB DDR4",
+    "Storage": "512 GB NVMe SSD",
+    "Graphics": "Intel UHD 770",
+    "Monitor": "HP P24 G5 23.8\"",
+    "Keyboard & mouse": "HP USB keyboard & mouse",
+    "Operating system": "Windows 11 Pro 23H2"
+   },
+   "software": [],
+   "log": [],
+   "notes": "",
+   "added": "2026-09-27T16:10:58.752038",
+   "updated": null
+  }
+ ],
+ "reports": [
+  {
+   "id": "R-1001",
+   "db_id": "R-1001",
+   "lab": 3,
+   "pc": 14,
+   "issue": "Slow / freezing",
+   "desc": "freeezeeee~~~",
+   "by": "juan dela cruz",
+   "created": "2026-10-04T22:31:30",
+   "status": "repair",
+   "urgency": "Normal",
+   "tech": "Ailyn Agustin",
+   "esc_note": "",
+   "local": true,
+   "history": [
+    {
+     "s": "reported",
+     "t": "2026-10-04T22:31:30",
+     "note": "Report sent"
+    },
+    {
+     "s": "repair",
+     "t": "2026-10-06T23:35:04",
+     "note": "Ailyn Agustin started the repair"
+    }
+   ]
+  },
+  {
+   "id": "R-1002",
+   "db_id": "R-1002",
+   "lab": 4,
+   "pc": 4,
+   "issue": "Software problem",
+   "desc": "",
+   "by": "juan dela cruz",
+   "created": "2026-10-04T22:33:23",
+   "status": "fixed",
+   "urgency": "High",
+   "tech": "Ailyn Agustin",
+   "esc_note": "for replacement",
+   "local": true,
+   "history": [
+    {
+     "s": "reported",
+     "t": "2026-10-04T22:33:23",
+     "note": "Report sent"
+    },
+    {
+     "s": "repair",
+     "t": "2026-10-06T23:50:20",
+     "note": "Ailyn Agustin started the repair"
+    },
+    {
+     "s": "escalated",
+     "t": "2026-10-06T23:58:41",
+     "note": "Escalated: for replacement"
+    },
+    {
+     "s": "fixed",
+     "t": "2026-10-07T00:46:38",
+     "note": "Fixed and tested"
+    }
+   ]
+  },
+  {
+   "id": "R-1003",
+   "db_id": "R-1003",
+   "lab": 3,
+   "pc": 30,
+   "issue": "Keyboard / mouse",
+   "desc": "missing",
+   "by": "juan dela cruz",
+   "created": "2026-10-04T22:42:05",
+   "status": "repair",
+   "urgency": "Normal",
+   "tech": "Ailyn Agustin",
+   "esc_note": "",
+   "local": true,
+   "history": [
+    {
+     "s": "reported",
+     "t": "2026-10-04T22:42:05",
+     "note": "Report sent"
+    },
+    {
+     "s": "repair",
+     "t": "2026-10-06T23:25:59",
+     "note": "Ailyn Agustin started the repair"
+    }
+   ]
+  }
+ ],
+ "events": [
+  {
+   "id": "ac9731784c06",
+   "t": "2026-10-04T22:15:01",
+   "kind": "status",
+   "title": "Your report CL-0001 is escalated",
+   "sub": "Centrum 1 PC 01 · Unknown, Slow performance · Ailyn Agustin",
+   "roles": [
+    "teacher"
+   ],
+   "actor": "Ailyn Agustin",
+   "to": "Alwyna Lopez",
+   "ref": [
+    "report",
+    "CL-0001"
+   ]
+  },
+  {
+   "id": "09ae59d49351",
+   "t": "2026-10-04T22:15:01",
+   "kind": "escalation",
+   "title": "Escalated · CL-0001",
+   "sub": "Centrum 1 PC 01 · Unknown, Slow performance · Escalated: power supply is damaged, no stock available",
+   "roles": [
+    "admin"
+   ],
+   "actor": "Ailyn Agustin",
+   "to": "",
+   "ref": [
+    "report",
+    "CL-0001"
+   ]
+  },
+  {
+   "id": "9f1efaf45c59",
+   "t": "2026-10-04T22:16:55",
+   "kind": "maintenance",
+   "title": "CL3-PC13 · maintenance logged (hardware replacement)",
+   "sub": "Centrum 3 PC 13 · by Ailyn Agustin",
+   "roles": [
+    "admin",
+    "technician"
+   ],
+   "actor": "Ailyn Agustin",
+   "to": "",
+   "ref": [
+    "pc",
+    3,
+    13
+   ]
+  },
+  {
+   "id": "1c42d6fe22b2",
+   "t": "2026-10-04T22:31:30",
+   "kind": "report",
+   "title": "New report R-1001 · Centrum 3 PC 14",
+   "sub": "Slow / freezing · juan dela cruz",
+   "roles": [
+    "admin"
+   ],
+   "actor": "juan dela cruz",
+   "to": "",
+   "ref": [
+    "report",
+    "R-1001"
+   ]
+  },
+  {
+   "id": "5b38c6ee6d06",
+   "t": "2026-10-04T22:33:23",
+   "kind": "report",
+   "title": "New report R-1002 · Centrum 4 PC 04 · High",
+   "sub": "Software problem · juan dela cruz",
+   "roles": [
+    "admin"
+   ],
+   "actor": "juan dela cruz",
+   "to": "",
+   "ref": [
+    "report",
+    "R-1002"
+   ]
+  },
+  {
+   "id": "983f92a4c0f2",
+   "t": "2026-10-04T22:42:05",
+   "kind": "report",
+   "title": "New report R-1003 · Centrum 3 PC 30",
+   "sub": "Keyboard / mouse · juan dela cruz",
+   "roles": [
+    "admin"
+   ],
+   "actor": "juan dela cruz",
+   "to": "",
+   "ref": [
+    "report",
+    "R-1003"
+   ]
+  },
+  {
+   "id": "30c8839a6565",
+   "t": "2026-10-06T23:25:59",
+   "kind": "status",
+   "title": "Your report R-1003 is under repair",
+   "sub": "Centrum 3 PC 30 · Keyboard / mouse · Ailyn Agustin",
+   "roles": [
+    "teacher"
+   ],
+   "actor": "Ailyn Agustin",
+   "to": "juan dela cruz",
+   "ref": [
+    "report",
+    "R-1003"
+   ]
+  },
+  {
+   "id": "f6e2ae8a2f23",
+   "t": "2026-10-06T23:35:04",
+   "kind": "status",
+   "title": "Your report R-1001 is under repair",
+   "sub": "Centrum 3 PC 14 · Slow / freezing · Ailyn Agustin",
+   "roles": [
+    "teacher"
+   ],
+   "actor": "Ailyn Agustin",
+   "to": "juan dela cruz",
+   "ref": [
+    "report",
+    "R-1001"
+   ]
+  },
+  {
+   "id": "57f49e376ae7",
+   "t": "2026-10-06T23:50:20",
+   "kind": "status",
+   "title": "Your report R-1002 is under repair",
+   "sub": "Centrum 4 PC 04 · Software problem · Ailyn Agustin",
+   "roles": [
+    "teacher"
+   ],
+   "actor": "Ailyn Agustin",
+   "to": "juan dela cruz",
+   "ref": [
+    "report",
+    "R-1002"
+   ]
+  },
+  {
+   "id": "79a2f21b38cb",
+   "t": "2026-10-06T23:58:41",
+   "kind": "status",
+   "title": "Your report R-1002 is escalated",
+   "sub": "Centrum 4 PC 04 · Software problem · Ailyn Agustin",
+   "roles": [
+    "teacher"
+   ],
+   "actor": "Ailyn Agustin",
+   "to": "juan dela cruz",
+   "ref": [
+    "report",
+    "R-1002"
+   ]
+  },
+  {
+   "id": "859f9106375d",
+   "t": "2026-10-06T23:58:41",
+   "kind": "escalation",
+   "title": "Escalated · R-1002",
+   "sub": "Centrum 4 PC 04 · Software problem · Escalated: for replacement",
+   "roles": [
+    "admin"
+   ],
+   "actor": "Ailyn Agustin",
+   "to": "",
+   "ref": [
+    "report",
+    "R-1002"
+   ]
+  },
+  {
+   "id": "6bc369e994d7",
+   "t": "2026-10-07T00:07:16",
+   "kind": "status",
+   "title": "Your report CL-0033 is under repair",
+   "sub": "Centrum 2 PC 17 · No display · Ailyn Agustin",
+   "roles": [
+    "teacher"
+   ],
+   "actor": "Ailyn Agustin",
+   "to": "juan dela cruz",
+   "ref": [
+    "report",
+    "CL-0033"
+   ]
+  },
+  {
+   "id": "0a60fa257e1f",
+   "t": "2026-10-07T00:45:03",
+   "kind": "status",
+   "title": "Your report CL-0033 is escalated",
+   "sub": "Centrum 2 PC 17 · No display · Ailyn Agustin",
+   "roles": [
+    "teacher"
+   ],
+   "actor": "Ailyn Agustin",
+   "to": "juan dela cruz",
+   "ref": [
+    "report",
+    "CL-0033"
+   ]
+  },
+  {
+   "id": "4823d2646932",
+   "t": "2026-10-07T00:45:03",
+   "kind": "escalation",
+   "title": "Escalated · CL-0033",
+   "sub": "Centrum 2 PC 17 · No display · Escalated: for repalcement",
+   "roles": [
+    "admin"
+   ],
+   "actor": "Ailyn Agustin",
+   "to": "",
+   "ref": [
+    "report",
+    "CL-0033"
+   ]
+  },
+  {
+   "id": "828cbba8a9f1",
+   "t": "2026-10-07T00:46:38",
+   "kind": "status",
+   "title": "Your report R-1002 is fixed",
+   "sub": "Centrum 4 PC 04 · Software problem · Ailyn Agustin",
+   "roles": [
+    "teacher"
+   ],
+   "actor": "Ailyn Agustin",
+   "to": "juan dela cruz",
+   "ref": [
+    "report",
+    "R-1002"
+   ]
+  },
+  {
+   "id": "25f140b4263f",
+   "t": "2026-10-07T00:47:07",
+   "kind": "status",
+   "title": "Your report CL-0033 is fixed",
+   "sub": "Centrum 2 PC 17 · No display · Ailyn Agustin",
+   "roles": [
+    "teacher"
+   ],
+   "actor": "Ailyn Agustin",
+   "to": "juan dela cruz",
+   "ref": [
+    "report",
+    "CL-0033"
+   ]
+  },
+  {
+   "id": "73dbb7a85003",
+   "t": "2026-10-07T01:33:21",
+   "kind": "inventory",
+   "title": "CL1-PC03 · details updated",
+   "sub": "Centrum 1 PC 03 · by Administrator",
+   "roles": [
+    "admin",
+    "technician"
+   ],
+   "actor": "Administrator",
+   "to": "",
+   "ref": [
+    "pc",
+    1,
+    3
+   ]
+  },
+  {
+   "id": "c2a260298707",
+   "t": "2026-10-07T01:39:20",
+   "kind": "status",
+   "title": "Your report CL-0025 is fixed",
+   "sub": "Centrum 1 PC 03 · Os Issue, ConnectivityProblem · Ailyn Agustin",
+   "roles": [
+    "teacher"
+   ],
+   "actor": "Ailyn Agustin",
+   "to": "Pedro Reyes",
+   "ref": [
+    "report",
+    "CL-0025"
+   ]
+  },
+  {
+   "id": "edcd1e39affa",
+   "t": "2026-10-07T12:41:35",
+   "kind": "inventory",
+   "title": "CL1-PC36 · added to the inventory",
+   "sub": "Centrum 1 PC 36 · by Ailyn Agustin",
+   "roles": [
+    "admin",
+    "technician"
+   ],
+   "actor": "Ailyn Agustin",
+   "to": "",
+   "ref": [
+    "pc",
+    1,
+    36
+   ]
+  },
+  {
+   "id": "9c0f4a048647",
+   "t": "2026-10-10T00:03:06",
+   "kind": "inventory",
+   "title": "CL1-PC01 · details updated",
+   "sub": "Centrum 1 PC 01 · by Ailyn Agustin",
+   "roles": [
+    "admin",
+    "technician"
+   ],
+   "actor": "Ailyn Agustin",
+   "to": "",
+   "ref": [
+    "pc",
+    1,
+    1
+   ]
+  },
+  {
+   "id": "0753633c30dd",
+   "t": "2026-10-10T00:34:57",
+   "kind": "status",
+   "title": "Your report CL-0001 is escalated",
+   "sub": "Centrum 1 PC 01 · No display, Slow performance · Ailyn Agustin",
+   "roles": [
+    "teacher"
+   ],
+   "actor": "Ailyn Agustin",
+   "to": "Alwyna Lopez",
+   "ref": [
+    "report",
+    "CL-0001"
+   ]
+  },
+  {
+   "id": "6926b7cf846b",
+   "t": "2026-10-10T00:34:57",
+   "kind": "escalation",
+   "title": "Escalated · CL-0001",
+   "sub": "Centrum 1 PC 01 · No display, Slow performance · Escalated: some wires are damaged",
+   "roles": [
+    "admin"
+   ],
+   "actor": "Ailyn Agustin",
+   "to": "",
+   "ref": [
+    "report",
+    "CL-0001"
+   ]
+  },
+  {
+   "id": "dede6bc15a81",
+   "t": "2026-10-12T23:08:38",
+   "kind": "inventory",
+   "title": "CL1-PC36 · added to the inventory",
+   "sub": "Centrum 1 PC 36 · by Administrator",
+   "roles": [
+    "admin",
+    "technician"
+   ],
+   "actor": "Administrator",
+   "to": "",
+   "ref": [
+    "pc",
+    1,
+    36
+   ]
+  }
+ ],
+ "read": {
+  "itsallinthemind792@gmail.com": [
+   "ev:983f92a4c0f2",
+   "ev:5b38c6ee6d06",
+   "ev:1c42d6fe22b2",
+   "ev:9f1efaf45c59",
+   "ev:09ae59d49351",
+   "esc:CL-0026:20261004171733",
+   "esc:CL-0028:20261004171733",
+   "esc:CL-0031:20261004171733",
+   "esc:CL-0001:20260927160913",
+   "req:23",
+   "req:24"
+  ],
+  "ailyn.agustin4306@gmail.com": [
+   "upd:25:1",
+   "upd:33:1",
+   "upd:2:1",
+   "upd:2:2",
+   "upd:33:2",
+   "upd:25:2"
+  ],
+  "ailynagustin101@gmail.com": [
+   "new:R-1003",
+   "ev:73dbb7a85003",
+   "new:CL-0034"
+  ]
+ },
+ "labs": [],
+ "accounts": {
+  "26": {
+   "confirmed_at": "2026-10-11T22:51:18",
+   "confirmed_by": "Administrator"
+  }
+ }
+}
