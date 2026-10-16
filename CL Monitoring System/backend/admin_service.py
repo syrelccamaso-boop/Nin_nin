@@ -191,6 +191,8 @@ def _request_from_user(user: dict) -> dict | None:
         "contact": user.get("contact_number") or "",
         "department": user.get("department") or "",
         "submitted_at": user.get("created_at"),
+        # Users."DateConfirmed" (nullable) - passed through unchanged.
+        "date_confirmed": user.get("date_confirmed"),
         "status": status,
     }
 
