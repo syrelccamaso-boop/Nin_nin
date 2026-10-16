@@ -191,6 +191,12 @@ class ChangePasswordRequest(BaseModel):
     new_password: str
 
 
+class ChangeEmailRequest(BaseModel):
+
+    new_email: str
+    current_password: str
+
+
 class RequestDecisionRequest(BaseModel):
 
     decision: str
@@ -743,6 +749,24 @@ def admin_change_password(
 
     result = admin_service.change_password(
         admin, data.current_password, data.new_password
+    )
+
+    if not result["success"]:
+
+        _fail(result)
+
+    return result
+
+
+@app.post("/admin/email")
+def admin_change_email(
+    data: ChangeEmailRequest, authorization: str | None = Header(default=None)
+):
+
+    admin = _require_dashboard_admin(authorization)
+
+    result = admin_service.change_email(
+        admin, data.new_email, data.current_password
     )
 
     if not result["success"]:

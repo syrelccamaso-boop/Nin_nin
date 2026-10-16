@@ -1271,6 +1271,29 @@ def admin_update_contact_number(
     )
 
 
+def admin_change_email(
+    token: str,
+    new_email: str,
+    current_password: str,
+) -> dict:
+    """
+    POST /admin/email
+
+    Changes the authenticated Admin's own email (the login email and
+    Users.Email). The current password is required.
+    """
+    return _request(
+        "POST",
+        "/admin/email",
+        payload={
+            "new_email": new_email,
+            "current_password": current_password,
+        },
+        headers=_auth_headers(token),
+        timeout=20,
+    )
+
+
 def admin_change_password(
     token: str,
     current_password: str,

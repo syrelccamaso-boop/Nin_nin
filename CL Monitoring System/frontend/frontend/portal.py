@@ -38,6 +38,7 @@ html, btn, hit, box, h = ui.html, ui.btn, ui.hit, ui.box, ui.h
 PER = 25  # default table rows per page (the user can pick 10, 25, 50 or 100)
 PER_OPTIONS = (10, 25, 50, 100)
 PHONE_RE = re.compile(r"^(?:\+63|0)9\d{9}$")
+EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 NOTIF_SHOWN = 15  # notifications listed in the notifications window
 
 # The notifications button: a rounded bell with a little clapper and ring marks.
@@ -1502,9 +1503,39 @@ class Shell:
         if ok:
             ss.pop(f"{self.p}_editing_number", None)
 
-    def contact_card(self, user: dict, save_number, email_note: str = "") -> None:
-        """Email (read-only; with email_note an Edit button explains how to change it) and contact number.
-        save_number(number) -> (ok, message)."""
+    def _start_email_edit(self, current: str) -> None:
+        ss[f"{self.p}_editing_email"] = True
+        ss[f"{self.p}_edit_email_in"] = "" if current == "Not set" else current
+        ss[f"{self.p}_edit_email_pw"] = ""
+
+    def _cancel_email_edit(self) -> None:
+        ss.pop(f"{self.p}_editing_email", None)
+        ss[f"{self.p}_edit_email_pw"] = ""
+
+    def _save_email(self, save, user: dict) -> None:
+        value = (ss.get(f"{self.p}_edit_email_in") or "").strip().lower()
+        password = ss.get(f"{self.p}_edit_email_pw") or ""
+        ss[f"{self.p}_edit_email_pw"] = ""  # never keep the password around
+        if not EMAIL_RE.match(value):
+            return self.toast("Enter a valid email address.", False)
+        if value == (user.get("email") or "").strip().lower():
+            return self.toast("That is already your email address.", False)
+        if not password:
+            return self.toast("Enter your current password to change your email.", False)
+        try:
+            ok, msg = save(value, password)
+        except Exception:
+            ok, msg = False, "Could not connect to the server. Your email was not changed."
+        self.toast(msg, ok)
+        if ok:
+            user["email"] = value
+            ss.pop(f"{self.p}_editing_email", None)
+
+    def contact_card(self, user: dict, save_number, email_note: str = "", save_email=None) -> None:
+        """Email and contact number.
+        save_number(number) -> (ok, message).
+        save_email(new_email, current_password) -> (ok, message): the email gets an Edit
+        button. Without it, email_note makes Edit explain how to change it."""
         html('<div class="card-h"><h3>Contact information</h3></div>')
         number = fmt_number(user.get("contact_number") or "") or "Not set"
         for fld, label, icon_name, value in (
@@ -1522,6 +1553,14 @@ class Shell:
                         f"{self.p}_pf_number_edit",
                         "ghostsm",
                         on_click=self._start_edit,
+                        args=(value,),
+                    )
+                elif save_email:
+                    btn(
+                        "Edit",
+                        f"{self.p}_pf_email_edit",
+                        "ghostsm",
+                        on_click=self._start_email_edit,
                         args=(value,),
                     )
                 elif email_note:
@@ -1554,6 +1593,38 @@ class Shell:
                         on_click=ss.pop,
                         args=(f"{self.p}_editing_number", None),
                     )
+            if fld == "email" and save_email and ss.get(f"{self.p}_editing_email"):
+                with box(f"{self.p}_pf_email_inl", "row"):
+                    st.text_input(
+                        "New email address",
+                        key=f"{self.p}_edit_email_in",
+                        label_visibility="collapsed",
+                        placeholder="New email address",
+                    )
+                    st.text_input(
+                        "Current password",
+                        type="password",
+                        key=f"{self.p}_edit_email_pw",
+                        label_visibility="collapsed",
+                        placeholder="Current password",
+                    )
+                    btn(
+                        "Save",
+                        f"{self.p}_pf_email_save",
+                        "primarysm",
+                        on_click=self._save_email,
+                        args=(save_email, user),
+                    )
+                    btn(
+                        "Cancel",
+                        f"{self.p}_pf_email_cancel",
+                        "ghostsm",
+                        on_click=self._cancel_email_edit,
+                    )
+                html(
+                    '<div class="adm-help" style="margin:0 0 10px">You log in with this email. '
+                    "Enter your current password to confirm the change.</div>"
+                )
             if fld == "email":
                 html('<div style="border-bottom:1px solid var(--line)"></div>')
 

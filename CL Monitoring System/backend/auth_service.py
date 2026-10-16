@@ -1815,6 +1815,185 @@ def change_password(
 
 
 # =========================================================
+# CHANGE EMAIL (login + profile together)
+# =========================================================
+#
+# The login checks the email stored in Supabase Auth (auth.users), while the
+# app shows Users.Email. Both must change together, or the user would have to
+# keep logging in with the old email.
+# =========================================================
+
+
+def _fail(message: str) -> dict:
+    return {"success": False, "error": message}
+
+
+def _set_auth_email(auth_user_id: str, email: str) -> None:
+    get_client().auth.admin.update_user_by_id(
+        auth_user_id,
+        {"email": email, "email_confirm": True},
+    )
+
+
+def _change_email(row: dict, new_email: str, other_changes: dict | None = None) -> dict:
+    """
+    Change a user's email in Supabase Auth first, then in Users (together
+    with any other Users changes). If the Users update fails, the Auth email
+    is put back, so the two never disagree.
+    """
+
+    new_email = users.normalize_email(new_email)
+    old_email = users.normalize_email(row.get("Email"))
+
+    try:
+        auth_user_id = _find_auth_user_id(old_email, row)
+    except Exception as error:
+        logger.error("Could not find the login for %s: %s", old_email, error_text(error))
+        auth_user_id = None
+
+    if not auth_user_id:
+        return _fail(
+            "This account has no login yet, so its email can't be changed. "
+            "Please contact the administrator."
+        )
+
+    try:
+        _set_auth_email(auth_user_id, new_email)
+    except Exception as error:
+        logger.error("Changing the login email failed: %s", error_text(error))
+        text = error_text(error).lower()
+        if "already" in text or "email_exists" in text:
+            return _fail("An account with this email already exists.")
+        return _fail(
+            "We couldn't change the login email "
+            "(the backend needs SUPABASE_SERVICE_ROLE_KEY). Please try again later."
+        )
+
+    def revert() -> None:
+        try:
+            _set_auth_email(auth_user_id, old_email)
+        except Exception as error:
+            logger.error(
+                "Users update failed AND the login email could not be put back "
+                "for %s - fix it in Supabase > Authentication > Users: %s",
+                old_email,
+                error_text(error),
+            )
+
+    try:
+        updated = users.update_user(
+            row.get("UserId"),
+            {**(other_changes or {}), "email": new_email},
+        )
+    except (ValueError, DatabaseError) as error:
+        revert()
+        return _fail(str(error))
+
+    if not updated:
+        revert()
+        return _fail("User not found.")
+
+    return {"success": True, "user": users.to_app_user(updated)}
+
+
+def change_own_email(
+    email: str,
+    current_password: str,
+    new_email: str,
+):
+    """
+    A signed-in user changes their own email. The current password is
+    required (same 5-attempt limit as login).
+    """
+
+    email = users.normalize_email(email)
+    new_email = users.normalize_email(new_email)
+
+    if _is_fixed_admin(email):
+        return _fail(
+            "The built-in admin account's email is set in .env (ADMIN_EMAIL) "
+            "and can't be changed here."
+        )
+
+    if not valid_email(new_email):
+        return _fail("Enter a valid email address.")
+
+    if new_email == email:
+        return _fail("That is already your email address.")
+
+    if not current_password:
+        return _fail("Enter your current password.")
+
+    try:
+        if email_taken(new_email):
+            return _fail("An account with this email already exists.")
+
+        row = users.get_user_by_email(email)
+
+    except DatabaseError as error:
+        return _fail(str(error))
+
+    if not row:
+        return _fail("No user profile was found for this login.")
+
+    # ---- confirm it's really them: check the current password ----
+
+    try:
+        blocked = _login_begin(email)
+    except _LoginLimitUnavailable:
+        return _fail(_LOGIN_UNAVAILABLE)
+
+    if blocked:
+        return _fail(blocked)
+
+    try:
+        response = new_auth_client().auth.sign_in_with_password(
+            {"email": email, "password": current_password}
+        )
+    except Exception as error:
+        text = error_text(error).lower()
+
+        if "invalid login credentials" in text or "invalid_credentials" in text:
+            try:
+                locked = _login_failed(email)
+            except _LoginLimitUnavailable:
+                locked = None
+            return _fail(locked or "Your current password is incorrect.")
+
+        _login_refund(email)
+        logger.error("Password check failed: %s", error_text(error))
+        return _fail("We couldn't check your password right now. Please try again.")
+
+    auth_user = getattr(response, "user", None)
+
+    if not auth_user:
+        try:
+            locked = _login_failed(email)
+        except _LoginLimitUnavailable:
+            locked = None
+        return _fail(locked or "Your current password is incorrect.")
+
+    _login_clear(email)
+
+    stored = row.get(users.AUTH_ID_COLUMN)
+
+    if stored and str(stored).lower() != str(auth_user.id).lower():
+        return _fail(
+            "Your account is not correctly linked to the login service. "
+            "Please contact the administrator."
+        )
+
+    result = _change_email(row, new_email)
+
+    if result.get("success"):
+        result["message"] = (
+            "Email updated. Use the new email the next time you log in."
+        )
+
+    return result
+
+
+# =========================================================
 # DATABASE CHECK
 # =========================================================
 
@@ -2107,7 +2286,37 @@ def admin_update_user(
 
     Field validation and schema restrictions are handled
     by users_repository.update_user().
+
+    A changed email is also changed in Supabase Auth, so the user logs in
+    with the new email.
     """
+
+    if "email" in changes:
+
+        try:
+            current = users.get_user_by_id(user_id)
+        except DatabaseError as error:
+            return {"success": False, "error": str(error)}
+
+        if not current:
+            return {"success": False, "error": "User not found."}
+
+        new_email = users.normalize_email(changes.get("email"))
+
+        if new_email != users.normalize_email(current.get("Email")):
+
+            if not valid_email(new_email):
+                return {"success": False, "error": "Enter a valid email address."}
+
+            if _is_fixed_admin(new_email):
+                return {
+                    "success": False,
+                    "error": "An account with this email already exists.",
+                }
+
+            other = {k: v for k, v in changes.items() if k != "email"}
+
+            return _change_email(current, new_email, other)
 
     try:
 

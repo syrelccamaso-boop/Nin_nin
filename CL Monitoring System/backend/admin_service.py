@@ -977,11 +977,30 @@ def change_password(
     )
 
 
+def change_email(
+    admin: dict,
+    new_email: str,
+    current_password: str,
+) -> dict:
+    """
+    Change the authenticated Admin's own email (login + Users.Email).
+
+    The current password is required.
+    """
+
+    return auth_service.change_own_email(
+        email=admin.get("email") or "",
+        current_password=current_password,
+        new_email=new_email,
+    )
+
+
 # =========================================================
 # PUBLIC API
 # =========================================================
 
 __all__ = [
+    "change_email",
     "change_password",
     "current_admin",
     "decide_escalation",

@@ -918,6 +918,67 @@ def _save_number(number: str) -> tuple[bool, str]:
     )
 
 
+def _save_email(
+    new_email: str,
+    current_password: str,
+) -> tuple[bool, str]:
+    """
+    Change the Admin's own email through the backend (login email and
+    Users.Email together). The current password is required.
+    """
+
+    s = store()
+
+    if not s.get("live"):
+        return (
+            False,
+            "Not connected to the server. "
+            "Log in again to change your email.",
+        )
+
+    token = ss.get(ui.TOKEN_KEY)
+
+    if not token:
+        return (
+            False,
+            "Your session has expired. Please log in again.",
+        )
+
+    try:
+        result = backend_client.admin_change_email(
+            token,
+            new_email,
+            current_password,
+        )
+    except Exception:
+        return (
+            False,
+            "Could not change the email.",
+        )
+
+    if not result.get("success"):
+        return (
+            False,
+            result.get("error")
+            or "Could not change the email.",
+        )
+
+    saved = result.get("user")
+    email = (
+        saved.get("email")
+        if isinstance(saved, dict) and saved.get("email")
+        else new_email
+    )
+    ss[f"{P}_me_email"] = email
+    ss.pop(f"{P}_users", None)
+
+    return (
+        True,
+        result.get("message")
+        or "Email updated. Use the new email the next time you log in.",
+    )
+
+
 def _change_password(
     current: str,
     new: str,
@@ -2911,10 +2972,7 @@ def page_profile(
             SHELL.contact_card(
                 user,
                 _save_number,
-                email_note=(
-                    "To change your email, ask another Admin to edit your "
-                    "account under Users (the login uses this email)."
-                ),
+                save_email=_save_email,
             )
 
         with box(
