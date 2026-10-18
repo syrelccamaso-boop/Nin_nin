@@ -1,20 +1,30 @@
 """
-frontend/inventory.py - Centrum Laboratory | the computer inventory (Admin + Technician)
+frontend/inventory.py - Computer Laboratory | the computer inventory (Admin + Technician)
 
 One inventory screen shared by the admin and technician dashboards, so both
 get exactly the same tools:
 
     - full inventory list (or live floor-map view) with every computer's details
-    - search, laboratory filter, status chips, Sort by, Export CSV
-    - computer details: hardware, software, maintenance history
+    - search, laboratory filter, status chips, Sort by, Export CSV,
+      Generate report (opens Print reports with the same filters: preview,
+      print, PDF)
+    - computer details: hardware, software, maintenance history, and every
+      report of the computer (one entry per problem, the same as the Reports
+      page; several reports -> pick which one to open)
     - Add computer (validated form)
+    - Add laboratory (Admin): name, code, building, floor, room, number of
+      computer units, seats per row, specs to copy - the units are saved in
+      the database (Computers: Room + UnitNumber)
     - Edit computer: details & hardware (incl. record status), software
       install / update / remove, log maintenance
 
-Every change is written to the shared lab store (frontend/lab_store.py), so it
-is visible system-wide straight away (admin, technicians and the teachers'
-floor map), is added to the computer's maintenance history and creates an
-"inventory update" notification for the other role.
+The inventory comes from the database only (Supabase, through the backend):
+Computers, ComputerHardware, ComputerSoftware and MaintenanceHistory. Every
+change is saved there first (and its lines added to MaintenanceHistory),
+then the data is read again, so admins, technicians and the teachers' floor
+map all see the stored records. Nothing is kept in data/centrum_lab.json;
+without a server connection the inventory is empty and can't be changed.
+An "inventory update" notification is still created for the other role.
 
     inv = inventory.Inventory(SHELL, store, me, "Technician")
     inv.page(s)                         # the Inventory page
@@ -24,15 +34,18 @@ floor map), is added to the computer's maintenance history and creates an
 
 from __future__ import annotations
 
+import copy
 import csv
 import io
 import re
 
 import streamlit as st
 
+from frontend import backend_client
 from frontend import lab_data as D
 from frontend import lab_store
 from frontend import portal
+from frontend import report_print
 from frontend import ui
 from frontend.portal import comp_badge, ic, lab_tile, page_slice, pager, sort_select, stat
 
@@ -46,6 +59,14 @@ I_FILTERS = [
     ("attention", "Needs attention"),
     ("inactive", "Inactive"),
 ]
+
+# Inventory status chip -> the computer statuses passed to the report generator.
+CHIP_STATUSES = {
+    "all": None,
+    "ok": ["ok"],
+    "attention": ["reported", "repair", "escalated", "maint"],
+    "inactive": ["inactive"],
+}
 
 
 class Inventory:
@@ -64,8 +85,9 @@ class Inventory:
         self.shell.toast(msg, ok)
 
     def _changed(self, comp: dict, text: str, kind: str = "inventory") -> None:
-        """Save the shared store and tell the other role about it."""
-        lab_store.save()
+        """The change is saved in the database: reload the data from it on the
+        next run and tell the other role about it."""
+        self._reload()
         lab_store.add_event(
             kind,
             f"{comp['tag']} · {text}",
@@ -74,6 +96,48 @@ class Inventory:
             actor=self.me(),
             ref=("pc", comp["lab"], comp["pc"]),
         )
+
+    # ------------------------------------------------------------------ database
+    def _token(self) -> str:
+        return ss.get(ui.TOKEN_KEY) or ""
+
+    def _live(self) -> bool:
+        """The inventory is saved in the database only: refuse changes when
+        this dashboard isn't connected to the server."""
+        if self.store().get("live") and self._token():
+            return True
+        self.toast(
+            "Not connected to the server. Log out and log in again to change "
+            "the inventory (it is saved in the database).",
+            False,
+        )
+        return False
+
+    def _reload(self) -> None:
+        """Read the inventory from the database again on the next run."""
+        ss.pop(f"{self.p}_data", None)
+
+    @staticmethod
+    def _lines(work: dict, start: int) -> list[dict]:
+        """The maintenance-history lines a change produced (saved to
+        MaintenanceHistory)."""
+        return [{"kind": e["kind"], "text": e["text"]} for e in work["log"][start:]]
+
+    def _db_id(self, comp: dict):
+        cid = comp.get("db_id")
+        if cid in (None, ""):
+            self.toast(
+                f"{comp['tag']} isn't linked to a database record. Refresh the data.",
+                False,
+            )
+            return None
+        return cid
+
+    def _saved(self, result: dict) -> bool:
+        if result.get("success"):
+            return True
+        self.toast(result.get("error") or "The change could not be saved to the database.", False)
+        return False
 
     def _comp(self, lab: int, pc: int) -> dict | None:
         return self.store()["computers"].get((lab, pc))
@@ -102,19 +166,29 @@ class Inventory:
             + (f" · {h(model)}" if model else "")
             + f"</div></div>{comp_badge(status)}</div></div>"
         )
-        r = D.pc_report(s, lab, pc)
-        if r:
+        # One entry per problem, the same as the Reports page.
+        reps = D.pc_problem_rows(s, lab, pc)
+        open_reps = [x for x in reps if x["status"] in D.OPEN]
+        if open_reps:
+            # Each open report on its own line (click one to open it).
             with box(f"{p}_pcrep_{ctx}", "row", "gap14"):
-                html(
-                    f'<div class="demo-note" style="margin:0 0 14px">{ic("alert")}<span><b>{h(r["id"])}</b> · '
-                    f'{h(r["issue"])} · {D.when(r["created"])}</span></div>'
-                )
+                with box(f"{p}_pcrep_l_{ctx}", "stack"):
+                    for i, r in enumerate(open_reps):
+                        bottom = "14px" if i == len(open_reps) - 1 else "6px"
+                        hit(
+                            f'<div class="demo-note" style="margin:0 0 {bottom};cursor:pointer">{ic("alert")}<span>'
+                            f'<b>{h(r["id"])}</b> · {h(r["issue"])} · {h(D.STATUS[r["status"]][0])} · '
+                            f'{D.when(r["created"])}</span></div>',
+                            f"{p}_pcrep_one_{ctx}_{r['row_key']}",
+                            self.open_report,
+                            (r["row_key"],),
+                        )
                 btn(
-                    "View report",
+                    "View report" if len(reps) == 1 else f"View reports · {len(reps)}",
                     f"{p}_pcrep_btn_{ctx}",
                     "ghostsm",
-                    on_click=self.shell.open_modal,
-                    args=("report", r["id"]),
+                    on_click=self.open_reports,
+                    args=(lab, pc),
                 )
 
         history = D.maintenance_history(s, comp)
@@ -185,6 +259,14 @@ class Inventory:
             rows += f'<dt>Last serviced</dt><dd>{D.when(last) if last else "—"}</dd>'
             html(f'<dl class="kv">{rows}</dl>')
         with box(f"{p}_pcact_{ctx}", "mactions"):
+            if reps and not open_reps:
+                btn(
+                    f"Past reports · {len(reps)}",
+                    f"{p}_pc_past_{ctx}",
+                    "ghost",
+                    on_click=self.open_reports,
+                    args=(lab, pc),
+                )
             btn(
                 "Log maintenance",
                 f"{p}_pc_log_{ctx}",
@@ -208,14 +290,49 @@ class Inventory:
                     on_click=self.shell.close_modal,
                 )
 
+    # ------------------------------------------------------------------ reports of one computer
+    def open_report(self, rid: str) -> None:
+        self.shell.open_modal("report", rid)
+
+    def open_reports(self, lab: int, pc: int) -> None:
+        """One report -> open it; several -> let the user pick which one."""
+        reps = D.pc_problem_rows(self.store(), lab, pc)
+        if not reps:
+            return self.toast("This computer has no reports.", False)
+        if len(reps) == 1:
+            return self.open_report(reps[0]["row_key"])
+        self.shell.open_modal("pcreports", (lab, pc))
+
+    def modal_pc_reports(self, s: dict, key) -> None:
+        lab, pc = tuple(key)
+        reps = D.pc_problem_rows(s, lab, pc)
+        if not reps:
+            return self.shell.close_modal()
+        n_open = sum(r["status"] in D.OPEN for r in reps)
+        with self.shell.window():
+            html(
+                f"<h3>Reports for {h(D.asset_tag(lab, pc))}</h3>"
+                f'<div class="m-sub">{D.lab_name(lab)} · {D.pc_name(pc)} · {n_open} open, '
+                f"{len(reps)} in total. Pick a report to see its details and history.</div>"
+            )
+            portal.pc_report_list(self.p, s, lab, pc, self.open_report, "pick")
+            with box(f"{self.p}_pcr_act", "mactions"):
+                if (lab, pc) in s["computers"]:
+                    btn(
+                        "View computer",
+                        f"{self.p}_pcr_pc",
+                        "ghost",
+                        on_click=self.open_pc,
+                        args=(lab, pc),
+                    )
+                btn("Close", f"{self.p}_pcr_close", "ghost", on_click=self.shell.close_modal)
+
     # ------------------------------------------------------------------ edit (callbacks)
     def open_edit(self, lab: int, pc: int, tab: str = "details") -> None:
         comp = self._comp(lab, pc)
         if comp is None:
             return self.toast("That computer is no longer in the inventory.", False)
         ek = self._ek
-        ss[ek("name")] = comp["name"]
-        ss[ek("notes")] = comp.get("notes", "")
         ss[ek("brand")] = comp.get("brand", "")
         ss[ek("model")] = comp.get("model", "")
         ss[ek("serial")] = comp.get("serial", "")
@@ -234,45 +351,82 @@ class Inventory:
         comp = self._comp(lab, pc)
         if comp is None:
             return self.toast("That computer is no longer in the inventory.", False)
+        if not self._live():
+            return
+        cid = self._db_id(comp)
+        if cid is None:
+            return
         hw = {
-            label: ss.get(ek("hw " + label), "") or ""
+            label: (ss.get(ek("hw " + label), "") or "").strip()
             for label in self._hw_labels(comp)
         }
-        with lab_store.lock():
-            ok, msg = D.update_details(
-                s,
-                comp,
-                name=ss.get(ek("name"), "") or "",
-                notes=ss.get(ek("notes"), "") or "",
-                hardware=hw,
-                by=self.me(),
-                brand=ss.get(ek("brand"), "") or "",
-                model=ss.get(ek("model"), "") or "",
-                serial=ss.get(ek("serial"), "") or "",
-                status=ss.get(ek("status")),
-            )
-            if ok:
-                self._changed(comp, "details updated")
-        self.toast(msg, ok)
-        if ok:
-            self.shell.open_modal("pc", (lab, pc))
-            ss[f"{self.p}_pctab"] = "history"
+        # Checked and described on a copy; the database is changed below.
+        work = copy.deepcopy(comp)
+        start = len(work["log"])
+        ok, msg = D.update_details(
+            s,
+            work,
+            name=work["name"],
+            notes=work.get("notes", ""),
+            hardware=hw,
+            by=self.me(),
+            brand=ss.get(ek("brand"), "") or "",
+            model=ss.get(ek("model"), "") or "",
+            serial=ss.get(ek("serial"), "") or "",
+            status=ss.get(ek("status")),
+        )
+        if not ok:
+            return self.toast(msg, False)
+        result = backend_client.inv_update_computer(
+            self._token(),
+            cid,
+            {
+                "brand": work.get("brand", ""),
+                "model": work.get("model", ""),
+                "serial": work.get("serial", ""),
+                "status": work.get("status") or "Working",
+                "hardware": hw,
+                "history": self._lines(work, start),
+            },
+        )
+        if not self._saved(result):
+            return
+        self._changed(comp, "details updated")
+        self.toast(msg)
+        self.shell.open_modal("pc", (lab, pc))
+        ss[f"{self.p}_pctab"] = "history"
 
     def _install(self, lab: int, pc: int) -> None:
         comp, ek = self._comp(lab, pc), self._ek
-        if comp is None:
+        if comp is None or not self._live():
             return
-        name = ss.get(ek("sw name"), "") or ""
-        with lab_store.lock():
-            ok, msg = D.install_software(
-                comp, name, ss.get(ek("sw version"), "") or "", self.me()
+        cid = self._db_id(comp)
+        if cid is None:
+            return
+        name = (ss.get(ek("sw name"), "") or "").strip()
+        version = (ss.get(ek("sw version"), "") or "").strip()
+        work = copy.deepcopy(comp)
+        start = len(work["log"])
+        ok, msg = D.install_software(work, name, version, self.me())
+        if not ok:
+            return self.toast(msg, False)
+        existing = next(
+            (x for x in comp["software"] if x["name"].lower() == name.lower()), None
+        )
+        if existing and existing.get("id"):
+            result = backend_client.inv_update_software(
+                self._token(), existing["id"], version, self._lines(work, start)
             )
-            if ok:
-                self._changed(comp, f"software: {name.strip()}", "maintenance")
-        self.toast(msg, ok)
-        if ok:
-            ss[ek("sw name")] = ""
-            ss[ek("sw version")] = ""
+        else:
+            result = backend_client.inv_install_software(
+                self._token(), cid, name, version, self._lines(work, start)
+            )
+        if not self._saved(result):
+            return
+        self._changed(comp, f"software: {name}", "maintenance")
+        self.toast(msg)
+        ss[ek("sw name")] = ""
+        ss[ek("sw version")] = ""
 
     def _start_sw_update(self, name: str, version: str) -> None:
         ss[f"{self.p}_sw_upd"] = name
@@ -281,28 +435,51 @@ class Inventory:
     def _cancel_sw_update(self) -> None:
         ss.pop(f"{self.p}_sw_upd", None)
 
+    def _software_id(self, comp: dict, name: str):
+        item = next((x for x in comp["software"] if x["name"] == name), None)
+        if item is None or not item.get("id"):
+            self.toast(f"{name} isn't linked to a database record. Refresh the data.", False)
+            return None
+        return item["id"]
+
     def _sw_update(self, lab: int, pc: int, name: str) -> None:
         comp = self._comp(lab, pc)
-        if comp is None:
+        if comp is None or not self._live():
             return
-        with lab_store.lock():
-            ok, msg = D.update_software(
-                comp, name, ss.get(self._ek("sw new version"), "") or "", self.me()
-            )
-            if ok:
-                self._changed(comp, f"{name} updated", "maintenance")
-        self.toast(msg, ok)
-        if ok:
-            ss.pop(f"{self.p}_sw_upd", None)
+        version = (ss.get(self._ek("sw new version"), "") or "").strip()
+        work = copy.deepcopy(comp)
+        start = len(work["log"])
+        ok, msg = D.update_software(work, name, version, self.me())
+        if not ok:
+            return self.toast(msg, False)
+        sid = self._software_id(comp, name)
+        if sid is None:
+            return
+        result = backend_client.inv_update_software(
+            self._token(), sid, version, self._lines(work, start)
+        )
+        if not self._saved(result):
+            return
+        self._changed(comp, f"{name} updated", "maintenance")
+        self.toast(msg)
+        ss.pop(f"{self.p}_sw_upd", None)
 
     def _sw_remove(self, lab: int, pc: int, name: str) -> None:
         comp = self._comp(lab, pc)
-        if comp is not None:
-            with lab_store.lock():
-                ok, msg = D.remove_software(comp, name, self.me())
-                if ok:
+        if comp is not None and self._live():
+            work = copy.deepcopy(comp)
+            start = len(work["log"])
+            ok, msg = D.remove_software(work, name, self.me())
+            sid = self._software_id(comp, name) if ok else None
+            if not ok:
+                self.toast(msg, False)
+            elif sid is not None:
+                result = backend_client.inv_remove_software(
+                    self._token(), sid, self._lines(work, start)
+                )
+                if self._saved(result):
                     self._changed(comp, f"{name} removed", "maintenance")
-            self.toast(msg, ok)
+                    self.toast(msg)
         ss[f"{self.p}_edtab"] = "software"
         self.shell.open_modal("edit", (lab, pc))
 
@@ -318,24 +495,24 @@ class Inventory:
 
     def _save_log(self, lab: int, pc: int) -> None:
         comp, ek = self._comp(lab, pc), self._ek
-        if comp is None:
+        if comp is None or not self._live():
+            return
+        cid = self._db_id(comp)
+        if cid is None:
             return
         kind = ss.get(ek("log kind")) or "Repair"
-        with lab_store.lock():
-            ok, msg = D.log_maintenance(
-                comp,
-                kind,
-                ss.get(ek("log text"), "") or "",
-                ss.get(ek("log by"), "") or self.me(),
-            )
-            if ok:
-                self._changed(
-                    comp, f"maintenance logged ({kind.lower()})", "maintenance"
-                )
-        self.toast(msg, ok)
-        if ok:
-            self.shell.open_modal("pc", (lab, pc))
-            ss[f"{self.p}_pctab"] = "history"
+        text = (ss.get(ek("log text"), "") or "").strip()
+        by = (ss.get(ek("log by"), "") or "").strip() or self.me()
+        ok, msg = D.log_maintenance(copy.deepcopy(comp), kind, text, by)
+        if not ok:
+            return self.toast(msg, False)
+        result = backend_client.inv_log_maintenance(self._token(), cid, kind, text, by)
+        if not self._saved(result):
+            return
+        self._changed(comp, f"maintenance logged ({kind.lower()})", "maintenance")
+        self.toast(msg)
+        self.shell.open_modal("pc", (lab, pc))
+        ss[f"{self.p}_pctab"] = "history"
 
     # ------------------------------------------------------------------ add (callbacks)
     def open_add(self) -> None:
@@ -345,8 +522,6 @@ class Inventory:
         ss[ek("add lab")] = lab
         ss[ek("add pc")] = str(D.next_free_pc(s, lab))
         for k in (
-            "add name",
-            "add notes",
             "add brand",
             "add model",
             "add serial",
@@ -354,7 +529,7 @@ class Inventory:
         ):
             ss[ek(k)] = ""
         ss[ek("add status")] = "Working"
-        for label, value in zip(D.HW_FIELDS, D.SPECS[lab]):
+        for label, value in zip(D.HW_FIELDS, self._lab_specs(lab)):
             ss[ek("add hw " + label)] = value
         ss[ek("add sw")] = [n for n, _ in D.DEFAULT_SOFTWARE if n in D.COMMON_SOFTWARE]
         self.shell.open_modal("add")
@@ -363,11 +538,23 @@ class Inventory:
         s, ek = self.store(), self._ek
         lab = ss.get(ek("add lab")) or 1
         ss[ek("add pc")] = str(D.next_free_pc(s, lab))
-        for label, value in zip(D.HW_FIELDS, D.SPECS.get(lab, D.SPECS[1])):
+        for label, value in zip(D.HW_FIELDS, self._lab_specs(lab)):
             ss[ek("add hw " + label)] = value
+
+    @staticmethod
+    def _lab_specs(lab: int) -> list[str]:
+        """Default hardware for the "Add computer" form of a laboratory."""
+        if lab in D.SPECS:
+            return D.SPECS[lab]
+        specs = (D.LAB_INFO.get(lab) or {}).get("specs")
+        if isinstance(specs, dict):
+            return [str(specs.get(f, "")) for f in D.HW_FIELDS]
+        return [""] * len(D.HW_FIELDS)
 
     def _save_add(self) -> None:
         s, ek = self.store(), self._ek
+        if not self._live():
+            return
         lab = int(ss.get(ek("add lab")) or 1)
         raw = str(ss.get(ek("add pc")) or "").strip()
         if not raw.isdigit() or not 1 <= int(raw) <= 999:
@@ -393,28 +580,50 @@ class Inventory:
                 name = parts[0] if ver else item
                 if not any(x["name"].lower() == name.lower() for x in software):
                     software.append({"name": name, "version": ver})
-        with lab_store.lock():
-            ok, msg = D.add_computer(
-                s,
-                lab=lab,
-                pc=pc,
-                name=ss.get(ek("add name"), "") or "",
-                hardware=hw,
-                software=software,
-                notes=ss.get(ek("add notes"), "") or "",
-                by=self.me(),
-                brand=ss.get(ek("add brand"), "") or "",
-                model=ss.get(ek("add model"), "") or "",
-                serial=ss.get(ek("add serial"), "") or "",
-                status=ss.get(ek("add status")) or "Working",
-            )
-            if ok:
-                self._changed(s["computers"][(lab, pc)], "added to the inventory")
-        self.toast(msg, ok)
-        if ok:
-            ss[f"{self.p}_pctab"] = "hardware"
-            ss[f"{self.p}_inv_sel"] = (lab, pc)
-            self.shell.open_modal("pc", (lab, pc))
+        # Checked on a copy of the inventory; the computer is saved in the
+        # database and read back from it.
+        check = {"computers": dict(s["computers"])}
+        ok, msg = D.add_computer(
+            check,
+            lab=lab,
+            pc=pc,
+            name="",  # the computer is named by its asset ID
+            hardware=hw,
+            software=software,
+            notes="",
+            by=self.me(),
+            brand=ss.get(ek("add brand"), "") or "",
+            model=ss.get(ek("add model"), "") or "",
+            serial=ss.get(ek("add serial"), "") or "",
+            status=ss.get(ek("add status")) or "Working",
+        )
+        if not ok:
+            return self.toast(msg, False)
+        comp = check["computers"][(lab, pc)]
+        result = backend_client.inv_add_computer(
+            self._token(),
+            {
+                "room": D.lab_room(lab),
+                "unit_number": pc,
+                "brand": comp.get("brand", ""),
+                "model": comp.get("model", ""),
+                "serial": comp.get("serial", ""),
+                "status": comp.get("status") or "Working",
+                "hardware": comp["hardware"],
+                "software": [
+                    {"name": x["name"], "version": x.get("version", "")}
+                    for x in comp["software"]
+                ],
+                "history": self._lines(comp, 0),
+            },
+        )
+        if not self._saved(result):
+            return
+        self._changed(comp, "added to the inventory")
+        self.toast(result.get("message") if result.get("message") not in (None, "", "Computer added") else msg)
+        ss[f"{self.p}_pctab"] = "hardware"
+        ss[f"{self.p}_inv_sel"] = (lab, pc)
+        self.shell.open_modal("pc", (lab, pc))
 
     # ------------------------------------------------------------------ the page
     def _reset_page(self) -> None:
@@ -473,8 +682,29 @@ class Inventory:
             )
         return buf.getvalue()
 
+    def _generate_report(self, lab: int, flt: str, search: str) -> None:
+        """Open the report generator with this page's filters (inventory report)."""
+        report_print.open_generator(
+            self.shell,
+            "inventory",
+            lab=lab or 0,
+            statuses=CHIP_STATUSES.get(flt) or report_print.PC_STATUS_KEYS,
+            search=search,
+        )
+
     def page(self, s: dict) -> None:
         p = self.p
+        # A laboratory just added: select it once it has been read back.
+        pending = ss.get(f"{p}_i_lab_pending")
+        if pending:
+            lab_id = next(
+                (l for l, i in D.LAB_INFO.items() if str(i.get("room") or "").lower() == str(pending).lower()),
+                None,
+            )
+            if lab_id is not None:
+                ss[f"{p}_i_lab__sel__"] = lab_id
+                ss[f"_keep_{p}_i_lab__sel__"] = lab_id
+            ss.pop(f"{p}_i_lab_pending", None)
         comps = list(s["computers"].values())
         statuses = {
             (c["lab"], c["pc"]): D.pc_status(s, c["lab"], c["pc"]) for c in comps
@@ -567,6 +797,14 @@ class Inventory:
                     )
                     ui.remember(f"{p}_i_q__search__")
                     ui.remember(f"{p}_i_lab__sel__")
+                    if self.role.lower() == "admin":
+                        btn(
+                            "Add laboratory",
+                            f"{p}_i_addlab",
+                            "ghostsm",
+                            icon=":material/domain_add:",
+                            on_click=self.open_add_lab,
+                        )
                     btn(
                         "Add computer",
                         f"{p}_i_add",
@@ -610,6 +848,16 @@ class Inventory:
                         key=f"{p}_i_csv__ghostsm__",
                         disabled=not rows,
                     )
+                    if "print" in self.shell.titles:
+                        btn(
+                            "Generate report",
+                            f"{p}_i_report",
+                            "primarysm",
+                            icon=":material/description:",
+                            on_click=self._generate_report,
+                            args=(lab, flt, q or ""),
+                            disabled=not rows,
+                        )
             html('<div style="height:12px"></div>')
             if view == "map":
                 self._inventory_map(s, rows, lab)
@@ -847,27 +1095,23 @@ class Inventory:
                 html(
                     '<div class="form-note">Fields marked <span class="req">*</span> are required.</div>'
                 )
+                # Computers.Status as stored is offered even when it isn't one
+                # of the usual record statuses.
+                status_opts = list(D.RECORD_STATUSES)
+                if comp.get("status") and comp["status"] not in status_opts:
+                    status_opts.append(comp["status"])
                 with box(f"{p}_ed_grid", "formgrid"):
-                    field("Computer name", ek("name"), comp["tag"])
                     field(
                         "Record status",
                         ek("status"),
                         kind="select",
-                        options=D.RECORD_STATUSES,
+                        options=status_opts,
                     )
                     field("Brand", ek("brand"), "e.g. Dell")
                     field("Model", ek("model"), "e.g. OptiPlex 3080")
                     field("Serial number", ek("serial"), "Unique serial / service tag")
-                    html("<div></div>")
                     for label in self._hw_labels(comp):
                         field(label, ek("hw " + label), required=label in D.REQUIRED_HW)
-                field(
-                    "Notes",
-                    ek("notes"),
-                    "Anything else worth knowing",
-                    kind="area",
-                    max_chars=500,
-                )
                 with box(f"{p}_ed_btns", "mactions"):
                     btn(
                         "Cancel",
@@ -907,7 +1151,7 @@ class Inventory:
                         labs,
                         key=ek("add lab"),
                         label_visibility="collapsed",
-                        format_func=lambda x: f"{D.lab_name(x)} · {D.WING[x]}",
+                        format_func=lambda x: f"{D.lab_name(x)} · {D.WING.get(x, '')}",
                         on_change=self._add_lab_changed,
                     )
                 field(
@@ -917,9 +1161,9 @@ class Inventory:
                     required=True,
                     max_chars=3,
                     help_text=f"Asset ID will be {D.asset_tag(lab, 0)[:-2]}NN. Next free seat in {D.lab_name(lab)}: "
-                    f"{D.next_free_pc(s, lab)}. Seats 1–{D.MAP_SEATS} are drawn on the floor map.",
+                    f"{D.next_free_pc(s, lab)}."
+                    + (f" Seats 1–{D.MAP_SEATS} are drawn on the floor map." if D.on_floor_map(lab) else ""),
                 )
-                field("Computer name", ek("add name"), "Optional, e.g. Instructor PC")
                 field(
                     "Record status",
                     ek("add status"),
@@ -930,7 +1174,6 @@ class Inventory:
                 field("Brand", ek("add brand"), "e.g. Dell")
                 field("Model", ek("add model"), "e.g. OptiPlex 3080")
                 field("Serial number", ek("add serial"), "Unique serial / service tag")
-                html("<div></div>")
                 for label in D.HW_FIELDS:
                     field(label, ek("add hw " + label), required=label in D.REQUIRED_HW)
             with box(f"{p}_add_sw", "field"):
@@ -947,13 +1190,6 @@ class Inventory:
                 ek("add sw other"),
                 "Comma separated, e.g. Unity 2022.3, Blender 4.1",
             )
-            field(
-                "Notes",
-                ek("add notes"),
-                "Supplier, warranty, property number...",
-                kind="area",
-                max_chars=500,
-            )
             with box(f"{p}_add_btns", "mactions"):
                 btn(
                     "Cancel",
@@ -969,6 +1205,199 @@ class Inventory:
                     on_click=self._save_add,
                 )
 
+    # ------------------------------------------------------------------ add laboratory
+    # The computer units are saved to public."Computers" (Room + UnitNumber)
+    # and the laboratory is listed from there.
+    def open_add_lab(self) -> None:
+        ek = self._ek
+        lab_id = D.next_lab_id()
+        ss[ek("lab name")] = ""
+        ss[ek("lab code")] = f"CL{lab_id}"
+        ss[ek("lab building")] = ""
+        for k in ("lab floor", "lab room", "lab desc"):
+            ss[ek(k)] = ""
+        ss[ek("lab units")] = 40
+        ss[ek("lab cols")] = 8
+        ss[ek("lab specs")] = 0
+        self.shell.open_modal("addlab")
+
+
+    def _save_lab(self) -> None:
+        s, ek = self.store(), self._ek
+        if not self._live():
+            return
+        name = re.sub(r"\s+", " ", str(ss.get(ek("lab name")) or "")).strip()
+        code = str(ss.get(ek("lab code")) or "").strip().upper()
+        building = str(ss.get(ek("lab building")) or "").strip()
+        floor = str(ss.get(ek("lab floor")) or "").strip()
+        # Computers.Room of every unit (spaces tidied the same way the
+        # backend does, so the room matches the saved rows exactly).
+        room = re.sub(r"\s+", " ", str(ss.get(ek("lab room")) or "")).strip() or name
+        desc = str(ss.get(ek("lab desc")) or "").strip()
+        units = int(ss.get(ek("lab units")) or 0)
+        cols = int(ss.get(ek("lab cols")) or 8)
+        copy_from = int(ss.get(ek("lab specs")) or 0)
+        if not name or not code or not building:
+            return self.toast("Fill in the laboratory name, code and building / wing.", False)
+        if len(name) > 60:
+            return self.toast("Keep the laboratory name under 60 characters.", False)
+        if not re.fullmatch(r"[A-Z0-9][A-Z0-9-]{1,11}", code):
+            return self.toast("The code should be 2–12 letters or numbers, e.g. CL5 or ICT-LAB.", False)
+        # Only laboratories that exist in the database (D.LAB_INFO is built
+        # from the Computers rooms) and rooms of loaded computers count.
+        taken = {
+            key: {str(i.get(key) or "").strip().lower() for i in D.LAB_INFO.values()}
+            for key in ("name", "code", "room")
+        }
+        if name.lower() in taken["name"]:
+            return self.toast(f"There is already a laboratory called {name}.", False)
+        if code.lower() in taken["code"]:
+            return self.toast(f"The code {code} is already used by another laboratory.", False)
+        used_rooms = taken["room"] | taken["name"] | {
+            str(c.get("room") or "").strip().lower()
+            for c in s["computers"].values()
+            if c.get("room")
+        }
+        if room.lower() in used_rooms:
+            return self.toast(f"The room {room} is already used by another laboratory.", False)
+        if not 1 <= units <= 200:
+            return self.toast("Number of computer units: 1 to 200.", False)
+        if not 2 <= cols <= 12:
+            return self.toast("Seats per row: 2 to 12.", False)
+        specs = (
+            dict(zip(D.HW_FIELDS, self._lab_specs(copy_from))) if copy_from else {}
+        )
+        # The computer units go to public."Computers" first: if the database
+        # refuses them, nothing is added and the form stays open.
+        result = backend_client.admin_create_laboratory(
+            self._token(), room, units, {k: v for k, v in specs.items() if v}
+        )
+        if not self._saved(result):
+            return
+        room = str(result.get("room") or room)
+        made = len([c for c in result.get("computers") or [] if isinstance(c, dict)])
+        # The laboratory's details (name, code, building, floor, seats per
+        # row, description) have no column in the database: they are kept as
+        # labels for its Room. The laboratory itself, and its computers, are
+        # read from the database.
+        lab_id = D.next_lab_id()
+        lab = lab_store.add_lab(
+            {
+                "id": lab_id,
+                "name": name,
+                "code": code,
+                "building": building,
+                "wing": building + (f", floor {floor}" if floor else ""),
+                "floor": floor,
+                "room": room,
+                "units": units,
+                "cols": cols,
+                "desc": desc,
+                "specs": {k: v for k, v in specs.items() if v},
+                "created_by": self.me(),
+            }
+        )
+        self._reload()
+        lab_store.add_event(
+            "inventory",
+            f"New laboratory · {name}",
+            f"{building} · {made} computer unit(s) · by {self.me()}",
+            roles=("admin", "technician", "teacher"),
+            actor=self.me(),
+        )
+        extra = str(result.get("message") or "")
+        self.toast(
+            f"{lab['name']} added with {made} computer unit(s) (saved to the database)"
+            + (f". {extra.split('saved.', 1)[-1].strip()}" if "could not" in extra else "")
+        )
+        ss[f"{self.p}_i_lab_pending"] = room
+        ss[f"{self.p}_ipage"] = 0
+        self.shell.close_modal()
+
+    def modal_add_lab(self, s: dict) -> None:
+        p, ek = self.p, self._ek
+        with self.shell.window(wide=True):
+            html(
+                '<h3>Add laboratory</h3><div class="m-sub">Register a new computer laboratory. It appears in every '
+                "laboratory filter, the live monitoring map, analytics and printed reports. Its computer units are "
+                "created now, numbered PC 01, PC 02, …</div>"
+                '<div class="form-note">Fields marked <span class="req">*</span> are required.</div>'
+            )
+            with box(f"{p}_lab_grid", "formgrid"):
+                field("Laboratory name", ek("lab name"), "e.g. IT Laboratory or CSSC Laboratory", required=True, max_chars=60)
+                field(
+                    "Laboratory code",
+                    ek("lab code"),
+                    "e.g. CL5",
+                    required=True,
+                    max_chars=12,
+                    help_text="Used in asset IDs, e.g. CL5-PC01.",
+                )
+                field("Building / wing", ek("lab building"), "e.g. Main Building, 2nd floor", required=True, max_chars=60)
+                field("Floor", ek("lab floor"), "e.g. 2nd", max_chars=20)
+                field(
+                    "Room number / name",
+                    ek("lab room"),
+                    "e.g. Room 204 (defaults to the laboratory name)",
+                    max_chars=40,
+                    help_text="Saved as the computers' room in the database.",
+                )
+                with box(f"{p}_lab_units", "field"):
+                    html('<div class="adm-label">Number of computer units <span class="req">*</span></div>')
+                    st.number_input(
+                        "Number of computer units",
+                        min_value=1,
+                        max_value=200,
+                        step=1,
+                        key=ek("lab units"),
+                        label_visibility="collapsed",
+                    )
+                    html('<div class="adm-help">The units are saved in the database (Computers table).</div>')
+                with box(f"{p}_lab_cols", "field"):
+                    html('<div class="adm-label">Seats per row (map layout) <span class="req">*</span></div>')
+                    st.number_input(
+                        "Seats per row",
+                        min_value=2,
+                        max_value=12,
+                        step=1,
+                        key=ek("lab cols"),
+                        label_visibility="collapsed",
+                    )
+                with box(f"{p}_lab_specs", "field"):
+                    html('<div class="adm-label">Hardware specs for the new units</div>')
+                    opts = [0] + [lab for lab, _ in D.LABS]
+                    if ss.get(ek("lab specs")) not in opts:
+                        ss[ek("lab specs")] = 0
+                    st.selectbox(
+                        "Hardware specs",
+                        opts,
+                        key=ek("lab specs"),
+                        label_visibility="collapsed",
+                        format_func=lambda x: f"Same as {D.lab_name(x)}" if x else "Leave blank (fill in later)",
+                    )
+            field(
+                "Description",
+                ek("lab desc"),
+                "Purpose, equipment, schedule...",
+                kind="area",
+                max_chars=300,
+            )
+            if not s.get("live"):
+                html(
+                    f'<div class="demo-note">{ic("info")}<span>Not connected to the server: a laboratory '
+                    "can only be added when its computer units can be saved to the database.</span></div>"
+                )
+            with box(f"{p}_lab_btns", "mactions"):
+                btn("Cancel", f"{p}_lab_cancel", "ghost", on_click=self.shell.close_modal)
+                btn(
+                    "Add laboratory",
+                    f"{p}_lab_save",
+                    "primary",
+                    icon=":material/domain_add:",
+                    on_click=self._save_lab,
+                    disabled=not s.get("live"),
+                )
+
     def render_modal(self, s: dict, kind: str, ref) -> bool:
         if kind == "pc":
             self.modal_pc(s, ref)
@@ -976,6 +1405,10 @@ class Inventory:
             self.modal_edit(s, ref)
         elif kind == "add":
             self.modal_add(s)
+        elif kind == "addlab":
+            self.modal_add_lab(s)
+        elif kind == "pcreports":
+            self.modal_pc_reports(s, ref)
         else:
             return False
         return True

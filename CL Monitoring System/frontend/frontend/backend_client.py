@@ -1008,6 +1008,7 @@ def submit_teacher_report(
     computer_id: int,
     issues: list,
     comment: str = "",
+    category: str = "",
 ) -> dict:
     """
     POST /teacher/reports
@@ -1021,7 +1022,29 @@ def submit_teacher_report(
             "computer_id": computer_id,
             "issues": issues,
             "comment": comment,
+            "category": category,
         },
+        headers=_auth_headers(token),
+        timeout=15,
+    )
+
+
+def follow_up_teacher_report(
+    token: str,
+    report_id,
+    message: str = "",
+) -> dict:
+    """
+    POST /teacher/reports/{report_id}/follow-up
+
+    report_id: the ReportId (25) or its code ("CL-0025"). The backend checks
+    the rules (own report, still waiting, 2 days old, once a day), saves it
+    and notifies the technicians.
+    """
+    return _request(
+        "POST",
+        f"/teacher/reports/{quote(str(report_id), safe='')}/follow-up",
+        payload={"message": message or ""},
         headers=_auth_headers(token),
         timeout=15,
     )
@@ -1116,6 +1139,37 @@ def get_teacher_computers(
         "/teacher/computers",
         headers=_auth_headers(token),
         timeout=20,
+    )
+
+
+# =========================================================
+# NOTIFICATIONS (any role; the backend returns only the user's own)
+# =========================================================
+
+
+def get_notifications(token: str, limit: int = 50) -> dict:
+    """
+    GET /notifications -> {"success": True, "notifications": [...]}
+    """
+    return _request(
+        "GET",
+        "/notifications",
+        params={"limit": limit},
+        headers=_auth_headers(token),
+        timeout=15,
+    )
+
+
+def mark_notifications_read(token: str, ids: list | None = None) -> dict:
+    """
+    PATCH /notifications/read  (ids=None marks all as read)
+    """
+    return _request(
+        "PATCH",
+        "/notifications/read",
+        payload={"ids": ids},
+        headers=_auth_headers(token),
+        timeout=15,
     )
 
 
@@ -1243,6 +1297,81 @@ def admin_decide_escalation(
         },
         headers=_auth_headers(token),
         timeout=15,
+    )
+
+
+# =========================================================
+# INVENTORY (Admin and Technician) -> Supabase
+# =========================================================
+#
+# history: the lines added to MaintenanceHistory, [{"kind", "text"}].
+
+
+def inv_add_computer(token: str, data: dict) -> dict:
+    """POST /inventory/computers: {room, unit_number, brand, model, serial,
+    status, hardware {label: value}, software [{name, version}], history}."""
+    return _request("POST", "/inventory/computers", payload=data,
+                    headers=_auth_headers(token), timeout=30)
+
+
+def inv_update_computer(token: str, computer_id, data: dict) -> dict:
+    """PATCH /inventory/computers/{id}: {brand, model, serial, status,
+    hardware {label: value}, history}."""
+    return _request("PATCH", f"/inventory/computers/{quote(str(computer_id), safe='')}",
+                    payload=data, headers=_auth_headers(token), timeout=30)
+
+
+def inv_install_software(token: str, computer_id, name: str, version: str, history=None) -> dict:
+    return _request("POST", f"/inventory/computers/{quote(str(computer_id), safe='')}/software",
+                    payload={"name": name, "version": version, "history": history or []},
+                    headers=_auth_headers(token), timeout=15)
+
+
+def inv_update_software(token: str, software_id, version: str, history=None) -> dict:
+    return _request("PATCH", f"/inventory/software/{quote(str(software_id), safe='')}",
+                    payload={"version": version, "history": history or []},
+                    headers=_auth_headers(token), timeout=15)
+
+
+def inv_remove_software(token: str, software_id, history=None) -> dict:
+    return _request("POST", f"/inventory/software/{quote(str(software_id), safe='')}/remove",
+                    payload={"history": history or []},
+                    headers=_auth_headers(token), timeout=15)
+
+
+def inv_log_maintenance(token: str, computer_id, kind: str, text: str, done_by: str = "") -> dict:
+    return _request("POST", f"/inventory/computers/{quote(str(computer_id), safe='')}/maintenance",
+                    payload={"kind": kind, "text": text, "done_by": done_by},
+                    headers=_auth_headers(token), timeout=15)
+
+
+def admin_create_laboratory(
+    token: str,
+    room: str,
+    units: int,
+    hardware: dict | None = None,
+) -> dict:
+    """
+    Add a laboratory's computer units to public."Computers" (Admin only).
+
+        POST /admin/laboratories   {"room": "...", "units": 40}
+
+    Every unit gets Room = room and UnitNumber 1..units; the backend refuses
+    a room that already has computers. The response lists the saved rows:
+
+        {"success": true, "room": "...", "computers": [{"id", "room",
+         "unit_number", "status", ...}, ...]}
+    """
+    return _request(
+        "POST",
+        "/admin/laboratories",
+        payload={
+            "room": room,
+            "units": int(units),
+            "hardware": hardware or {},
+        },
+        headers=_auth_headers(token),
+        timeout=30,
     )
 
 

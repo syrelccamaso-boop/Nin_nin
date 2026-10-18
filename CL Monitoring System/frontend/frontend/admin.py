@@ -169,6 +169,42 @@ def _created(r: dict):
     return r.get("created")
 
 
+def _fix_seconds(r: dict) -> float | None:
+    """
+    How long one report took to fix, in seconds, from the database
+    timestamps:
+
+        start       Reports."CreatedAt"  (when the teacher reported it)
+        completion  Reports."FixedDate"  (when it was marked fixed)
+
+    Returns None -- the report is left out of every fix-time average --
+    when:
+        - the report is not fixed (still open, or sent back / reopened)
+        - CreatedAt or FixedDate is missing or not a valid timestamp
+          (no substitute such as UpdatedAt or "now" is used)
+        - FixedDate is not after CreatedAt
+    """
+
+    if not isinstance(r, dict) or r.get("status") != "fixed":
+        return None
+
+    # Live reports keep Reports.CreatedAt as "sent" (None when it is
+    # missing); "created" falls back to the current time, so it is not used
+    # for them. Reports made in this app only have "created".
+    start = D.parse_dt(r["sent"] if "sent" in r else r.get("created"))
+    end = D.fixed_at(r)
+
+    if start is None or end is None:
+        return None
+
+    try:
+        seconds = (end - start).total_seconds()
+    except TypeError:
+        return None
+
+    return seconds if seconds > 0 else None
+
+
 def _has_computer(s: dict, lab, pc) -> bool:
     """
     Report whether a given (lab, pc) exists in the loaded computer data.
@@ -482,7 +518,8 @@ def _open_report(rid: str) -> None:
 
     reports = _rows(store(), "reports")
 
-    if any(str(r.get("id")) == str(rid) for r in reports):
+    # rid: a report id, or a row_key (one problem of a report).
+    if D.find_problem_row(reports, rid) is not None:
         open_modal("report", rid)
         return
 
@@ -494,11 +531,31 @@ def _open_report(rid: str) -> None:
 
 def _notifications(s: dict) -> list[dict]:
     """
-    Build Admin notifications from backend-loaded data.
+    The Admin's notifications, from the database (Notifications table):
+    reports sent / edited / cancelled / updated, escalations and account
+    requests by teachers and technicians, as allowed by the Admin role's
+    NotificationPreferences. Created by the backend when those things happen.
 
-    Notifications are UI objects only.
+    Falls back to the notifications built from the loaded data when this
+    project's portal.py has no db_notifications().
+    """
 
-    They are NOT persisted through lab_store.py.
+    db_notifications = getattr(portal, "db_notifications", None)
+
+    if db_notifications is None:
+        return _notifications_from_data(s)
+
+    return db_notifications(
+        P,
+        open_report=_open_report,
+        on_account=lambda: go("requests"),
+    )
+
+
+def _notifications_from_data(s: dict) -> list[dict]:
+    """
+    Admin notifications built from the loaded reports / requests (used when
+    the database notifications are not available).
     """
 
     out: list[dict] = []
@@ -1473,6 +1530,10 @@ def _report_from_list(lab: int, flt: str) -> None:
 
 def page_reports(s: dict) -> None:
 
+    # One row per problem per computer (a report with two problems is two
+    # rows); the chips count the same rows.
+    problem_list = D.problem_rows(_rows(s, "reports"))
+
     flt = ss.setdefault(
         f"{P}_rfilter",
         "all",
@@ -1505,7 +1566,7 @@ def page_reports(s: dict) -> None:
 
                     count = sum(
                         _r_match(r, key)
-                        for r in _rows(s, "reports")
+                        for r in problem_list
                     )
 
                     btn(
@@ -1605,7 +1666,7 @@ def page_reports(s: dict) -> None:
 
         rows = []
 
-        for r in _rows(s, "reports"):
+        for r in problem_list:
 
             if not _r_match(r, flt):
                 continue
@@ -1700,9 +1761,9 @@ def page_reports(s: dict) -> None:
                 f'<span class="fakebtn">View</span>'
                 f"</div>"
                 f"</div>",
-                f"{P}_r_{report_id}",
+                f"{P}_r_{r.get('row_key', report_id)}",
                 open_modal,
-                ("report", report_id),
+                ("report", r.get("row_key", report_id)),
             )
 
         pager(
@@ -1756,26 +1817,20 @@ def page_analytics(s: dict) -> None:
         and _created(r) > now - timedelta(days=30)
     ]
 
-    # A report only contributes to fix-time statistics when it has BOTH a
-    # fixed timestamp and a creation timestamp. Requiring `created` here is
-    # what makes the `in24` calculation below safe -- it previously did
-    # `D.fixed_at(r) - r["created"]` over this list and raised KeyError on
-    # any fixed report whose `created` field was missing.
+    # Time to fix = Reports."FixedDate" - Reports."CreatedAt", both read from
+    # Supabase. Only completed fixes with valid timestamps count (see
+    # _fix_seconds); a report without them is left out, never estimated.
     fixed = [
         r
         for r in reports
-        if D.fixed_at(r)
-        and _created(r) is not None
+        if _fix_seconds(r) is not None
     ]
 
     def avg_fix(lst):
         seconds = [
-            (
-                D.fixed_at(r) - _created(r)
-            ).total_seconds()
-            for r in lst
-            if D.fixed_at(r)
-            and _created(r) is not None
+            secs
+            for secs in (_fix_seconds(r) for r in lst)
+            if secs is not None
         ]
 
         return (
@@ -1784,23 +1839,14 @@ def page_analytics(s: dict) -> None:
             else 0
         )
 
-    fixed_30 = [
-        r
-        for r in fixed
-        if D.fixed_at(r)
-        and D.fixed_at(r) > now - timedelta(days=30)
-    ]
-
-    average = avg_fix(fixed_30)
+    # Overall average: every fixed computer in every laboratory (or in the
+    # laboratory picked above), not only the last 30 days.
+    average = avg_fix(fixed)
 
     in24 = (
         round(
             sum(
-                (
-                    D.fixed_at(r)
-                    - _created(r)
-                ).total_seconds()
-                <= 86400
+                _fix_seconds(r) <= 86400
                 for r in fixed
             )
             / len(fixed)
@@ -2165,7 +2211,6 @@ def most_reported_section(s: dict, lab_filter: int) -> None:
         body = ""
         for x in shown:
             cid = h(x["db_id"]) if x["db_id"] not in (None, "") else "—"
-            name = x["name"] if x["name"] != x["tag"] else "—"
             status = (
                 portal.comp_badge(x["status"]) if x["status"]
                 else '<span class="badge b-neutral">Not in inventory</span>'
@@ -2173,7 +2218,6 @@ def most_reported_section(s: dict, lab_filter: int) -> None:
             body += (
                 f'<tr><td class="num strong">{x["rank"]}</td>'
                 f'<td class="strong">{h(x["tag"])}<div class="small">ID {cid}</div></td>'
-                f"<td>{h(name)}</td>"
                 f'<td>{h(D.lab_name(x["lab"]))}<div class="small">{h(D.pc_name(x["pc"]))}</div></td>'
                 f'<td class="num"><b>{x["total"]}</b></td>'
                 f'<td class="num">{x["open"]}</td><td class="num">{x["fixed"]}</td>'
@@ -2184,7 +2228,7 @@ def most_reported_section(s: dict, lab_filter: int) -> None:
         html(
             '<div class="table-wrap" style="margin:0">'
             '<table class="t"><thead><tr>'
-            '<th class="num">#</th><th>Computer ID</th><th>Computer name</th><th>Laboratory</th>'
+            '<th class="num">#</th><th>Computer ID</th><th>Laboratory</th>'
             '<th class="num">Total reports</th><th class="num">Open</th><th class="num">Fixed</th>'
             "<th>Most common problem</th><th>Last reported</th><th>Status now</th>"
             f"</tr></thead><tbody>{body}</tbody></table></div>"
@@ -3006,14 +3050,10 @@ def modal_report(
     rid: str,
 ) -> None:
 
-    report = next(
-        (
-            x
-            for x in _rows(s, "reports")
-            if str(x.get("id")) == str(rid)
-        ),
-        None,
-    )
+    # The problem row that was clicked (row_key), shown exactly as on the
+    # Reports page: one problem, its own entry. A plain report id opens the
+    # report's first problem.
+    report = D.find_problem_row(_rows(s, "reports"), rid)
 
     if report is None:
         return close_modal()
@@ -3023,6 +3063,28 @@ def modal_report(
         html(
             portal.report_details(report)
         )
+
+        # Every report for the same computer, so the Admin can switch
+        # between them (each is kept separately, with its own history).
+        if len(
+            D.pc_problem_rows(s, report.get("lab"), report.get("pc"))
+        ) > 1:
+            html(
+                '<h4 style="font-size:14px;margin:18px 0 10px">'
+                "All reports for this computer</h4>"
+                '<div class="m-sub" style="margin-top:-6px">'
+                "Each report is kept separately. Pick another one "
+                "to see its details and history.</div>"
+            )
+            portal.pc_report_list(
+                P,
+                s,
+                report.get("lab"),
+                report.get("pc"),
+                _open_report,
+                "m",
+                current=report.get("row_key"),
+            )
 
         with box(
             f"{P}_m_act",

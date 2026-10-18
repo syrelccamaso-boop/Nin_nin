@@ -1198,6 +1198,19 @@ def create_account(email: str):
 
     user = users.to_app_user(row)
 
+    # Tell the admins (best effort; never fails the sign-up).
+    try:
+        from . import notification_service as notify
+
+        name = f"{user.get('first_name', '')} {user.get('last_name', '')}".strip() or email
+        details = f"{user.get('role') or signup['role']} · {user.get('department') or ''} · {email}"
+        if user["status"] == "pending":
+            notify.notify_admins("account", notify.message(f"Account request · {name}", details))
+        else:
+            notify.notify_admins("account", notify.message(f"New account · {name}", details))
+    except Exception as exc:
+        logger.warning("Could not notify admins about the new account: %s", exc)
+
     return {
         "success": True,
         "message": "Account created successfully.",

@@ -31,9 +31,15 @@ ReportStatus database mapping:
     5 = Follow Up
     6 = Cancelled      <- new row needed in the ReportStatus table
 
-Urgency: the backend report call only takes computer_id / issues / comment, so a
-"High" urgency is stored as a tag at the start of the comment
-(see _URGENCY_TAG) and read back in _report_from_db().
+What a new report saves (Reports table):
+    Issues          the problem picked on the form, exactly as shown
+    Comment         the Details the teacher typed - nothing else
+    CategoryId      Hardware / Software, as picked on the form
+    ResolutionNote  empty; the technician's note goes there later
+
+Urgency has no column in Reports, so it is shown on the form but not saved.
+Older reports may still carry an urgency / issue tag at the start of the
+comment; _report_from_db() still reads those.
 
 Same-day rule (frontend only): the same computer can't be reported for the same
 problem twice on the same day. The teacher is told to report it again tomorrow
@@ -234,43 +240,12 @@ def _is_other(issue: str | None) -> bool:
     return bool(issue) and (issue == "Other" or issue.startswith("Other "))
 
 
-def _compose_comment(desc: str, urgency: str, issue: str | None = None, cat: str | None = None) -> str:
-    """Comment sent to the backend: [urgency tag] [issue tag] details.
-
-    The issue tag is only added when the problem name isn't in the ReportIssues
-    table yet (see _submit); it keeps the real problem so the app can show it.
-    """
-    parts = []
-    if urgency == "High":
-        parts.append(_URGENCY_TAG)
-    if issue:
-        parts.append(f"{_ISSUE_TAG_START}{cat or _category_of(issue) or 'Other'} | {issue}]")
-    desc = (desc or "").strip()
-    if desc:
-        parts.append(desc)
-    return " ".join(parts)
-
-
 def _read_issue_tag(comment: str) -> tuple[str | None, str | None, str]:
     """Pull '[ISSUE: Hardware | Mouse not working]' off the front of a comment."""
     m = _ISSUE_TAG_RE.match(comment or "")
     if not m:
         return None, None, comment
     return m.group(1).strip(), m.group(2).strip(), comment[m.end():].strip()
-
-
-def _issue_missing(result: dict) -> bool:
-    """True when the backend refused the report because the problem name isn't in ReportIssues."""
-    err = str(result.get("error") or result.get("detail") or "").lower()
-    return "reportissues" in err or "does not exist" in err
-
-
-def _fallback_issue() -> str:
-    """A problem name that already exists in the ReportIssues table."""
-    names = list(getattr(D, "ISSUES", []) or [])
-    if "Other" in names or not names:
-        return "Other"
-    return names[-1]
 
 
 def _reload() -> None:
@@ -335,6 +310,9 @@ def _build_store(result: dict) -> dict:
     s = D.empty_store()
     s["live"] = True
 
+    # Laboratories come from the database rooms (Computers.Room).
+    D.register_db_labs([c for c in result.get("computers") or [] if isinstance(c, dict)])
+
     for comp in result.get("computers") or []:
         lab = D.lab_of(comp.get("Room") or comp.get("room"))
         try:
@@ -350,9 +328,11 @@ def _build_store(result: dict) -> dict:
                "installed": str(i.get("DateInstalled") or i.get("date_installed") or "")}
               for i in (comp.get("software") or []) if isinstance(i, dict)]
 
-        db_status = str(comp.get("Status") or comp.get("status") or "good").lower()
+        raw_status = str(comp.get("Status") or comp.get("status") or "").strip()
+        db_status = (raw_status or "good").lower()
         rec_status = ("Under maintenance" if db_status == "issue"
-                      else "Inactive" if db_status == "replace" else "Working")
+                      else "Inactive" if db_status == "replace"
+                      else raw_status if raw_status and db_status != "good" else "Working")
 
         s["computers"][(lab, pc)] = D.new_computer(
             lab, pc, hw, sw,
@@ -572,11 +552,9 @@ def _save_edit(rid: str) -> None:
     if issue != r["first_issue"] and _reported_today(r["lab"], r["pc"], issue, skip_id=rid):
         return toast(_same_day_message(r["pc"]), False)
 
+    # Issues = the selected problem, Comment = the details only.
     result = _call("update_teacher_report", _token(), report_id=r["db_id"], issues=[issue],
-                   comment=_compose_comment(desc, urg), reason=reason)
-    if not result.get("success") and _issue_missing(result):
-        result = _call("update_teacher_report", _token(), report_id=r["db_id"], issues=[_fallback_issue()],
-                       comment=_compose_comment(desc, urg, issue=issue), reason=reason)
+                   comment=desc, reason=reason, category=ss.get(f"{P}_ed_cat") or "")
     if not result.get("success") and not result.get("offline"):
         return toast(result.get("error") or "Could not update the report.", False)
     if result.get("offline"):
@@ -746,16 +724,12 @@ def _submit() -> None:
     if computer_id is None:
         return toast("Could not find that computer in the database. Please refresh and try again.", False)
 
+    # Issues = the selected problem, Comment = the details only,
+    # category = the Hardware / Software choice.
     result = backend_client.submit_teacher_report(
-        _token(), computer_id=computer_id, issues=[d["issue"]], comment=_compose_comment(desc, d["urg"]),
+        _token(), computer_id=computer_id, issues=[d["issue"]], comment=desc,
+        category=d.get("cat") or "",
     )
-    if not result.get("success") and _issue_missing(result):
-        # The problem name isn't in the ReportIssues table yet: save it under an
-        # existing name ("Other") and keep the real problem in the comment.
-        result = backend_client.submit_teacher_report(
-            _token(), computer_id=computer_id, issues=[_fallback_issue()],
-            comment=_compose_comment(desc, d["urg"], issue=d["issue"], cat=d.get("cat")),
-        )
     if not result.get("success"):
         return toast(result.get("error") or "Could not send the report.", False)
 

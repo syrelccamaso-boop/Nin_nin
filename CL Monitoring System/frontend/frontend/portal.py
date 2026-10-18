@@ -161,7 +161,9 @@ def empty(text: str, icon_name: str = "check") -> str:
 def report_details(r: dict) -> str:
     """The body of a report's details window (who, when, urgency, technician, progress)."""
     tl = "".join(
-        f'<li><b>{D.STATUS[e["s"]][0]}</b> — {h(e["note"])}<span>{D.sent_date_time(e["t"])}</span></li>'
+        f'<li><b>{h(e.get("label") or D.STATUS.get(e["s"], (e["s"],))[0])}</b> — {h(e["note"])}<span>'
+        + ("Time not recorded" if e.get("t_unknown") else D.sent_date_time(e["t"]))
+        + "</span></li>"
         for e in r["history"]
     )
     # Reports.CreatedAt as stored ("sent"); older reports without it fall back to "created".
@@ -178,20 +180,82 @@ def report_details(r: dict) -> str:
         f'<dl class="kv"><dt>Reported by</dt><dd>{h(D.by_name(r))}</dd><dt>Reported</dt><dd>{reported}'
         f'</dd><dt>Urgency</dt><dd>{h(r["urgency"])}</dd><dt>Technician</dt>'
         f'<dd>{h(r["tech"] or "Not assigned yet")}</dd><dt>Details</dt><dd>{h(r["desc"] or "—")}</dd>{esc}</dl>'
-        f'<h4 style="font-size:14px;margin-bottom:10px">Progress</h4><ul class="timeline">{tl}</ul>'
+        f'<h4 style="font-size:14px;margin-bottom:10px">Report history</h4><ul class="timeline">{tl}</ul>'
     )
+
+
+def pc_report_list(p: str, s: dict, lab: int, pc: int, on_open, ctx: str, current=None) -> int:
+    """Every report for one computer, listed exactly like the Reports page: one
+    entry per problem (open first, newest first). on_open(row_key) opens it;
+    `current` (a row_key) is shown as the one being viewed. Returns how many
+    entries were listed."""
+    reps = D.pc_problem_rows(s, lab, pc)
+    for i, r in enumerate(reps):
+        last = i == len(reps) - 1
+        sub = f"{r['issue']} · {D.by_name(r)} · {D.sent_date(r.get('sent', r['created']))}"
+        if r["row_key"] == current:
+            html(
+                row(
+                    "alert",
+                    tone(r["status"]),
+                    f"{h(r['id'])} · viewing now",
+                    sub,
+                    badge(r["status"]),
+                    last=last,
+                )
+            )
+            continue
+        hit(
+            row(
+                "alert",
+                tone(r["status"]),
+                h(r["id"]),
+                sub,
+                badge(r["status"]),
+                last=last,
+                clickable=True,
+            ),
+            f"{p}_pcr_{ctx}_{r['row_key']}",
+            on_open,
+            (r["row_key"],),
+        )
+    return len(reps)
 
 
 # ===========================================================================
 # How Streamlit's widgets fit into the design
 # ===========================================================================
-_PC_POS = [
-    (int(m.group(1)), int(m.group(2)), float(m.group(3)), float(m.group(4)))
-    for m in re.finditer(
-        r'data-room="(\d+)" data-pc="(\d+)"[^>]*rotate\([-\d.]+ ([\d.]+) ([\d.]+)\)',
-        MAP_SVG,
-    )
-]
+def _map_positions(svg: str) -> tuple[list, tuple]:
+    """Where every computer of the floor plan really is, as
+    (lab, pc, centre x %, centre y %) of the drawing's width, plus the drawing's
+    viewBox. Read from each <rect class="pc">: its own x / y / width / height,
+    turned by its rotate(); so the click/hover area sits exactly on the drawn
+    computer whatever the viewBox or rotation centre is."""
+    vb = re.search(r'viewBox="([-\d.]+)[ ,]+([-\d.]+)[ ,]+([\d.]+)[ ,]+([\d.]+)"', svg)
+    vx, vy, vw, vh = (float(v) for v in vb.groups()) if vb else (0.0, 0.0, 612.0, 612.0)
+    out = []
+    for tag in re.findall(r'<rect class="pc"[^>]*>', svg):
+        attr = dict(re.findall(r'([\w-]+)="([^"]*)"', tag))
+        try:
+            lab, pc = int(attr["data-room"]), int(attr["data-pc"])
+            x, y = float(attr["x"]), float(attr["y"])
+            w, hgt = float(attr["width"]), float(attr["height"])
+        except (KeyError, ValueError):
+            continue
+        cx, cy = x + w / 2, y + hgt / 2
+        rot = re.search(r"rotate\(([-\d.]+)(?:[ ,]+([-\d.]+)[ ,]+([-\d.]+))?\)", attr.get("transform", ""))
+        if rot:
+            a = math.radians(float(rot.group(1)))
+            ox, oy = (float(rot.group(2)), float(rot.group(3))) if rot.group(2) else (0.0, 0.0)
+            dx, dy = cx - ox, cy - oy
+            cx, cy = ox + dx * math.cos(a) - dy * math.sin(a), oy + dx * math.sin(a) + dy * math.cos(a)
+        # Both as % of the WIDTH (left and margin-top), so the drawing's height
+        # never shifts them.
+        out.append((lab, pc, (cx - vx) / vw * 100, (cy - vy) / vw * 100))
+    return out, (vx, vy, vw, vh)
+
+
+_PC_POS, _ = _map_positions(MAP_SVG)
 
 GLUE_CSS = """
 [data-testid="stToolbarActions"], [data-testid="stMainMenu"], [data-testid="stAppDeployButton"], [data-testid="stDecoration"],
@@ -372,10 +436,23 @@ section[data-testid="stSidebar"][aria-expanded="false"] .st-key-cl_sidefoot { di
 
 /* live floor map: an invisible button over every computer */
 [class*="__mapbox__"] { position: relative; max-width: 560px; width: 100%; margin: 0 auto; }
-[class*="__pcdot__"] { position: absolute !important; width: 2.9% !important; height: 2.9% !important; z-index: 5;
-  transform: translate(-50%, -50%); margin: 0 !important; }
+/* top 0 + margin-top % (a % of the WIDTH, like left) keeps every button on its computer even
+   when the map's box is taller than the drawing; the size is a % of the width too */
+[class*="__pcdot__"] { position: absolute !important; top: 0 !important; width: 2.9% !important; height: auto !important;
+  aspect-ratio: 1 / 1; z-index: 5; transform: translate(-50%, -50%); margin: 0 !important; overflow: visible !important; }
+[class*="__pcdot__"]:hover { z-index: 30; }
 [class*="__pcdot__"] *, [class*="__pcdot__"] button { width: 100% !important; height: 100% !important; min-height: 0 !important; padding: 0 !important; }
-[class*="__pcdot__"] button { opacity: 0 !important; border-radius: 50% !important; cursor: pointer; }
+[class*="__pcdot__"] button { opacity: 0 !important; border-radius: 50% !important; cursor: pointer;
+  overflow: hidden !important; font-size: 0 !important; line-height: 0 !important; border: 0 !important; }
+/* the button's (invisible) label must not stick out of its circle: it would cover the neighbouring
+   computers - even ones in the next laboratory - and show their details */
+[class*="__pcdot__"] button * { display: none !important; }
+/* the hovered computer's details: drawn by CSS on the hovered button itself, and never catches the mouse */
+[class*="__pcdot__"]::after { position: absolute; left: 50%; bottom: calc(100% + 8px); transform: translateX(-50%);
+  display: none; pointer-events: none; white-space: nowrap; max-width: 340px; overflow: hidden; text-overflow: ellipsis;
+  background: var(--navy, #14213d); color: #fff; font: 600 12px/1.35 'Open Sans', 'Segoe UI', sans-serif;
+  padding: 6px 10px; border-radius: 8px; box-shadow: 0 6px 18px rgba(20, 33, 61, .22); }
+[class*="__pcdot__"]:hover::after { display: block; }
 /* live monitoring: Working / Reported / Under repair / Escalated (+ maintenance, inactive) */
 :root { --ok: #2fae66; --maint: #0e9f9a; }
 .fp .pc.s-none { fill: #e3e8f0; }
@@ -746,8 +823,10 @@ _CSS_CACHE: list[str] = []
 def css() -> str:
     if not _CSS_CACHE:
         pos = "".join(
-            f'[class*="_{lab}_{pc}__pcdot__"]{{left:{(cx + 6) / 612 * 100:.2f}%;top:{(cy + 6) / 612 * 100:.2f}%;}}'
-            for lab, pc, cx, cy in _PC_POS
+            # stronger than the general __pcdot__ rule however the styles are scoped
+            f'[class*="__mapbox__"] [class*="_{lab}_{pc}__pcdot__"][class*="__pcdot__"]'
+            f'{{left:{px:.3f}% !important;top:0 !important;margin:{py:.3f}% 0 0 0 !important;}}'
+            for lab, pc, px, py in _PC_POS
         )
         _CSS_CACHE.append(ui.scope_css(PORTAL_CSS + GLUE_CSS) + pos)
     return _CSS_CACHE[0]
@@ -942,9 +1021,15 @@ def map_svg(
 
 def pc_tip(s: dict, lab: int, pc: int) -> str:
     r = D.pc_report(s, lab, pc)
+    n_open = sum(x["status"] in D.OPEN for x in D.pc_problem_rows(s, lab, pc))
     comp = s["computers"].get((lab, pc))
     name = f" ({comp['name']})" if comp and comp["name"] != comp["tag"] else ""
     head = f"{D.lab_name(lab)} · {D.pc_name(pc)}{name}"
+    if r and n_open > 1:
+        return (
+            f"{head} — {n_open} open reports (latest: {D.STATUS[r['status']][0]}: "
+            f"{r['issue']}, {D.when(r['created'])})"
+        )
     if r:
         return f"{head} — {D.STATUS[r['status']][0]}: {r['issue']}, {D.when(r['created'])}"
     return f"{head} — {D.computer_status_label(D.pc_status(s, lab, pc))[0]}"
@@ -984,6 +1069,33 @@ def lab_grid(p: str, s: dict, ctx: str, lab: int, on_pc, sel: tuple | None = Non
             )
 
 
+def _css_text(text: str) -> str:
+    """Text for a CSS content: "..." string (quotes, backslashes, line breaks
+    and "<" escaped, so it can't end the string or the <style> tag)."""
+    return (
+        str(text).replace("\\", "\\\\").replace('"', '\\"')
+        .replace("\n", " ").replace("\r", " ").replace("<", "\\3C ")
+    )
+
+
+def _map_hover_css(s: dict, ctx: str, shown: list) -> str:
+    """The hover details of every computer on the floor map. Each button shows
+    the details of ITS computer (pc_tip) and outlines that computer's drawing,
+    so what is shown always matches the computer under the cursor. Computers
+    near the top of the map show their details below instead of above."""
+    rules = []
+    for lab, pc, py in shown:
+        key = f'[class*="pcb_{ctx}_{lab}_{pc}__pcdot__"]'
+        rules.append(f'{key}::after{{content:"{_css_text(pc_tip(s, lab, pc))}";}}')
+        if py < 12:
+            rules.append(f"{key}::after{{bottom:auto;top:calc(100% + 8px);}}")
+        rules.append(
+            f'[class*="__mapbox__"]:has({key}:hover) .fp .pc[data-room="{lab}"][data-pc="{pc}"]'
+            "{stroke:var(--navy);stroke-width:2.5;}"
+        )
+    return f"<style>{''.join(rules)}</style>" if rules else ""
+
+
 def live_map(
     p: str, s: dict, ctx: str, on_pc, focus: int | None = None, sel: tuple | None = None
 ) -> None:
@@ -994,16 +1106,22 @@ def live_map(
     show_svg = not focus or D.on_floor_map(focus)
     if show_svg:
         with box(f"{p}_map_{ctx}", "mapbox"):
-            html(f'<div class="map-wrap">{map_svg(s, ctx, focus, sel)}</div>')
-            for lab, pc, _, _ in _PC_POS:
-                if (lab, pc) in s["computers"] and (not focus or focus == lab):
-                    st.button(
-                        f"{D.lab_name(lab)} {D.pc_name(pc)}",
-                        key=f"pcb_{ctx}_{lab}_{pc}__pcdot__",
-                        help=pc_tip(s, lab, pc),
-                        on_click=on_pc,
-                        args=(lab, pc),
-                    )
+            shown = [
+                (lab, pc, py)
+                for lab, pc, _, py in _PC_POS
+                if (lab, pc) in s["computers"] and (not focus or focus == lab)
+            ]
+            html(
+                f'<div class="map-wrap">{map_svg(s, ctx, focus, sel)}</div>'
+                + _map_hover_css(s, ctx, shown)
+            )
+            for lab, pc, _ in shown:
+                st.button(
+                    f"{D.lab_name(lab)} {D.pc_name(pc)}",
+                    key=f"pcb_{ctx}_{lab}_{pc}__pcdot__",
+                    on_click=on_pc,
+                    args=(lab, pc),
+                )
     extra = [lab for lab, _ in D.LABS if not D.on_floor_map(lab) and (not focus or focus == lab)]
     for lab in extra:
         lab_grid(p, s, ctx, lab, on_pc, sel)
@@ -1173,6 +1291,104 @@ def lab_analytics(p: str, s: dict, ctx: str = "dash", title: str = "Laboratory a
 # ===========================================================================
 # The shell: sidebar, top bar, page + pop-up state
 # ===========================================================================
+# ===========================================================================
+# Notifications stored in the database (Notifications table)
+# ===========================================================================
+DB_NOTIF_TTL = 20  # seconds the bell keeps the fetched list before asking again
+
+
+def _db_notif_style(title: str) -> tuple[str, str]:
+    t = (title or "").lower()
+    if t.startswith("escalation") or "escalated" in t:
+        return "up", "ic-violet"
+    if t.startswith("new report"):
+        return "alert", "ic-amber"
+    if t.startswith("follow-up"):
+        return "bell", "ic-amber"
+    if "fixed" in t:
+        return "check", "ic-green"
+    if "under repair" in t:
+        return "wrench", "ic-red"
+    if "account" in t:
+        return "users", "ic-violet"
+    return "bell", "ic-blue"
+
+
+def db_notifications(p: str, open_report=None, on_account=None) -> list[dict]:
+    """The signed-in user's notifications from the database, as bell items.
+
+    Fetched from the backend (GET /notifications, the user's own rows only)
+    and kept for DB_NOTIF_TTL seconds. A notification about a report
+    ("CL-0025") opens that report with open_report(code); an account
+    notification calls on_account()."""
+    import time
+
+    from frontend import backend_client
+
+    token = ss.get(ui.TOKEN_KEY)
+    if not token:
+        return []
+    key = f"{p}_dbnotif"
+    cached = ss.get(key)
+    if cached and time.time() - cached[0] < DB_NOTIF_TTL:
+        rows = cached[1]
+    else:
+        try:
+            result = backend_client.get_notifications(token)
+        except Exception:
+            result = {}
+        rows = result.get("notifications") if result.get("success") else None
+        if not isinstance(rows, list):
+            rows = cached[1] if cached else []  # keep the last list if the server is down
+        ss[key] = (time.time(), rows)
+    items = []
+    for n in rows:
+        if not isinstance(n, dict) or n.get("id") is None:
+            continue
+        title = n.get("title") or n.get("message") or "Notification"
+        icon, tone = _db_notif_style(title)
+        cb, args = None, ()
+        if n.get("report_code") and open_report:
+            cb, args = open_report, (n["report_code"],)
+        elif "account" in title.lower() and on_account:
+            cb = on_account
+        items.append(
+            {
+                "id": f"db:{n['id']}",
+                "icon": icon,
+                "tone": tone,
+                "title": title,
+                "sub": n.get("details") or "",
+                "t": D.parse_dt(n.get("created_at")),
+                "cb": cb,
+                "args": args,
+                "read": bool(n.get("read")),
+            }
+        )
+    return items
+
+
+def _db_mark_read(p: str, ids) -> None:
+    """Save 'read' in the database for notifications that came from it."""
+    db_ids = []
+    for i in ids or []:
+        if str(i).startswith("db:"):
+            try:
+                db_ids.append(int(str(i)[3:]))
+            except ValueError:
+                pass
+    token = ss.get(ui.TOKEN_KEY)
+    if not db_ids or not token:
+        return
+    try:
+        from frontend import backend_client
+
+        backend_client.mark_notifications_read(token, db_ids)
+    except Exception:
+        pass
+    ss.pop(f"{p}_dbnotif", None)  # fetch again so the read marks show
+
+
 class Shell:
     """One dashboard's frame. pages = [(key, label, icon), ...]."""
 
@@ -1272,12 +1488,14 @@ class Shell:
 
     def _open_notif(self, ukey: str, nid: str, cb, args) -> None:
         lab_store.mark_read(ukey, [nid])
+        _db_mark_read(self.p, [nid])
         self.close_modal()  # close the notifications window, then open the item
         if cb:
             cb(*args)
 
     def _mark(self, ukey: str, ids: list) -> None:
         lab_store.mark_read(ukey, ids)
+        _db_mark_read(self.p, ids)
         self.toast(
             "Marked as read"
             if len(ids) == 1
@@ -1289,7 +1507,8 @@ class Shell:
         count. It opens the notifications window (no dropdown menu)."""
         ukey = self.user_key(user)
         items = self._visible(items)
-        read = lab_store.read_ids(ukey)
+        # read: marked here, or (database notifications) IsRead in the database
+        read = lab_store.read_ids(ukey) | {n["id"] for n in items if n.get("read")}
         n_unread = sum(1 for n in items if n["id"] not in read)
         # what the notifications window shows (drawn later with the other pop-ups)
         ss[f"{self.p}_notif_ctx"] = (ukey, items)
@@ -1310,7 +1529,9 @@ class Shell:
     def notifications_window(self) -> None:
         """The notifications pop-up window (opened from the bell)."""
         ukey, items = ss.get(f"{self.p}_notif_ctx") or ("", [])
-        read = lab_store.read_ids(ukey) if ukey else set()
+        read = (lab_store.read_ids(ukey) if ukey else set()) | {
+            n["id"] for n in items if n.get("read")
+        }
         unread = [n for n in items if n["id"] not in read]
         n_unread = len(unread)
         view_key = f"{self.p}_nview"

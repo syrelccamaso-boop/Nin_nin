@@ -221,6 +221,109 @@ def register_labs(labs: list[dict]) -> None:
     LABS[:] = sorted(WING.items())
 
 
+# The laboratories built into the app (drawn on the floor map).
+_BUILTIN_LABS = list(LABS)
+_BUILTIN_INFO = {lab: dict(info) for lab, info in LAB_INFO.items()}
+
+
+def _builtin_lab_of(room: str) -> int | None:
+    """The built-in laboratory a Computers.Room belongs to, if any."""
+    text = " ".join(str(room or "").split()).lower()
+    if not text:
+        return None
+    for lab, info in _BUILTIN_INFO.items():
+        for key in ("room", "name", "code"):
+            if text == str(info.get(key) or "").strip().lower():
+                return lab
+    m = re.search(r"\d+", text)
+    if m and int(m.group()) in _BUILTIN_INFO:
+        return int(m.group())
+    return None
+
+
+# Saved details of laboratories added with "Add laboratory" (name, code,
+# building, floor, seats per row...): set by lab_store. They only label a
+# Room that exists in the database; a laboratory is never listed from them.
+LAB_DETAILS = lambda: []  # noqa: E731
+
+
+def _saved_details() -> dict[str, dict]:
+    """{room (lower case): saved details}; the latest entry for a room wins."""
+    out: dict[str, dict] = {}
+    try:
+        saved = LAB_DETAILS() or []
+    except Exception:
+        saved = []
+    for info in saved:
+        if isinstance(info, dict):
+            room = " ".join(str(info.get("room") or info.get("name") or "").split()).lower()
+            if room:
+                out[room] = info
+    return out
+
+
+def register_db_labs(units) -> None:
+    """The laboratories, from the database only: the built-in ones plus one
+    laboratory per other Computers.Room. units: the computers (dicts with
+    'room' / 'Room' and 'id' / 'ComputerId'); a room's laboratory number
+    follows the order its first computer was added, so it stays the same.
+
+    LABS / WING / LAB_INFO are rebuilt in place (every module sees them)."""
+    first: dict[str, tuple[int, str]] = {}
+    for u in units or []:
+        if not isinstance(u, dict):
+            continue
+        room = " ".join(str(u.get("room") or u.get("Room") or "").split())
+        if not room or _builtin_lab_of(room) is not None:
+            continue
+        try:
+            cid = int(u.get("id") or u.get("ComputerId") or u.get("computer_id") or 0)
+        except (TypeError, ValueError):
+            cid = 0
+        key = room.lower()
+        if key not in first or cid < first[key][0]:
+            first[key] = (cid, room)
+    LAB_INFO.clear()
+    LAB_INFO.update({lab: dict(info) for lab, info in _BUILTIN_INFO.items()})
+    WING.clear()
+    WING.update(dict(_BUILTIN_LABS))
+    details = _saved_details()
+    rooms = [room for _, room in sorted(first.values())]
+    # A room added with "Add laboratory" keeps its number (asset IDs such as
+    # CL5-PC01); the other rooms get the next free numbers.
+    used = set(_BUILTIN_INFO)
+    wanted: dict[str, int] = {}
+    for room in rooms:
+        try:
+            n = int((details.get(room.lower()) or {}).get("id") or 0)
+        except (TypeError, ValueError):
+            n = 0
+        if n > 0 and n not in used:
+            wanted[room] = n
+            used.add(n)
+    for room in rooms:
+        lab = wanted.get(room)
+        if lab is None:
+            # The lowest free number, so the numbers of the other rooms stay
+            # the same when a laboratory is added.
+            lab = max(_BUILTIN_INFO) + 1
+            while lab in used:
+                lab += 1
+            used.add(lab)
+        saved = details.get(room.lower()) or {}
+        info = {
+            "id": lab, "name": room, "code": f"CL{lab}", "wing": "", "building": "",
+            "floor": "", "room": room, "units": 0, "cols": 8, "desc": "", "builtin": False,
+        }
+        if wanted.get(room) == lab:
+            info.update({k: v for k, v in saved.items() if v not in (None, "") and k != "id"})
+            info["room"] = room
+        info["wing"] = str(info.get("wing") or info.get("building") or "")
+        LAB_INFO[lab] = info
+        WING[lab] = info["wing"]
+    LABS[:] = sorted(WING.items())
+
+
 def next_lab_id() -> int:
     return max([lab for lab, _ in LABS] + [0]) + 1
 
@@ -375,7 +478,17 @@ def fixed_at(r: dict) -> datetime | None:
 
     return None
 
-_LIVE_STATUS = {"resolved": "fixed", "followup": "escalated"}
+# Status text from the backend -> status here. technician_service sends the
+# labels "Under repair" / "Fixed" / "Follow Up"; the raw codes "resolved" /
+# "followup" are accepted too. Anything else is "Under repair" once a
+# technician has it, otherwise "Reported".
+_LIVE_STATUS = {
+    "resolved": "fixed",
+    "fixed": "fixed",
+    "followup": "escalated",
+    "follow up": "escalated",
+    "follow-up": "escalated",
+}
 
 
 def report_from_backend(r: dict) -> dict:
@@ -389,6 +502,12 @@ def report_from_backend(r: dict) -> dict:
         issues = [i.strip() for i in issues.split(",") if i.strip()]
     sent_at = parse_dt(r.get("created_at"))  # Reports.CreatedAt; None when missing
     created = sent_at or now()
+    # Reports.UpdatedAt: set by the backend on every status change, so it is
+    # when the report reached its CURRENT status. Earlier steps are not stored
+    # in the database (there is no report-history table).
+    changed = parse_dt(r.get("updated_at"))
+    if changed and changed < created:
+        changed = None
     note = str(r.get("resolution_note") or "")
     try:
         pc = int(r.get("unit_number") or 0)
@@ -401,6 +520,8 @@ def report_from_backend(r: dict) -> dict:
         "lab": lab_of(r.get("room")),
         "pc": pc,
         "issue": ", ".join(map(str, issues)) or "Other",
+        # Each problem the teacher picked, kept separately.
+        "issues": [str(i) for i in issues] or ["Other"],
         "desc": str(r.get("comment") or ""),
         "by": str(r.get("reporter") or "Unknown"),
         "created": created,
@@ -412,18 +533,72 @@ def report_from_backend(r: dict) -> dict:
         "esc_note": note if status == "escalated" else "",
         "history": [{"s": "reported", "t": created, "note": "Report sent"}],
     }
-    if status != "reported":
-        rep["history"].append(
-            {
-                "s": "repair",
-                "t": created,
-                "note": f"{handled or 'Technician'} started the repair",
-            }
+    # When each step happened: Reports.UnderRepairDate / EscalatedDate /
+    # FixedDate / FollowUpDate (once those columns exist); otherwise only
+    # the current step's time is known (UpdatedAt).
+    repair_at = parse_dt(r.get("under_repair_date"))
+    escalated_at = parse_dt(r.get("escalated_date"))
+    fixed_at_ = parse_dt(r.get("fixed_date"))
+    follow_at = parse_dt(r.get("follow_up_date"))
+    if fixed_at_:
+        rep["fixed_at"] = fixed_at_  # read by fixed_at() (time to fix in Analytics)
+
+    def step(s, note_text, when, current, label=None):
+        e = {"s": s, "note": note_text}
+        if label:
+            e["label"] = label
+        when = when or (changed if current else None)
+        if when:
+            e["t"] = when
+        else:
+            # Not stored: created is only a placeholder for sorting; it is
+            # shown as "Time not recorded".
+            e.update(t=created, t_unknown=True)
+        rep["history"].append(e)
+
+    if follow_at:
+        # s="reported" so screens that only know the four statuses still work;
+        # the label shows it as a follow-up.
+        step("reported", "The teacher followed up: still waiting for a technician",
+             follow_at, False, label="Follow-up")
+    if status != "reported" or repair_at:
+        step("repair", f"{handled or 'Technician'} started the repair", repair_at,
+             status == "repair" and not escalated_at)
+    # The Admin's decisions on escalations (ReportDecisions table), oldest first.
+    decisions = [d for d in r.get("admin_decisions") or [] if isinstance(d, dict)]
+    last = decisions[-1] if decisions else {}
+    decision = str(last.get("decision") or "")
+    decided_at = parse_dt(last.get("decided_at"))
+    resolved_by_admin = decision == "resolve"
+
+    if status == "escalated" or escalated_at:
+        # ResolutionNote still holds the technician's escalation reason while
+        # the report is escalated, and after an admin decision until the
+        # technician writes a new note (marks it fixed).
+        reason_kept = status == "escalated" or (
+            decision and (resolved_by_admin or status == "repair")
         )
-    if status in ("escalated", "fixed"):
-        rep["history"].append(
-            {"s": status, "t": created, "note": note or STATUS[status][0]}
-        )
+        step("escalated", note if reason_kept and note else "Escalated to the admin",
+             escalated_at, status == "escalated")
+    labels = {
+        "approve": ("repair", "Replacement approved"),
+        "resolve": ("fixed", "Resolved by the admin"),
+        "send_back": ("repair", "Sent back to the technician"),
+    }
+    for d in decisions:
+        kind, label = labels.get(str(d.get("decision")), ("repair", "Admin decision"))
+        step(kind, str(d.get("note") or label), parse_dt(d.get("decided_at")), False, label=label)
+
+    if status == "fixed" and not (resolved_by_admin and (not fixed_at_ or fixed_at_ == decided_at)):
+        # (when the admin resolved it, the decision above is the "fixed" step)
+        step("fixed", note or STATUS["fixed"][0], fixed_at_, True)
+    # Steps in the order they happened (unknown times keep their place).
+    first = rep["history"][0]
+    known = sorted((e for e in rep["history"][1:] if not e.get("t_unknown")), key=lambda e: e["t"])
+    ordered, it = [first], iter(known)
+    for e in rep["history"][1:]:
+        ordered.append(e if e.get("t_unknown") else next(it))
+    rep["history"] = ordered
     return rep
 
 
@@ -452,7 +627,8 @@ def new_computer(
         "brand": brand,
         "model": model,
         "serial": serial,
-        "status": status if status in RECORD_STATUSES else "Working",
+        # Computers.Status as stored (computer_status enum).
+        "status": str(status or "").strip() or "Working",
         "hardware": dict(hardware),
         "software": [dict(s) for s in software],
         "log": [],
@@ -492,6 +668,7 @@ def hardware_fields(row) -> dict:
 
 def computers_from_units(units: list[dict]) -> dict:
     """Computers stored in the backend (/... units) -> inventory records."""
+    register_db_labs(units)
     comps = {}
     for u in units or []:
         lab = lab_of(u.get("room"))
@@ -505,7 +682,7 @@ def computers_from_units(units: list[dict]) -> dict:
         hw = hardware_fields(u.get("hardware"))
         for k, v in hardware_fields(u.get("system")).items():
             hw.setdefault(k, v)
-        sw_raw = u.get("software") or []
+        sw_raw = u.get("software_rows") or u.get("software") or []
         if isinstance(sw_raw, dict):
             sw_raw = list(sw_raw.items())
         sw = []
@@ -524,6 +701,8 @@ def computers_from_units(units: list[dict]) -> dict:
                         "name": str(item.get("name", "")),
                         "version": str(item.get("version", "")),
                         "installed": str(item.get("installed") or ""),
+                        # ComputerSoftware.SoftwareId (update / remove it).
+                        "id": item.get("id"),
                     }
                 )
         comps[(lab, pc)] = new_computer(
@@ -532,10 +711,29 @@ def computers_from_units(units: list[dict]) -> dict:
             {str(k): str(v) for k, v in hw.items()},
             sw,
             name=str(u.get("name") or ""),
-            added=parse_dt(u.get("created_at")),
+            added=parse_dt(u.get("date_added")) or parse_dt(u.get("created_at")),
+            brand=str(u.get("brand") or ""),
+            model=str(u.get("model") or ""),
+            serial=str(u.get("serial") or ""),
+            status=str(u.get("record_status") or "Working"),
         )
+        # Maintenance history from MaintenanceHistory.
+        comps[(lab, pc)]["log"] = [
+            {
+                "t": parse_dt(e.get("t")) or parse_dt(u.get("created_at")) or now(),
+                "kind": str(e.get("kind") or "Maintenance"),
+                "text": str(e.get("text") or ""),
+                "by": str(e.get("by") or "Staff"),
+            }
+            for e in u.get("maintenance") or []
+            if isinstance(e, dict)
+        ]
+        comps[(lab, pc)]["last_serviced"] = parse_dt(u.get("last_serviced"))
+        comps[(lab, pc)]["updated"] = parse_dt(u.get("updated_at"))
         # Computers.ComputerId, shown as "Computer ID" (e.g. in Analytics).
         comps[(lab, pc)]["db_id"] = u.get("id") or u.get("computer_id") or u.get("ComputerId")
+        # Computers.Room as stored (Add laboratory checks new rooms against it).
+        comps[(lab, pc)]["room"] = str(u.get("room") or "")
     return comps
 
 
@@ -674,6 +872,8 @@ def live_store(result: dict) -> dict:
     problems = [str(p) for p in result.get("problems") or []]
     lab = result.get("lab")
     if isinstance(lab, dict):
+        # Laboratories come from the database rooms (before reports are mapped).
+        register_db_labs(lab.get("units") or [])
         reports = [
             report_from_backend(r)
             for r in lab.get("reports") or []
@@ -719,6 +919,8 @@ def technician_store(result: dict) -> dict:
     """
     store = empty_store()
     store["live"] = True
+    # Laboratories come from the database rooms (before reports are mapped).
+    register_db_labs(result.get("units") or [])
     reports = [
         report_from_backend(r)
         for r in result.get("reports") or []
@@ -753,17 +955,87 @@ def pc_report(store: dict, lab: int, pc: int) -> dict | None:
     return max(mine, key=lambda r: r["created"]) if mine else None
 
 
+def pc_reports(store: dict, lab: int, pc: int) -> list[dict]:
+    """Every report for one computer, each one separately: open reports first,
+    then closed ones; newest first within each group."""
+    mine = [
+        r
+        for r in store.get("reports") or []
+        if r.get("lab") == lab and r.get("pc") == pc
+    ]
+    return sorted(
+        mine,
+        key=lambda r: (
+            r.get("status") not in OPEN,
+            -(r["created"].timestamp() if r.get("created") else 0),
+        ),
+    )
+
+
+def report_issues(r: dict) -> list[str]:
+    """The separate problems of one report (a teacher can pick several)."""
+    raw = r.get("issues")
+    if isinstance(raw, (list, tuple)):
+        items = [str(x).strip() for x in raw if str(x).strip()]
+    else:
+        items = [x.strip() for x in str(r.get("issue") or "").split(",") if x.strip()]
+    return items or [str(r.get("issue") or "Other")]
+
+
+def problem_rows(reports: list[dict]) -> list[dict]:
+    """One row per problem per computer: a report with two problems becomes two
+    rows. Each row is a copy of its report with "issue" set to that one problem,
+    plus part / parts ("problem 1 of 2") and a unique row_key. The report's id,
+    status, technician and history are shared, because the database keeps one
+    status per report."""
+    out = []
+    for r in reports or []:
+        items = report_issues(r)
+        for i, issue in enumerate(items, 1):
+            out.append(
+                {**r, "issue": issue, "part": i, "parts": len(items),
+                 "row_key": f"{r.get('id')}_{i}"}
+            )
+    return out
+
+
+def pc_problem_rows(store: dict, lab: int, pc: int) -> list[dict]:
+    """One computer's reports as problem rows - the same rows the Reports
+    page shows (a report with two problems is two entries)."""
+    return problem_rows(pc_reports(store, lab, pc))
+
+
+def find_problem_row(reports: list[dict], ref) -> dict | None:
+    """The problem row for `ref`: a row_key from the Reports page (e.g.
+    "CL-0023_2"), or a plain report id (then its first problem)."""
+    rows = problem_rows(reports)
+    ref = str(ref)
+    return next((r for r in rows if r["row_key"] == ref), None) or next(
+        (r for r in rows if str(r.get("id")) == ref), None
+    )
+
+
+def open_report_counts(store: dict) -> dict:
+    """{(lab, pc): number of open reports} - to mark computers with several."""
+    counts: dict = {}
+    for r in store.get("reports") or []:
+        if r.get("status") in OPEN:
+            key = (r.get("lab"), r.get("pc"))
+            counts[key] = counts.get(key, 0) + 1
+    return counts
+
+
 def pc_status(store: dict, lab: int, pc: int) -> str:
     """ok / reported / repair / escalated (open report) / maint / inactive (record status)."""
     r = pc_report(store, lab, pc)
     if r:
         return r["status"]
     comp = store["computers"].get((lab, pc))
-    rec = (comp or {}).get("status", "Working")
+    rec = str((comp or {}).get("status") or "Working").strip().lower()
     return (
         "maint"
-        if rec == "Under maintenance"
-        else "inactive" if rec == "Inactive" else "ok"
+        if "maint" in rec
+        else "inactive" if "inactive" in rec else "ok"
     )
 
 
@@ -879,6 +1151,8 @@ def most_reported(store: dict, lab: int | None = None,
 
 def last_serviced(store: dict, comp: dict) -> datetime | None:
     times = [e["t"] for e in maintenance_history(store, comp)]
+    if comp.get("last_serviced"):
+        times.append(comp["last_serviced"])
     return max(times) if times else None
 
 

@@ -36,6 +36,7 @@ from datetime import datetime, timezone
 
 from . import auth_service
 from . import computers_repository as computers
+from . import notification_service as notify
 from . import users_repository as users
 from .users_repository import DatabaseError, _run
 
@@ -63,6 +64,9 @@ REPLACEMENTS_TABLE = "HardwareReplacements"
 SOFTWARE_UPDATES_TABLE = "SoftwareUpdates"
 
 
+# Optional Computers columns used by the inventory.
+COMPUTER_DETAIL_COLUMNS = ("Brand", "Model", "SerialNumber", "DateAdded", "LastServiced")
+
 UNIT_STATUSES = (
     "good",
     "issue",
@@ -87,6 +91,61 @@ REPORT_STATUSES = (
 )
 
 MAX_NOTE_LENGTH = 2000
+
+# When each step of a report happened (optional Reports columns, timestamptz).
+# The report's own CreatedAt is when it was reported. Until the columns are
+# added, everything still works; the history just can't show those times.
+REPORT_DATE_COLUMNS = ("UnderRepairDate", "FixedDate", "EscalatedDate", "FollowUpDate")
+
+# The Admin's decisions on escalations: one row per decision in the
+# ReportDecisions table (ReportId, Decision approve|resolve|send_back, Note,
+# DecidedBy, DecidedAt). Optional: without the table there is no history of
+# decisions.
+REPORT_DECISIONS_TABLE = "ReportDecisions"
+
+
+def load_report_decisions() -> dict[int, list[dict]]:
+    """{ReportId: [{decision, note, decided_at}, ...] oldest first}; {} when
+    the ReportDecisions table doesn't exist."""
+    try:
+        rows = _select_all(
+            REPORT_DECISIONS_TABLE,
+            "DecisionId,ReportId,Decision,Note,DecidedAt",
+            "DecisionId",
+        )
+    except DatabaseError as error:
+        if error.code == "missing_table":
+            return {}
+        raise
+    out: dict[int, list[dict]] = {}
+    for row in rows:
+        rid = _parse_int(row.get("ReportId"))
+        if rid is None:
+            continue
+        out.setdefault(rid, []).append(
+            {
+                "decision": _safe_string(row.get("Decision")).lower(),
+                "note": _safe_string(row.get("Note")),
+                "decided_at": row.get("DecidedAt"),
+            }
+        )
+    return out
+
+
+def _without_missing_dates(action: str, changes: dict, run):
+    """Run an update with the step date; if the date column doesn't exist
+    yet, run it again without it."""
+    try:
+        return run(changes)
+    except DatabaseError as error:
+        if error.code != "missing_column" or not any(c in changes for c in REPORT_DATE_COLUMNS):
+            raise
+        logger.warning(
+            "Reports has no step-date columns yet (%s) - saved %s without the date.",
+            ", ".join(REPORT_DATE_COLUMNS),
+            action,
+        )
+        return run({k: v for k, v in changes.items() if k not in REPORT_DATE_COLUMNS})
 PAGE_SIZE = 1000
 
 _PHONE_ALLOWED = re.compile(r"^[0-9+()\-\s]+$")
@@ -431,19 +490,27 @@ def _load_computers() -> dict[int, dict]:
         UpdatedAt
     """
 
-    rows = _select_all(
-        COMPUTERS_TABLE,
-        (
-            "ComputerId,"
-            "Room,"
-            "UnitNumber,"
-            "Status,"
-            "EscalationStatus,"
-            "CreatedAt,"
-            "UpdatedAt"
-        ),
-        "ComputerId",
+    base = (
+        "ComputerId,"
+        "Room,"
+        "UnitNumber,"
+        "Status,"
+        "EscalationStatus,"
+        "CreatedAt,"
+        "UpdatedAt"
     )
+    # Inventory columns (Brand, Model, SerialNumber, DateAdded, LastServiced):
+    # read when they exist.
+    try:
+        rows = _select_all(
+            COMPUTERS_TABLE,
+            base + "," + ",".join(COMPUTER_DETAIL_COLUMNS),
+            "ComputerId",
+        )
+    except DatabaseError as error:
+        if error.code != "missing_column":
+            raise
+        rows = _select_all(COMPUTERS_TABLE, base, "ComputerId")
 
     result: dict[int, dict] = {}
 
@@ -469,7 +536,10 @@ def _unit_from_row(
 
     computer_id = _parse_int(row.get("ComputerId"))
 
-    status = _safe_string(row.get("Status")).lower()
+    # Computers.Status as stored (computer_status enum, e.g. 'Working').
+    record_status = _safe_string(row.get("Status"))
+
+    status = record_status.lower()
 
     if status not in UNIT_STATUSES:
         status = "good"
@@ -536,8 +606,81 @@ def _unit_from_row(
         "lifecycle": {},
         "created_at": row.get("CreatedAt"),
         "updated_at": row.get("UpdatedAt"),
+
+        # Inventory details (Computers columns, as stored).
+        "record_status": record_status,
+        "brand": _safe_string(row.get("Brand")),
+        "model": _safe_string(row.get("Model")),
+        "serial": _safe_string(row.get("SerialNumber")),
+        "date_added": row.get("DateAdded"),
+        "last_serviced": row.get("LastServiced"),
+
+        # Each ComputerSoftware row with its SoftwareId (to update / remove it).
+        "software_rows": [
+            {
+                "id": _parse_int(item.get("SoftwareId")),
+                "name": _safe_string(item.get("SoftwareName")),
+                "version": _safe_string(item.get("Version")),
+                "installed": _safe_string(item.get("DateInstalled")),
+            }
+            for item in software_rows
+            if isinstance(item, dict) and _safe_string(item.get("SoftwareName"))
+        ],
     }
 
+
+
+# =========================================================
+# MAINTENANCE HISTORY
+# =========================================================
+
+
+def load_maintenance(users_by_id: dict | None = None) -> dict[int, list[dict]]:
+    """
+    MaintenanceHistory rows grouped by ComputerId:
+
+        {ComputerId: [{"t", "kind", "text", "by"}, ...]}
+
+    Description is saved as "<kind> — <text>" by the inventory. {} when the
+    table doesn't exist.
+    """
+
+    try:
+        rows = _select_all(
+            MAINTENANCE_TABLE,
+            "Id,ComputerId,TechnicianId,Description,DatePerformed,CreatedAt",
+            "Id",
+        )
+    except DatabaseError as error:
+        if error.code not in ("missing_table", "missing_column"):
+            logger.warning("Maintenance history unavailable: %s", error)
+        return {}
+
+    users_by_id = users_by_id or {}
+    result: dict[int, list[dict]] = {}
+
+    for row in rows:
+        computer_id = _parse_int(row.get("ComputerId"))
+        if computer_id is None:
+            continue
+        text = _safe_string(row.get("Description"))
+        kind, sep, rest = text.partition(" — ")
+        if not sep or len(kind) > 60:
+            kind, rest = "Maintenance", text
+        user = users_by_id.get(_parse_int(row.get("TechnicianId"))) or {}
+        by = " ".join(
+            x for x in (_safe_string(user.get("FirstName")), _safe_string(user.get("LastName"))) if x
+        )
+        result.setdefault(computer_id, []).append(
+            {
+                "t": row.get("DatePerformed") or row.get("CreatedAt"),
+                "kind": kind.strip(),
+                "text": rest.strip(),
+                "by": by or "Staff",
+            }
+        )
+
+    return result
 
 
 # =========================================================
@@ -732,6 +875,21 @@ def _find_status_id(
     Instead, the CurrentStatus value in the database is examined.
     """
 
+    # Exact names first: "Reported" also normalises to "Under repair", so
+    # without this "progress" picked the "Reported" row (StatusId 1) instead
+    # of "under repair".
+    exact = {
+        "progress": ("under repair", "in progress", "progress", "repair"),
+        "resolved": ("fixed", "resolved", "closed", "completed", "complete"),
+    }.get(_safe_string(requested_status).lower(), ())
+
+    for name in exact:
+        for row in status_rows:
+            if _safe_string(row.get("CurrentStatus")).lower() == name:
+                status_id = _parse_int(row.get("StatusId"))
+                if status_id is not None:
+                    return status_id
+
     requested = _normalize_report_status(requested_status)
 
     for row in status_rows:
@@ -761,11 +919,18 @@ def _load_report_issues() -> dict[int, str]:
         Name
     """
 
-    rows = _select_all(
-        REPORT_ISSUES_TABLE,
-        "IssueId,Name",
-        "IssueId",
-    )
+    try:
+        rows = _select_all(
+            REPORT_ISSUES_TABLE,
+            "IssueId,Name",
+            "IssueId",
+        )
+    except DatabaseError as error:
+        # The ReportIssues table is optional (Reports.Issues holds the problem
+        # names); without it the dashboards must still load.
+        if error.code == "missing_table":
+            return {}
+        raise
 
     result: dict[int, str] = {}
 
@@ -900,6 +1065,11 @@ def _report_from_row(
         "updated_at": row.get("UpdatedAt"),
         "created": row.get("CreatedAt"),
         "updated": row.get("UpdatedAt"),
+        # When each step happened (None until the columns exist / the step happens).
+        "under_repair_date": row.get("UnderRepairDate"),
+        "fixed_date": row.get("FixedDate"),
+        "escalated_date": row.get("EscalatedDate"),
+        "follow_up_date": row.get("FollowUpDate"),
     }
 
 
@@ -956,6 +1126,11 @@ def get_dashboard_data() -> dict:
 
     users_by_id = _load_users()
 
+    # Maintenance history of each computer (MaintenanceHistory, if it exists).
+    maintenance = load_maintenance(users_by_id)
+    for unit in units:
+        unit["maintenance"] = maintenance.get(unit.get("id"), [])
+
     status_rows = _select_all(
         REPORT_STATUS_TABLE,
         "StatusId,CurrentStatus",
@@ -974,24 +1149,37 @@ def get_dashboard_data() -> dict:
     # Load reports
     # -----------------------------------------------------
 
-    report_rows = _select_all(
-        REPORTS_TABLE,
-        (
-            "ReportId,"
-            "ComputerId,"
-            "ReportedBy,"
-            "ReporterName,"
-            "Issues,"
-            "Comment,"
-            "ResolutionNote,"
-            "HandledBy,"
-            "CreatedAt,"
-            "UpdatedAt,"
-            "IssueId,"
-            "StatusId"
-        ),
-        "ReportId",
+    report_columns = (
+        "ReportId,"
+        "ComputerId,"
+        "ReportedBy,"
+        "ReporterName,"
+        "Issues,"
+        "Comment,"
+        "ResolutionNote,"
+        "HandledBy,"
+        "CreatedAt,"
+        "UpdatedAt,"
+        "StatusId"
+        # Reports has no IssueId column (problems are in Issues).
     )
+
+    # Optional step-date columns: read them when they exist.
+    report_rows = None
+    for extra in (
+        REPORT_DATE_COLUMNS,
+        (),
+    ):
+        try:
+            report_rows = _select_all(
+                REPORTS_TABLE,
+                report_columns + "".join("," + c for c in extra),
+                "ReportId",
+            )
+            break
+        except DatabaseError as error:
+            if error.code != "missing_column" or not extra:
+                raise
 
     reports = [
         _report_from_row(
@@ -1003,6 +1191,11 @@ def get_dashboard_data() -> dict:
         )
         for row in report_rows
     ]
+
+    # The Admin's decisions (ReportDecisions table, if it exists).
+    decisions = load_report_decisions()
+    for report in reports:
+        report["admin_decisions"] = decisions.get(report.get("id"), [])
 
     # Only return reports connected to an existing computer.
     reports = [
@@ -1118,22 +1311,34 @@ def update_report_status(
 
     changes = {
         "StatusId": status_id,
-        "ResolutionNote": note,
         "HandledBy": technician_id,
         "UpdatedAt": _now(),
     }
 
-    def update(client):
-        response = (
-            client.table(REPORTS_TABLE).update(changes).eq("ReportId", number).execute()
-        )
+    # Reports.ResolutionNote holds the technician's own note (what was done /
+    # why it was escalated). Starting a repair sends no note, so it doesn't
+    # wipe a note that is already there.
+    if note:
+        changes["ResolutionNote"] = note
 
-        return response.data[0] if response.data else None
+    # When this step happened.
+    changes[
+        {"progress": "UnderRepairDate", "resolved": "FixedDate", "followup": "EscalatedDate"}[
+            requested_status
+        ]
+    ] = changes["UpdatedAt"]
 
-    row = _run(
-        "updating a report",
-        update,
-    )
+    def save(values):
+        def update(client):
+            response = (
+                client.table(REPORTS_TABLE).update(values).eq("ReportId", number).execute()
+            )
+
+            return response.data[0] if response.data else None
+
+        return _run("updating a report", update)
+
+    row = _without_missing_dates("a status change", changes, save)
 
     if not row:
         return {
@@ -1173,11 +1378,85 @@ def update_report_status(
         "followup": f"{code} flagged for follow-up",
     }[requested_status]
 
+    # ---- notifications (best effort; NotificationPreferences decide) ----
+    # The teacher hears about THEIR OWN report only; the admins see what the
+    # technician did (an escalation as an escalation).
+    label = {"progress": "under repair", "resolved": "fixed", "followup": "escalated"}[
+        requested_status
+    ]
+    where = (
+        f"{normalized.get('room') or 'Laboratory'} PC {int(normalized.get('unit_number') or 0):02d}"
+    )
+    problems = normalized.get("issue") or "Report"
+    tech_name = _person_name(technician)
+    detail = f"{code} · {problems}" + (f" · {note}" if note else "")
+    notify.notify_user(
+        row.get("ReportedBy"),
+        "report_update",
+        notify.message(f"Your report is {label} · {where}", f"{detail} · by {tech_name}"),
+    )
+    if requested_status == "followup":
+        notify.notify_admins(
+            "escalation",
+            notify.message(f"Escalation · {where}", f"{detail} · by {tech_name}"),
+        )
+    else:
+        notify.notify_admins(
+            "activity",
+            notify.message(f"Report {label} · {where}", f"{detail} · by {tech_name}"),
+        )
+
     return {
         "success": True,
         "message": message,
         "report": normalized,
     }
+
+
+def admin_set_report_status(report_id, status: str, note: str) -> dict:
+    """
+    An Admin's decision on an escalated report: set Reports.StatusId to
+    "under repair" (status="progress") or "fixed" (status="resolved"), with
+    the decision as ResolutionNote. HandledBy (the technician) is kept.
+    """
+
+    number = _parse_int(report_id)
+
+    if number is None:
+        return {"success": False, "error": "Invalid report."}
+
+    status = _safe_string(status).lower()
+
+    if status not in ("progress", "resolved"):
+        return {"success": False, "error": "Invalid report status."}
+
+    status_rows = _select_all(REPORT_STATUS_TABLE, "StatusId,CurrentStatus", "StatusId")
+    status_id = _find_status_id(status, status_rows)
+
+    if status_id is None:
+        return {
+            "success": False,
+            "error": f"No ReportStatus entry exists for '{status}'. Check the ReportStatus table.",
+        }
+
+    changes = {
+        "StatusId": status_id,
+        "ResolutionNote": _safe_string(note)[:MAX_NOTE_LENGTH],
+        "UpdatedAt": _now(),
+    }
+
+    row = _run(
+        "saving the admin decision",
+        lambda client: (
+            client.table(REPORTS_TABLE).update(changes).eq("ReportId", number).execute().data
+            or [None]
+        )[0],
+    )
+
+    if not row:
+        return {"success": False, "error": "That report no longer exists."}
+
+    return {"success": True, "row": row}
 
 
 # =========================================================

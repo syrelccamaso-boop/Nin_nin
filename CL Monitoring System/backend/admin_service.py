@@ -36,10 +36,12 @@ This service must NOT create another local source of truth.
 from __future__ import annotations
 
 import logging
+from datetime import date
 
 from . import auth_service
+from . import notification_service as notify
 from . import technician_service
-from .users_repository import DatabaseError
+from .users_repository import DatabaseError, _run
 
 
 logger = logging.getLogger("centrum.admin")
@@ -662,267 +664,209 @@ def decide_escalation(
     decision: str,
 ) -> dict:
     """
-    Process an Admin decision for an escalated report.
+    The Admin's decision on an escalated report.
 
-    Decisions:
+        approve     replacement approved: the report goes back to the
+                    technician as "under repair";
+                    Computers.EscalationStatus -> Under inspection
+        resolve     closed as fixed;
+                    Computers.EscalationStatus -> Cleared
+        send_back   back to the technician as "under repair" without a
+                    decision ("back" is accepted too);
+                    Computers.EscalationStatus -> Pending review
 
-        approve
-            -> Under inspection
-
-        resolve
-            -> Cleared
-
-        send_back
-            -> Pending review
+    report_id may be the ReportId (1) or the code the screens show ("CL-0001").
+    Saved in Reports (StatusId, UpdatedAt) and Computers (EscalationStatus);
+    the teacher who sent the report and the technician are notified.
     """
 
-    # =====================================================
-    # VALIDATE ADMIN
-    # =====================================================
-
     if not is_admin(admin):
-        return {
-            "success": False,
-            "error": "Administrator access is required.",
-        }
+        return {"success": False, "error": "Administrator access is required."}
 
-    # =====================================================
-    # VALIDATE REPORT
-    # =====================================================
-
-    if report_id in (None, ""):
-        return {
-            "success": False,
-            "error": "Invalid report.",
-        }
-
-    # =====================================================
-    # VALIDATE DECISION
-    # =====================================================
-
-    decision = (
-        decision or ""
-    ).strip().lower()
+    decision = (decision or "").strip().lower()
+    decision = {"back": "send_back", "sendback": "send_back"}.get(decision, decision)
 
     if decision not in ESCALATION_DECISIONS:
         return {
             "success": False,
-            "error": (
-                "Invalid escalation decision. "
-                "Expected approve, resolve, or send_back."
-            ),
+            "error": "Invalid escalation decision. Expected approve, resolve, or send_back.",
         }
 
-    # =====================================================
-    # LOAD SHARED LAB DATA
-    # =====================================================
-
+    text = str(report_id or "").strip()
+    if text.upper().startswith("CL-"):
+        text = text[3:]
     try:
-        lab = _normalize_lab_data(
-            technician_service.get_dashboard_data()
-        )
+        number = int(text)
+    except ValueError:
+        return {"success": False, "error": "Invalid report."}
 
-    except DatabaseError as error:
-        logger.exception(
-            "Unable to load report %s for Admin escalation.",
-            report_id,
-        )
+    # ---- the report, as the dashboards see it --------------------------
+    try:
+        lab = _normalize_lab_data(technician_service.get_dashboard_data())
+    except Exception as error:
+        logger.exception("Unable to load report %s for an escalation decision.", report_id)
+        return {"success": False, "error": f"Unable to load the report: {error}"}
 
-        return {
-            "success": False,
-            "error": f"Unable to load the report: {error}",
-        }
-
-    except Exception:
-        logger.exception(
-            "Unexpected error loading report %s.",
-            report_id,
-        )
-
-        return {
-            "success": False,
-            "error": "Unable to load the report.",
-        }
-
-    reports = lab.get("reports") or []
-
-    # =====================================================
-    # LOCATE REPORT
-    # =====================================================
-
-    report = None
-
-    target_id = str(report_id)
-
-    for item in reports:
-
-        if not isinstance(item, dict):
-            continue
-
-        item_id = item.get("report_id")
-
-        if item_id is None:
-            item_id = item.get("ReportId")
-
-        if item_id is None:
-            item_id = item.get("id")
-
-        if item_id is None:
-            continue
-
-        if str(item_id) == target_id:
-            report = item
-            break
-
-    if report is None:
-        return {
-            "success": False,
-            "error": "That report no longer exists.",
-        }
-
-    # =====================================================
-    # EXTRACT COMPUTER INFORMATION
-    # =====================================================
-
-    computer_id = report.get("computer_id")
-
-    if computer_id is None:
-        computer_id = report.get("ComputerId")
-
-    room = (
-        report.get("room")
-        or report.get("Room")
-        or ""
-    )
-
-    unit_number = report.get("unit_number")
-
-    if unit_number is None:
-        unit_number = report.get("UnitNumber")
-
-    # =====================================================
-    # RESOLVE ESCALATION STATUS
-    # =====================================================
-
-    if decision == "approve":
-
-        escalation_status = "Under inspection"
-
-    elif decision == "resolve":
-
-        escalation_status = "Cleared"
-
-    else:
-
-        escalation_status = "Pending review"
-
-    # =====================================================
-    # GET ESCALATION SETTER
-    # =====================================================
-
-    setter = getattr(
-        technician_service,
-        "set_escalation_status",
+    report = next(
+        (r for r in lab.get("reports") or [] if isinstance(r, dict) and str(r.get("id")) == str(number)),
         None,
     )
+    if report is None:
+        return {"success": False, "error": "That report no longer exists."}
 
-    if not callable(setter):
+    # technician_service shows a technician escalation ("Follow Up") as "Follow Up"
+    if "follow" not in str(report.get("status") or "").lower():
+        return {"success": False, "error": "This report is not escalated any more. Refresh the data."}
 
-        logger.error(
-            "technician_service.set_escalation_status "
-            "is not available."
-        )
+    # ---- new report status ---------------------------------------------
+    wanted = "resolved" if decision == "resolve" else "progress"
 
+    escalation_status = {
+        "approve": "Under inspection",
+        "resolve": "Cleared",
+        "send_back": "Pending review",
+    }[decision]
+
+    admin_name = (
+        f"{admin.get('first_name') or ''} {admin.get('last_name') or ''}".strip()
+        or (admin.get("email") or "Admin").split("@")[0]
+    )
+    note = {
+        "approve": f"Replacement approved by {admin_name}",
+        "resolve": f"Marked resolved by {admin_name}",
+        "send_back": f"Sent back to the technician by {admin_name}",
+    }[decision]
+
+    # Saved here (not through a technician_service helper), so this file
+    # works with any version of technician_service.py.
+    status_rows = technician_service._select_all(
+        technician_service.REPORT_STATUS_TABLE, "StatusId,CurrentStatus", "StatusId"
+    )
+    status_id = technician_service._find_status_id(wanted, status_rows)
+    if status_id is None:
         return {
             "success": False,
-            "error": (
-                "The backend escalation operation "
-                "is not available yet."
-            ),
+            "error": f"No ReportStatus entry exists for '{wanted}'. Check the ReportStatus table.",
         }
 
-    # =====================================================
-    # UPDATE SHARED DATABASE
-    # =====================================================
+    now = technician_service._now()
 
+    # Is there a ReportDecisions table? Then the decision is saved there (one
+    # row per decision) and the technician's note (ResolutionNote) is kept.
+    # Without it, the decision goes into ResolutionNote as before.
     try:
-
-        result = setter(
-            room=room,
-            unit_number=unit_number,
-            status=escalation_status,
-            computer_id=computer_id,
+        _run(
+            "checking ReportDecisions",
+            lambda client: client.table(technician_service.REPORT_DECISIONS_TABLE)
+            .select("DecisionId")
+            .limit(1)
+            .execute(),
         )
+        has_decisions_table = True
+    except DatabaseError as error:
+        if error.code != "missing_table":
+            return {"success": False, "error": str(error)}
+        has_decisions_table = False
 
-    except TypeError:
+    changes = {"StatusId": status_id, "UpdatedAt": now}
+    if not has_decisions_table:
+        changes["ResolutionNote"] = note
+    if decision == "resolve":
+        changes["FixedDate"] = now  # when it was fixed
 
-        # Compatibility with positional implementations.
+    def save(values):
+        def update(client):
+            response = (
+                client.table(technician_service.REPORTS_TABLE)
+                .update(values)
+                .eq("ReportId", number)
+                .execute()
+            )
+            return response.data[0] if response.data else None
+
+        return _run("saving the admin decision", update)
+
+    attempts = [changes, {k: v for k, v in changes.items() if k != "FixedDate"}]
+
+    row = None
+    for i, values in enumerate(attempts):
         try:
+            row = save(values)
+            break
+        except DatabaseError as error:
+            if error.code != "missing_column" or i == len(attempts) - 1:
+                return {"success": False, "error": str(error)}
 
-            result = setter(
-                room,
-                unit_number,
-                escalation_status,
-                computer_id,
+    if not row:
+        return {"success": False, "error": "That report no longer exists."}
+
+    # ---- the decision itself (ReportDecisions) -------------------------
+    if has_decisions_table:
+        decided_by = admin.get("user_id")
+        try:
+            decided_by = int(decided_by)
+        except (TypeError, ValueError):
+            decided_by = None
+        try:
+            _run(
+                "saving the decision",
+                lambda client: client.table(technician_service.REPORT_DECISIONS_TABLE)
+                .insert(
+                    {
+                        "ReportId": number,
+                        "Decision": decision,
+                        "Note": note,
+                        "DecidedBy": decided_by,
+                        "DecidedAt": now,
+                    }
+                )
+                .execute(),
             )
+        except DatabaseError:
+            # The report is already updated; keep the decision in its note.
+            logger.exception("Decision on report %s not saved in ReportDecisions.", report_id)
+            try:
+                save({"ResolutionNote": note})
+            except DatabaseError:
+                pass
 
-        except Exception:
-
-            logger.exception(
-                "Unable to update escalation for report %s.",
-                report_id,
-            )
-
-            return {
-                "success": False,
-                "error": "Unable to update the escalation.",
-            }
-
-    except Exception:
-
-        logger.exception(
-            "Unable to update escalation for report %s.",
-            report_id,
+    # ---- the computer's escalation status (best effort) ----------------
+    try:
+        technician_service.set_escalation_status(
+            report.get("room"), report.get("unit_number"), escalation_status
         )
+    except Exception:
+        logger.exception("Escalation status of report %s's computer not updated.", report_id)
 
-        return {
-            "success": False,
-            "error": "Unable to update the escalation.",
-        }
-
-    if not result or not result.get("success", False):
-
-        return result or {
-            "success": False,
-            "error": "Unable to update the escalation.",
-        }
-
-    # =====================================================
-    # RESPONSE
-    # =====================================================
+    # ---- notifications (best effort; preferences decide) ---------------
+    code = report.get("code") or f"CL-{number:04d}"
+    where = f"{report.get('room') or 'Laboratory'} PC {int(report.get('unit_number') or 0):02d}"
+    label = {"approve": "replacement approved", "resolve": "fixed", "send_back": "sent back"}[decision]
+    details = f"{code} · {report.get('issue') or 'Report'} · {note}"
+    notify.notify_user(
+        row.get("ReportedBy"),
+        "report_update",
+        notify.message(f"Your report is {'fixed' if decision == 'resolve' else 'under repair'} · {where}", details),
+    )
+    if row.get("HandledBy") is not None:
+        notify.notify_user(
+            row.get("HandledBy"),
+            "escalation",
+            notify.message(f"Escalation {label} · {where}", details),
+        )
 
     messages = {
-        "approve": (
-            "The escalation was approved and is now "
-            "under inspection."
-        ),
-
-        "resolve": (
-            "The escalation was resolved."
-        ),
-
-        "send_back": (
-            "The escalation was sent back for review."
-        ),
+        "approve": f"{code} approved and returned to the technician.",
+        "resolve": f"{code} marked as resolved.",
+        "send_back": f"{code} sent back to the technician.",
     }
 
     return {
         "success": True,
         "message": messages[decision],
-        "report_id": report_id,
+        "report_id": number,
         "decision": decision,
         "escalation_status": escalation_status,
-        "report": report,
     }
 
 
@@ -996,12 +940,218 @@ def change_email(
 
 
 # =========================================================
+# ADD LABORATORY (Computers table)
+# =========================================================
+#
+#   public."Computers"
+#       ComputerId        identity         (never sent)
+#       Room              text NOT NULL    the laboratory's room
+#       UnitNumber        int  NOT NULL    > 0
+#       Status            computer_status  DEFAULT 'Working'        (not sent)
+#       EscalationStatus  text             DEFAULT 'Pending review' (not sent)
+#       CreatedAt / UpdatedAt              DEFAULT CURRENT_TIMESTAMP (not sent)
+#       DateAdded         date NULL        today
+#       UNIQUE ("Room", "UnitNumber")
+
+MAX_LAB_UNITS = 200
+MAX_ROOM_LENGTH = 100
+
+_COMPUTER_READ_COLUMNS = (
+    "ComputerId,Room,UnitNumber,Status,EscalationStatus,CreatedAt,UpdatedAt,DateAdded"
+)
+
+
+def _clean_room(room) -> str:
+    return " ".join(str(room or "").split())
+
+
+def _lab_rows(room: str) -> list[dict]:
+    """The Computers rows of one room, read back from Supabase."""
+
+    def read(client, columns):
+        return (
+            client.table(technician_service.COMPUTERS_TABLE)
+            .select(columns)
+            .eq("Room", room)
+            .order("UnitNumber")
+            .execute()
+            .data
+            or []
+        )
+
+    try:
+        return _run("reading the laboratory's computers", lambda c: read(c, _COMPUTER_READ_COLUMNS))
+    except DatabaseError as error:
+        if error.code != "missing_column":
+            raise
+        return _run(
+            "reading the laboratory's computers",
+            lambda c: read(c, "ComputerId,Room,UnitNumber,Status,EscalationStatus,CreatedAt,UpdatedAt"),
+        )
+
+
+def create_laboratory(admin: dict, room, units, hardware: dict | None = None) -> dict:
+    """
+    Save a new laboratory's computer units to public."Computers":
+    one row per unit, Room = the laboratory's room, UnitNumber = 1..units.
+
+    Refused when the room already has computers (case and spacing ignored),
+    so no (Room, UnitNumber) pair is ever duplicated. All units are inserted
+    in one statement: either every unit is saved or none is.
+
+    Returns the rows as stored in Supabase.
+    """
+
+    room = _clean_room(room)
+
+    if not room:
+        return {"success": False, "error": "Enter the laboratory's room."}
+
+    if len(room) > MAX_ROOM_LENGTH:
+        return {
+            "success": False,
+            "error": f"Keep the room under {MAX_ROOM_LENGTH} characters.",
+        }
+
+    try:
+        units = int(units)
+    except (TypeError, ValueError):
+        return {"success": False, "error": "The number of computer units must be a whole number."}
+
+    # A laboratory exists in the database through its computers, so it
+    # needs at least one unit.
+    if not 1 <= units <= MAX_LAB_UNITS:
+        return {
+            "success": False,
+            "error": f"Number of computer units: 1 to {MAX_LAB_UNITS}.",
+        }
+
+    # Duplicate check against what is actually in the database.
+    try:
+        existing = technician_service._select_all(
+            technician_service.COMPUTERS_TABLE,
+            "ComputerId,Room,UnitNumber",
+            "ComputerId",
+        )
+    except DatabaseError as error:
+        return {"success": False, "error": str(error)}
+
+    key = room.lower()
+    taken = [
+        row for row in existing
+        if _clean_room(row.get("Room")).lower() == key
+    ]
+
+    if taken:
+        return {
+            "success": False,
+            "code": "duplicate",
+            "error": (
+                f'The room "{_clean_room(taken[0].get("Room"))}" already has '
+                f"{len(taken)} computer unit(s) in the database. "
+                "Use another room for the new laboratory."
+            ),
+        }
+
+    today = date.today().isoformat()  # DateAdded: the server's local date
+
+    rows = [
+        {"Room": room, "UnitNumber": number, "DateAdded": today}
+        for number in range(1, units + 1)
+    ]
+
+    def insert(values):
+        return _run(
+            "adding the laboratory's computers",
+            lambda client: client.table(technician_service.COMPUTERS_TABLE)
+            .insert(values)
+            .execute(),
+        )
+
+    try:
+        try:
+            insert(rows)
+        except DatabaseError as error:
+            if error.code != "missing_column":
+                raise
+            insert([{k: v for k, v in r.items() if k != "DateAdded"} for r in rows])
+    except DatabaseError as error:
+        if error.code == "duplicate":
+            return {
+                "success": False,
+                "code": "duplicate",
+                "error": (
+                    f'Computers for room "{room}" already exist in the database '
+                    "(each Room and UnitNumber must be unique). Refresh and use "
+                    "another room."
+                ),
+            }
+        return {"success": False, "error": str(error)}
+
+    try:
+        saved = _lab_rows(room)
+    except DatabaseError as error:
+        saved = None
+        read_error = error
+    else:
+        read_error = None
+
+    # The hardware specs picked on the form, for every new unit.
+    hw_failed = 0
+    if saved and isinstance(hardware, dict) and any(str(v or "").strip() for v in hardware.values()):
+        from . import inventory_service
+
+        for row in saved:
+            try:
+                inventory_service._save_hardware(row.get("ComputerId"), hardware)
+            except DatabaseError as error:
+                hw_failed += 1
+                logger.warning("Hardware not saved for computer %s: %s", row.get("ComputerId"), error)
+
+    if read_error is not None:
+        error = read_error
+        return {
+            "success": True,
+            "room": room,
+            "computers": [],
+            "message": f"{units} computer unit(s) saved, but they could not be read back: {error}",
+        }
+
+    logger.info(
+        "Laboratory %r added by %s: %d computer unit(s).",
+        room,
+        admin.get("email") or admin.get("name") or "admin",
+        len(saved),
+    )
+
+    return {
+        "success": True,
+        "room": room,
+        "computers": [
+            {
+                "id": row.get("ComputerId"),
+                "room": row.get("Room"),
+                "unit_number": row.get("UnitNumber"),
+                "status": row.get("Status"),
+                "escalation_status": row.get("EscalationStatus"),
+                "created_at": row.get("CreatedAt"),
+                "date_added": row.get("DateAdded"),
+            }
+            for row in saved
+        ],
+        "message": f"{len(saved)} computer unit(s) saved."
+        + (f" The hardware specs could not be saved for {hw_failed} of them." if hw_failed else ""),
+    }
+
+
+# =========================================================
 # PUBLIC API
 # =========================================================
 
 __all__ = [
     "change_email",
     "change_password",
+    "create_laboratory",
     "current_admin",
     "decide_escalation",
     "decide_user_request",

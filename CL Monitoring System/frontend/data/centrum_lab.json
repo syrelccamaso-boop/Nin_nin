@@ -3235,10 +3235,10 @@
    "desc": "missing",
    "by": "juan dela cruz",
    "created": "2026-10-04T22:42:05",
-   "status": "repair",
+   "status": "escalated",
    "urgency": "Normal",
    "tech": "Ailyn Agustin",
-   "esc_note": "",
+   "esc_note": "damaged wire ng mouse",
    "local": true,
    "history": [
     {
@@ -3250,6 +3250,11 @@
      "s": "repair",
      "t": "2026-10-06T23:25:59",
      "note": "Ailyn Agustin started the repair"
+    },
+    {
+     "s": "escalated",
+     "t": "2026-10-18T16:18:39",
+     "note": "Escalated: damaged wire ng mouse"
     }
    ]
   }
@@ -3614,6 +3619,133 @@
     "report",
     "CL-0001"
    ]
+  },
+  {
+   "id": "39e2ec452ba9",
+   "t": "2026-10-18T16:18:39",
+   "kind": "status",
+   "title": "Your report R-1003 is escalated",
+   "sub": "Centrum 3 PC 30 · Keyboard / mouse · Ailyn Agustin",
+   "roles": [
+    "teacher"
+   ],
+   "actor": "Ailyn Agustin",
+   "to": "juan dela cruz",
+   "ref": [
+    "report",
+    "R-1003"
+   ]
+  },
+  {
+   "id": "a50e3b6c8732",
+   "t": "2026-10-18T16:18:39",
+   "kind": "escalation",
+   "title": "Escalated · R-1003",
+   "sub": "Centrum 3 PC 30 · Keyboard / mouse · Escalated: damaged wire ng mouse",
+   "roles": [
+    "admin"
+   ],
+   "actor": "Ailyn Agustin",
+   "to": "",
+   "ref": [
+    "report",
+    "R-1003"
+   ]
+  },
+  {
+   "id": "b718b7eecf98",
+   "t": "2026-10-18T16:23:34",
+   "kind": "escalation",
+   "title": "Escalated · CL-0032",
+   "sub": "Centrum 1 PC 05 · Unknown · Escalated: unknown error",
+   "roles": [
+    "admin"
+   ],
+   "actor": "Ailyn Agustin",
+   "to": "",
+   "ref": [
+    "report",
+    "CL-0032"
+   ]
+  },
+  {
+   "id": "4f896dcde752",
+   "t": "2026-10-18T16:24:51",
+   "kind": "escalation",
+   "title": "Escalated · CL-0031",
+   "sub": "Centrum 1 PC 04 · ConnectivityProblem · Escalated: no internet",
+   "roles": [
+    "admin"
+   ],
+   "actor": "Ailyn Agustin",
+   "to": "",
+   "ref": [
+    "report",
+    "CL-0031"
+   ]
+  },
+  {
+   "id": "11f2c7728111",
+   "t": "2026-10-18T16:56:38",
+   "kind": "inventory",
+   "title": "New laboratory · CSS Laboratory",
+   "sub": "Main Building · 0 computer unit(s) · by Centrum Admin",
+   "roles": [
+    "admin",
+    "technician",
+    "teacher"
+   ],
+   "actor": "Centrum Admin",
+   "to": "",
+   "ref": null
+  },
+  {
+   "id": "31eb755e94ef",
+   "t": "2026-10-18T17:07:53",
+   "kind": "inventory",
+   "title": "New laboratory · IT Laboratory",
+   "sub": "Main Building · 40 computer unit(s) · by Centrum Admin",
+   "roles": [
+    "admin",
+    "technician",
+    "teacher"
+   ],
+   "actor": "Centrum Admin",
+   "to": "",
+   "ref": null
+  },
+  {
+   "id": "8995f1891def",
+   "t": "2026-10-18T17:11:34",
+   "kind": "inventory",
+   "title": "CSS-LAB-PC01 · added to the inventory",
+   "sub": "CSS Laboratory PC 01 · by Centrum Admin",
+   "roles": [
+    "admin",
+    "technician"
+   ],
+   "actor": "Centrum Admin",
+   "to": "",
+   "ref": [
+    "pc",
+    5,
+    1
+   ]
+  },
+  {
+   "id": "8d205e92c336",
+   "t": "2026-10-18T17:39:09",
+   "kind": "inventory",
+   "title": "New laboratory · CSS Laboratory",
+   "sub": "Main Building · 20 computer unit(s) · by Centrum Admin",
+   "roles": [
+    "admin",
+    "technician",
+    "teacher"
+   ],
+   "actor": "Centrum Admin",
+   "to": "",
+   "ref": null
   }
  ],
  "read": {
@@ -3636,14 +3768,67 @@
    "upd:2:1",
    "upd:2:2",
    "upd:33:2",
-   "upd:25:2"
+   "upd:25:2",
+   "upd:34:1"
   ],
   "ailynagustin101@gmail.com": [
    "new:R-1003",
    "ev:73dbb7a85003",
-   "new:CL-0034"
+   "new:CL-0034",
+   "db:35",
+   "db:43",
+   "db:48"
+  ],
+  "itsallinthemind729@gmail.com": [
+   "esc:CL-0032:20261018162331"
   ]
  },
- "labs": [],
+ "labs": [
+  {
+   "id": 5,
+   "name": "CSS Laboratory",
+   "code": "CSS-LAB",
+   "building": "Main Building",
+   "wing": "Main Building, floor 2nd Floor",
+   "floor": "2nd Floor",
+   "room": "206",
+   "units": 20,
+   "cols": 8,
+   "desc": "",
+   "specs": {},
+   "created_by": "Centrum Admin",
+   "created": "2026-10-18T16:56:38"
+  },
+  {
+   "id": 6,
+   "name": "IT Laboratory",
+   "code": "IT-LAB1",
+   "building": "Main Building",
+   "wing": "Main Building, floor 2nd Floor",
+   "floor": "2nd Floor",
+   "room": "207",
+   "units": 40,
+   "cols": 8,
+   "desc": "",
+   "specs": {},
+   "created_by": "Centrum Admin",
+   "created": "2026-10-18T17:07:53"
+  },
+  {
+   "id": 7,
+   "name": "CSS Laboratory",
+   "code": "CSS-LAB",
+   "building": "Main Building",
+   "wing": "Main Building",
+   "floor": "",
+   "room": "CSS Lab",
+   "units": 20,
+   "cols": 6,
+   "desc": "",
+   "specs": {},
+   "created_by": "Centrum Admin",
+   "created": "2026-10-18T17:39:09"
+  }
+ ],
  "accounts": {}
 }

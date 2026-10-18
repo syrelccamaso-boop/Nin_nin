@@ -6,7 +6,7 @@ from fastapi import FastAPI, Header, HTTPException, Request
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
-from . import admin_service, teacher_service, technician_service
+from . import admin_service, inventory_service, teacher_service, technician_service
 from .auth_service import (
     admin_delete_user,
     admin_get_user,
@@ -191,6 +191,11 @@ class ChangePasswordRequest(BaseModel):
     new_password: str
 
 
+class MarkReadRequest(BaseModel):
+
+    ids: list[int] | None = None  # None = all of my notifications
+
+
 class ChangeEmailRequest(BaseModel):
 
     new_email: str
@@ -215,11 +220,57 @@ class UserUpdateRequest(BaseModel):
     status: str | None = None
 
 
+class EscalationDecisionRequest(BaseModel):
+
+    decision: str  # approve | resolve | back (send_back)
+
+
+class LaboratoryRequest(BaseModel):
+
+    room: str  # Computers.Room for every unit of the laboratory
+    units: int = 0  # UnitNumber 1..units
+    hardware: dict | None = None  # specs copied to every unit (ComputerHardware)
+
+
+class InventoryComputerRequest(BaseModel):
+
+    room: str = ""
+    unit_number: int = 0
+    brand: str | None = None
+    model: str | None = None
+    serial: str | None = None
+    status: str | None = None
+    hardware: dict | None = None
+    software: list[dict] = []
+    history: list[dict] = []  # [{"kind", "text"}] -> MaintenanceHistory
+
+
+class InventorySoftwareRequest(BaseModel):
+
+    name: str = ""
+    version: str = ""
+    history: list[dict] = []
+
+
+class InventoryMaintenanceRequest(BaseModel):
+
+    kind: str = "Other"
+    text: str = ""
+    done_by: str = ""
+
+
+class FollowUpRequest(BaseModel):
+
+    message: str = ""
+
+
 class SubmitReportRequest(BaseModel):
 
     computer_id: int
     issues: list[str]
     comment: str = ""
+    # "Hardware" or "Software", as picked on the teacher's form (Reports.CategoryId)
+    category: str = ""
 
 
 # =========================================================
@@ -724,6 +775,170 @@ def admin_decide_request(
     return result
 
 
+@app.patch("/admin/reports/{report_id}/escalation")
+def admin_decide_escalation(
+    report_id: str,
+    data: EscalationDecisionRequest,
+    authorization: str | None = Header(default=None),
+):
+    """Approve / resolve / send back an escalated report (Admin only)."""
+
+    admin = _require_dashboard_admin(authorization)
+
+    result = admin_service.decide_escalation(admin, report_id, data.decision)
+
+    if not result.get("success"):
+
+        _fail(result)
+
+    return result
+
+
+@app.post("/admin/laboratories")
+def admin_create_laboratory(
+    data: LaboratoryRequest,
+    authorization: str | None = Header(default=None),
+):
+    """Add a laboratory: its computer units are saved to public."Computers"
+    (Room + UnitNumber 1..units) and returned as stored (Admin only)."""
+
+    admin = _require_dashboard_admin(authorization)
+
+    result = admin_service.create_laboratory(admin, data.room, data.units, data.hardware)
+
+    if not result.get("success"):
+
+        _fail(result, 409 if result.get("code") == "duplicate" else 400)
+
+    return result
+
+
+# =========================================================
+# INVENTORY (Admin and Technician) -> Supabase
+# =========================================================
+
+
+def _require_inventory_user(authorization: str | None) -> dict:
+    """A signed-in Admin or Technician."""
+
+    token = (authorization or "").strip()
+
+    if token.lower().startswith("bearer "):
+
+        token = token[7:].strip()
+
+    result = admin_service.current_admin(token)
+
+    if result.get("success"):
+
+        return result["user"]
+
+    result = technician_service.current_technician(token)
+
+    if result.get("success"):
+
+        return result["user"]
+
+    _fail(
+        {"error": "Only Admins and Technicians can change the inventory."},
+        status_code=result.get("status_code", 401),
+    )
+
+
+def _dump(data: BaseModel, exclude_unset: bool = False) -> dict:
+
+    if hasattr(data, "model_dump"):
+
+        return data.model_dump(exclude_unset=exclude_unset)
+
+    return data.dict(exclude_unset=exclude_unset)  # pydantic v1
+
+
+def _inventory_result(result: dict) -> dict:
+
+    if not result.get("success"):
+
+        code = result.get("code")
+
+        _fail(result, 409 if code == "duplicate" else 404 if code == "not_found" else 400)
+
+    return result
+
+
+@app.post("/inventory/computers")
+def inventory_add_computer(
+    data: InventoryComputerRequest, authorization: str | None = Header(default=None)
+):
+    user = _require_inventory_user(authorization)
+
+    return _inventory_result(inventory_service.create_computer(user, _dump(data)))
+
+
+@app.patch("/inventory/computers/{computer_id}")
+def inventory_update_computer(
+    computer_id: int,
+    data: InventoryComputerRequest,
+    authorization: str | None = Header(default=None),
+):
+    user = _require_inventory_user(authorization)
+
+    return _inventory_result(
+        inventory_service.update_computer(user, computer_id, _dump(data, exclude_unset=True))
+    )
+
+
+@app.post("/inventory/computers/{computer_id}/software")
+def inventory_install_software(
+    computer_id: int,
+    data: InventorySoftwareRequest,
+    authorization: str | None = Header(default=None),
+):
+    user = _require_inventory_user(authorization)
+
+    return _inventory_result(
+        inventory_service.install_software(user, computer_id, data.name, data.version, data.history)
+    )
+
+
+@app.patch("/inventory/software/{software_id}")
+def inventory_update_software(
+    software_id: int,
+    data: InventorySoftwareRequest,
+    authorization: str | None = Header(default=None),
+):
+    user = _require_inventory_user(authorization)
+
+    return _inventory_result(
+        inventory_service.update_software(user, software_id, data.version, data.history)
+    )
+
+
+@app.post("/inventory/software/{software_id}/remove")
+def inventory_remove_software(
+    software_id: int,
+    data: InventorySoftwareRequest,
+    authorization: str | None = Header(default=None),
+):
+    user = _require_inventory_user(authorization)
+
+    return _inventory_result(
+        inventory_service.remove_software(user, software_id, data.history)
+    )
+
+
+@app.post("/inventory/computers/{computer_id}/maintenance")
+def inventory_log_maintenance(
+    computer_id: int,
+    data: InventoryMaintenanceRequest,
+    authorization: str | None = Header(default=None),
+):
+    user = _require_inventory_user(authorization)
+
+    return _inventory_result(
+        inventory_service.log_maintenance(user, computer_id, data.kind, data.text, data.done_by)
+    )
+
+
 @app.patch("/admin/profile")
 def admin_update_profile(
     data: ContactNumberRequest, authorization: str | None = Header(default=None)
@@ -777,6 +992,57 @@ def admin_change_email(
 
 
 # =========================================================
+# NOTIFICATIONS  (any logged-in user; only their own)
+# =========================================================
+
+
+def _require_user(authorization: str | None) -> dict:
+
+    token = (authorization or "").strip()
+
+    if token.lower().startswith("bearer "):
+
+        token = token[7:].strip()
+
+    from .auth_service import user_from_token
+
+    result = user_from_token(token)
+
+    if not result.get("success"):
+
+        _fail(result, status_code=401)
+
+    return result["user"]
+
+
+@app.get("/notifications")
+def my_notifications(limit: int = 50, authorization: str | None = Header(default=None)):
+
+    from . import notification_service
+
+    user = _require_user(authorization)
+
+    return {
+        "success": True,
+        "notifications": notification_service.list_for_user(user.get("user_id"), limit),
+    }
+
+
+@app.patch("/notifications/read")
+def read_my_notifications(
+    data: MarkReadRequest, authorization: str | None = Header(default=None)
+):
+
+    from . import notification_service
+
+    user = _require_user(authorization)
+
+    n = notification_service.mark_read(user.get("user_id"), data.ids)
+
+    return {"success": True, "updated": n}
+
+
+# =========================================================
 # TEACHER  (requires the login's access token)
 # =========================================================
 # backend_client sends "Authorization: Bearer <access_token from /auth/login>".
@@ -791,13 +1057,23 @@ def _require_teacher(authorization: str | None) -> dict:
 
         token = token[7:].strip()
 
-    result = teacher_service.current_teacher(token)
+    # Checked here with auth_service, so it works with any version of
+    # teacher_service.py (some have no current_teacher()).
+    from .auth_service import user_from_token
 
-    if not result["success"]:
+    result = user_from_token(token)
 
-        _fail(result, status_code=result.get("status_code", 401))
+    if not result.get("success"):
 
-    return result["user"]
+        _fail(result, status_code=401)
+
+    user = result.get("user") or {}
+
+    if str(user.get("role") or "").strip().lower() != "teacher":
+
+        _fail({"error": "This page is for teachers only."}, status_code=403)
+
+    return user
 
 
 @app.get("/teacher/dashboard")
@@ -860,12 +1136,38 @@ def teacher_submit_report(
             computer_id=data.computer_id,
             issues=data.issues,
             comment=data.comment,
+            category=data.category,
         )
         return {"success": True, "report": inserted}
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from None
     except RuntimeError as exc:
         raise HTTPException(status_code=500, detail=str(exc)) from None
+
+
+@app.post("/teacher/reports/{report_id}/follow-up")
+def teacher_follow_up_report(
+    report_id: str,
+    data: FollowUpRequest,
+    authorization: str | None = Header(default=None),
+):
+    """Follow up one of the teacher's own reports that no technician has
+    picked up yet (after 2 days, at most once a day). Notifies the technicians."""
+
+    teacher = _require_teacher(authorization)
+
+    try:
+        updated = teacher_service.follow_up_report(teacher, report_id, data.message)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from None
+    except RuntimeError as exc:
+        raise HTTPException(status_code=500, detail=str(exc)) from None
+
+    return {
+        "success": True,
+        "message": "Follow-up sent to the technicians.",
+        "report": updated,
+    }
 
 
 @app.get("/teacher/profile")

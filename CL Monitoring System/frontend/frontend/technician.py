@@ -150,12 +150,17 @@ REPORTS = report_print.ReportCenter(SHELL, store, me, ROLE)
 # ===========================================================================
 # Actions (callbacks)
 # ===========================================================================
-def _save(r: dict, status: str, note: str) -> bool:
-    """Change a report's status here and, when signed in, in the database."""
+def _save(r: dict, status: str, note: str, tech_note: str = "") -> bool:
+    """Change a report's status here and, when signed in, in the database.
+
+    note:      the line shown in the report's history here.
+    tech_note: ONLY what the technician typed - saved as Reports.ResolutionNote
+               (empty when they typed nothing, e.g. Start repair).
+    """
     s = store()
     if s["live"] and not r.get("local"):
         result = backend_client.update_report_status(
-            ss.get(ui.TOKEN_KEY), r["db_id"], D.BACKEND_STATUS[status], note
+            ss.get(ui.TOKEN_KEY), r["db_id"], D.BACKEND_STATUS[status], tech_note.strip()
         )
         if not result.get("success"):
             toast(result.get("error") or "Could not save the change.", False)
@@ -168,15 +173,16 @@ def _save(r: dict, status: str, note: str) -> bool:
             lab_store.save()
         where = f"{D.lab_name(r['lab'])} {D.pc_name(r['pc'])} · {r['issue']}"
         label = D.STATUS[status][0].lower()
-        lab_store.add_event(
-            "status",
-            f"Your report {r['id']} is {label}",
-            f"{where} · {me()}",
-            roles=("teacher",),
-            actor=me(),
-            to=r["by"],
-            ref=("report", r["id"]),
-        )
+        if r.get("local"):  # database reports: the backend notifies the teacher
+            lab_store.add_event(
+                "status",
+                f"Your report {r['id']} is {label}",
+                f"{where} · {me()}",
+                roles=("teacher",),
+                actor=me(),
+                to=r["by"],
+                ref=("report", r["id"]),
+            )
         if status == "escalated":
             lab_store.add_event(
                 "escalation",
@@ -205,8 +211,10 @@ def ask(kind: str, rid: str) -> None:
 
 def do_fixed(rid: str) -> None:
     r = find(rid)
-    note = (ss.get(f"{P}_note") or "").strip() or "Fixed and tested"
-    if r and _save(r, "fixed", note):
+    note = (ss.get(f"{P}_note") or "").strip()
+    if not note:
+        return toast("Write what you did - it is saved as the report's resolution note.", False)
+    if r and _save(r, "fixed", note, tech_note=note):
         toast(f"{r['id']} marked fixed. The teacher can see it now.")
         close_modal()
 
@@ -216,7 +224,7 @@ def do_escalate(rid: str) -> None:
     note = (ss.get(f"{P}_note") or "").strip()
     if not note:
         return toast("Add a short reason so the admin knows what's needed.", False)
-    if r and _save(r, "escalated", f"Escalated: {note}"):
+    if r and _save(r, "escalated", f"Escalated: {note}", tech_note=note):
         r["esc_note"] = note
         toast(f"{r['id']} sent to the admin")
         close_modal()
@@ -227,9 +235,13 @@ def open_report(rid: str) -> None:
 
 
 def pc_clicked(lab: int, pc: int) -> None:
-    r = D.pc_report(store(), lab, pc)
-    if r:
-        return open_modal("report", r["id"])
+    """A computer on the map: one open report -> that report; several open
+    reports -> pick which one; none -> the computer's details."""
+    open_reps = [r for r in D.pc_problem_rows(store(), lab, pc) if r["status"] in D.OPEN]
+    if len(open_reps) > 1:
+        return open_modal("pcreports", (lab, pc))
+    if open_reps:
+        return open_modal("report", open_reps[0]["row_key"])
     INV.open_pc(lab, pc)
 
 
@@ -396,28 +408,32 @@ def _menu_do(fn, *args) -> None:
 
 
 def _report_menu(r: dict) -> None:
-    """The items of a report's ⋮ menu: the next steps for its status + View."""
+    """The items of a report's ⋮ menu: the next steps for its status + View.
+    Actions apply to the whole report (all its problems share one status)."""
     rid = r["id"]
+    k = r.get("row_key", rid)  # one row per problem -> keys per row
     if r["status"] == "reported":
-        btn("Start repair", f"{P}_qm_go_{rid}", "menuitem", icon=":material/build:",
+        btn("Start repair", f"{P}_qm_go_{k}", "menuitem", icon=":material/build:",
             on_click=_menu_do, args=(start_repair, rid))
     if r["status"] in ("repair", "escalated"):
-        btn("Mark fixed", f"{P}_qm_fx_{rid}", "menuitemok", icon=":material/check_circle:",
+        btn("Mark fixed", f"{P}_qm_fx_{k}", "menuitemok", icon=":material/check_circle:",
             on_click=_menu_do, args=(ask, "fixed", rid))
     if r["status"] == "repair":
-        btn("Escalate to admin", f"{P}_qm_es_{rid}", "menuitem", icon=":material/arrow_upward:",
+        btn("Escalate to admin", f"{P}_qm_es_{k}", "menuitem", icon=":material/arrow_upward:",
             on_click=_menu_do, args=(ask, "escalate", rid))
-    btn("View details", f"{P}_qm_v_{rid}", "menuitem", icon=":material/visibility:",
-        on_click=_menu_do, args=(open_report, rid))
+    btn("View details", f"{P}_qm_v_{k}", "menuitem", icon=":material/visibility:",
+        on_click=_menu_do, args=(open_report, k))
 
 
 def page_reports(s: dict) -> None:
+    # One row per problem per computer; the chips count the same rows.
+    problem_list = D.problem_rows(s["reports"])
     flt = ss.setdefault(f"{P}_qfilter", "open")
     with box(f"{P}_qcard", "card", "pad0"):
         with box(f"{P}_qhead", "cardh", "padh"):
             with box(f"{P}_qchips", "chips"):
                 for key, label in Q_FILTERS:
-                    n = sum(_q_match(r, key) for r in s["reports"])
+                    n = sum(_q_match(r, key) for r in problem_list)
                     btn(
                         f"{label} · {n}",
                         f"{P}_qf_{key}",
@@ -461,7 +477,7 @@ def page_reports(s: dict) -> None:
         q = (q or "").strip().lower()
         rows = [
             r
-            for r in s["reports"]
+            for r in problem_list
             if _q_match(r, flt)
             and (not lab or r["lab"] == lab)
             and (
@@ -487,15 +503,16 @@ def page_reports(s: dict) -> None:
                 if r["urgency"] == "High" and r["status"] != "fixed"
                 else ""
             )
-            with box(f"{P}_q_{r['id']}", "trow"):
+            with box(f"{P}_q_{r['row_key']}", "trow"):
                 html(
                     f'<div class="tt-row" style="grid-template-columns:{grid}"><div class="strong">{h(r["id"])}{high}</div>'
-                    f'<div>{D.lab_name(r["lab"])}<div class="small">{D.pc_name(r["pc"])}</div></div><div>{h(r["issue"])}</div>'
+                    f'<div>{D.lab_name(r["lab"])}<div class="small">{D.pc_name(r["pc"])}'
+                    + f'</div></div><div>{h(r["issue"])}</div>'
                     f'<div>{h(D.by_name(r))}</div><div>{D.sent_date(r.get("sent", r["created"]))}</div><div>{badge(r["status"])}</div></div>'
                 )
-                with box(f"{P}_q_act_{r['id']}_{gen}", "kebab"):
+                with box(f"{P}_q_act_{r['row_key']}_{gen}", "kebab"):
                     with st.popover("⋮", help="Actions"):
-                        with box(f"{P}_q_menu_{r['id']}", "umenu"):
+                        with box(f"{P}_q_menu_{r['row_key']}", "umenu"):
                             _report_menu(r)
         pager(f"{P}_qpage", page, len(rows))
 
@@ -688,11 +705,20 @@ def page_profile(s: dict, user: dict) -> None:
 # Pop-up windows
 # ===========================================================================
 def modal_report(s: dict, rid: str) -> None:
-    r = find(rid)
+    # rid: the clicked problem row (row_key) or a plain report id (first problem).
+    # Shown exactly as on the Reports page; the buttons act on the report itself.
+    r = D.find_problem_row(s["reports"], rid)
     if r is None:
         return close_modal()
     with SHELL.window():
         html(portal.report_details(r))
+        if len(D.pc_problem_rows(s, r["lab"], r["pc"])) > 1:
+            html(
+                '<h4 style="font-size:14px;margin:18px 0 10px">All reports for this computer</h4>'
+                '<div class="m-sub" style="margin-top:-6px">Each report is kept separately. '
+                "Pick another one to see its details and history.</div>"
+            )
+            portal.pc_report_list(P, s, r["lab"], r["pc"], open_report, "m", current=r["row_key"])
         with box(f"{P}_m_act", "mactions"):
             _actions(r, "m", small=False)
             btn("Close", f"{P}_m_close", "ghost", on_click=close_modal)
@@ -759,30 +785,17 @@ def render_modal(s: dict) -> None:
 # Public entry point
 # ===========================================================================
 def _open_report_safe(rid: str) -> None:
-    if find(rid):
+    if D.find_problem_row(store()["reports"], rid):
         open_report(rid)
     else:
         toast("That report is no longer available.", False)
 
 
 def _notifications(s: dict) -> list[dict]:
-    """New reports waiting for a technician, admin decisions and inventory updates by others."""
-    new = [r for r in s["reports"] if r["status"] == "reported"]
-    out = [
-        {
-            "id": f"new:{r['id']}",
-            "icon": "alert",
-            "tone": "ic-amber",
-            "title": f"New report · {D.lab_name(r['lab'])} {D.pc_name(r['pc'])}"
-            + (" · High" if r["urgency"] == "High" else ""),
-            "sub": f"{r['issue']} · {D.by_name(r)}",
-            "t": r["created"],
-            "cb": open_report,
-            "args": (r["id"],),
-            "roles": ["technician"],
-        }
-        for r in new
-    ]
+    """New reports and follow-ups from the database (Notifications table, as
+    allowed by the Technician role's NotificationPreferences), plus inventory
+    updates made by others."""
+    out = portal.db_notifications(P, open_report=_open_report_safe)
     return out + inventory.event_notifications(
         "technician", me(), INV.open_pc, _open_report_safe
     )

@@ -186,7 +186,9 @@ def shared() -> dict:
         m = _mtime()
         if _STATE["data"] is None or (m is not None and m != _STATE["mtime"]):
             data = load_file()
-            D.register_labs(data["labs"])
+            # Laboratories and computers come from the database only
+            # (lab_data.register_db_labs); the "labs" kept in this file are
+            # no longer used.
             if not data["computers"]:
                 try:  # first run: fill the inventory once (idempotent)
                     from frontend import seed_inventory
@@ -223,20 +225,15 @@ def lock():
 def attach(store: dict) -> dict:
     """Point a dashboard store at the shared inventory and reports.
 
-    - computers: always the shared inventory (computers the backend knows about
-      but the inventory doesn't are added to it once).
+    - computers: the database's computers only (empty when not connected).
     - reports:   live -> the backend's reports + teacher reports kept here;
                  offline -> the reports kept here.
     """
     data = shared()
-    units = store.pop("units", None)
-    if units:
-        new = {k: v for k, v in units.items() if k not in data["computers"]}
-        if new:
-            with _LOCK:
-                data["computers"].update(new)
-                save()
-    store["computers"] = data["computers"]
+    # The inventory is the database's (Computers / ComputerHardware /
+    # ComputerSoftware / MaintenanceHistory): never the copy in this file.
+    store.pop("units", None)
+    store["computers"] = store.get("computers") if store.get("live") else {}
     if store.get("live"):
         store["reports"] = list(store.get("backend_reports") or []) + [
             r for r in data["reports"] if r.get("local")
@@ -322,9 +319,15 @@ def labs() -> list[dict]:
     return list(shared().get("labs") or [])
 
 
+# The saved laboratory details label the database rooms (lab_data.register_db_labs).
+D.LAB_DETAILS = lambda: labs()
+
+
 def sync_labs() -> None:
-    """Make sure every laboratory saved here is in lab_data.LABS."""
-    D.register_labs(labs())
+    """Kept for the callers: laboratories now come from the database only
+    (lab_data.register_db_labs, when the dashboard data is loaded), so the
+    ones saved in this file are not registered any more."""
+    return None
 
 
 def add_lab(info: dict) -> dict:
@@ -334,7 +337,12 @@ def add_lab(info: dict) -> dict:
     with _LOCK:
         data = shared()
         data.setdefault("labs", [])
-        data["labs"] = [l for l in data["labs"] if l.get("id") != lab["id"]] + [lab]
+        room = " ".join(str(lab.get("room") or lab.get("name") or "").split()).lower()
+        data["labs"] = [
+            l for l in data["labs"]
+            if l.get("id") != lab["id"]
+            and " ".join(str(l.get("room") or l.get("name") or "").split()).lower() != room
+        ] + [lab]
         save()
     D.register_labs([lab])
     return lab
