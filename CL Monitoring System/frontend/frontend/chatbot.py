@@ -44,17 +44,19 @@ log = logging.getLogger("centrum.chatbot")
 NAVY = "#141d33"
 BLUE = "#2f6fe4"
 
-MAX_INPUT_CHARS = 1000        # longest message a user can send
-MAX_STORED_MESSAGES = 60      # chat history kept in session state
-MAX_PROMPT_HISTORY = 8        # recent messages sent to the AI
-MAX_PROMPT_REPORTS = 15       # reports sent to the AI (newest first)
-PAINT_INTERVAL = 0.06         # seconds between streaming repaints
+MAX_INPUT_CHARS = 1000  # longest message a user can send
+MAX_STORED_MESSAGES = 60  # chat history kept in session state
+MAX_PROMPT_HISTORY = 8  # recent messages sent to the AI
+MAX_PROMPT_REPORTS = 15  # reports sent to the AI (newest first)
+PAINT_INTERVAL = 0.06  # seconds between streaming repaints
 
 AI_DOWN_NOTICE = (
     "⚠️ The AI assistant isn't available right now, "
     "so I'm using the built-in helper.\n\n"
 )
-INTERRUPTED_NOTE = "\n\n_(The connection was interrupted, so this answer may be incomplete.)_"
+INTERRUPTED_NOTE = (
+    "\n\n_(The connection was interrupted, so this answer may be incomplete.)_"
+)
 
 _AI_SUGGEST = [
     ("ask", "Status of my reports"),
@@ -65,6 +67,7 @@ _AI_SUGGEST = [
 # ---------------------------------------------------------------------------
 # Robot icon
 # ---------------------------------------------------------------------------
+
 
 def robot_svg(fg: str = "#ffffff", eye: str = NAVY) -> str:
     return (
@@ -652,8 +655,15 @@ def _authorized_reports(reports: list[dict] | None, user: dict, c: dict) -> list
 # ---------------------------------------------------------------------------
 
 _GREETING_WORDS = {
-    "hi", "hello", "hey", "hiya", "morning", "afternoon", "evening",
-    "kumusta", "kamusta",
+    "hi",
+    "hello",
+    "hey",
+    "hiya",
+    "morning",
+    "afternoon",
+    "evening",
+    "kumusta",
+    "kamusta",
 }
 
 _STATUS_WORDS = ("status", "progress", "resolved", "follow up", "followup", "follow-up")
@@ -684,7 +694,9 @@ _CONTACT_Q = re.compile(
     r"((contact|phone|mobile) (number|no)\b)|my number|update.{0,20}(contact|profile)|\bprofile\b"
 )
 
-_PASSWORD_Q = re.compile(r"forgot.{0,10}password|reset.{0,10}password|nakalimutan.{0,15}password")
+_PASSWORD_Q = re.compile(
+    r"forgot.{0,10}password|reset.{0,10}password|nakalimutan.{0,15}password"
+)
 _LAB_WORDS = ("computer", "pc", "unit", "lab ", "windows", "workstation")
 
 
@@ -711,7 +723,8 @@ def _route(
     # A specific report the user owns, e.g. "what about CL-1043"
     hit = next(
         (
-            r for r in reports
+            r
+            for r in reports
             if len(_norm_id(r.get("id", ""))) >= 3 and _norm_id(r["id"]) in tn
         ),
         None,
@@ -771,11 +784,17 @@ def _route(
             lines.append("Still open:")
             lines += [f"- {_describe(r, c)}" for r in open_reports[:5]]
             if len(open_reports) > 5:
-                lines.append(f"...and {len(open_reports) - 5} more in {nm['myreports']}.")
+                lines.append(
+                    f"...and {len(open_reports) - 5} more in {nm['myreports']}."
+                )
         else:
             lines.append("All of them are resolved.")
             lines.append(f"Latest: {_describe(reports[0], c)}.")
-        return "\n".join(lines), [go("myreports"), ("ask", "What do the statuses mean?")], True
+        return (
+            "\n".join(lines),
+            [go("myreports"), ("ask", "What do the statuses mean?")],
+            True,
+        )
 
     if c.get("urgent_help") and _has(t, "urgent", "urgency", "emergency", "asap"):
         return _fill(c["urgent_help"], c), [go("report")], True
@@ -803,7 +822,9 @@ def _route(
             True,
         )
 
-    if n_words <= 4 and _has(t, "who are you", "what can you do", "help", "what do you do"):
+    if n_words <= 4 and _has(
+        t, "who are you", "what can you do", "help", "what do you do"
+    ):
         return (
             "I'm the Computer Lab Assistant. I can walk you through reporting a "
             "computer problem, check on the reports you've sent, and point "
@@ -814,9 +835,22 @@ def _route(
 
     # Everything below needs the AI (or the offline helper's best guess).
     if _has(
-        t, "report", "issue", "problem", "broken", "not working", "won't",
-        "wont", "slow", "internet", "keyboard", "mouse", "monitor",
-        "turn on", "how do i", "how to",
+        t,
+        "report",
+        "issue",
+        "problem",
+        "broken",
+        "not working",
+        "won't",
+        "wont",
+        "slow",
+        "internet",
+        "keyboard",
+        "mouse",
+        "monitor",
+        "turn on",
+        "how do i",
+        "how to",
     ):
         return (
             "To report a problem:\n" + _fill(c["report_howto"], c),
@@ -848,6 +882,7 @@ def answer(
 # AI context (verified data only)
 # ---------------------------------------------------------------------------
 
+
 def _reports_text(reports: list[dict], c: dict) -> str:
     """The signed-in user's reports as plain, prompt-safe lines (newest first)."""
     lines = [
@@ -878,6 +913,7 @@ def _pages_text(c: dict) -> str:
 # State + callbacks
 # ---------------------------------------------------------------------------
 
+
 def _k(p: str, name: str) -> str:
     return f"{p}_bot_{name}"
 
@@ -907,9 +943,9 @@ def _ask(p: str, text: str, ctx: dict) -> None:
     ss = st.session_state
     text = " ".join(_CTRL_CHARS.sub(" ", text or "").split())[:MAX_INPUT_CHARS]
     if not text:
-        return                      # empty input
+        return  # empty input
     if ss.get(_k(p, "pending")):
-        return                      # an answer is already being written
+        return  # an answer is already being written
 
     msgs: list[dict] = ss[_k(p, "msgs")]
     msgs.append({"role": "me", "text": text})
@@ -940,6 +976,7 @@ def _go(p: str, page: str, ctx: dict) -> None:
 # Producing a reply (a generator, so the UI can stream it)
 # ---------------------------------------------------------------------------
 
+
 def _stream_reply(text: str, prior: list[dict], ctx: dict, out: dict) -> Iterator[str]:
     """
     Yield the reply in pieces. ``out["suggest"]`` is set to the chips to show
@@ -969,7 +1006,10 @@ def _stream_reply(text: str, prior: list[dict], ctx: dict, out: dict) -> Iterato
     try:
         for piece in ai_service.stream_chat(
             text,
-            [{"role": m.get("role"), "text": m.get("text", "")} for m in prior[-MAX_PROMPT_HISTORY:]],
+            [
+                {"role": m.get("role"), "text": m.get("text", "")}
+                for m in prior[-MAX_PROMPT_HISTORY:]
+            ],
             teacher_name=_first_name(user) or "Teacher",
             role=str(user.get("role") or "teacher").lower(),
             reports_text=_reports_text(ctx["reports"], ctx["config"]),
@@ -997,7 +1037,7 @@ def _run_pending(p: str, text: str, ctx: dict, slot) -> None:
     """Stream the answer for the pending question into ``slot``, then finish."""
     ss = st.session_state
     msgs: list[dict] = ss[_k(p, "msgs")]
-    prior = msgs[:-1]               # everything before the question itself
+    prior = msgs[:-1]  # everything before the question itself
 
     out: dict = {"suggest": None}
     parts: list[str] = []
@@ -1087,6 +1127,7 @@ _HEADER_HTML = (
 # Main render
 # ---------------------------------------------------------------------------
 
+
 def render(
     p: str,
     user: dict,
@@ -1172,9 +1213,13 @@ def render(
                 for i, s in enumerate(suggest or []):
                     chip_key = _k(p, f"chip_{turn}_{i}")
                     if s[0] == "ask":
-                        st.button(s[1], key=chip_key, on_click=_ask, args=(p, s[1], ctx))
+                        st.button(
+                            s[1], key=chip_key, on_click=_ask, args=(p, s[1], ctx)
+                        )
                     else:
-                        st.button(f"{s[1]} ›", key=chip_key, on_click=_go, args=(p, s[2], ctx))
+                        st.button(
+                            f"{s[1]} ›", key=chip_key, on_click=_go, args=(p, s[2], ctx)
+                        )
                 if show_reset:
                     st.button(
                         "↺ New chat",
@@ -1211,3 +1256,45 @@ def render(
         # Write the answer last, so the whole panel is already on screen.
         if pending:
             _run_pending(p, pending, ctx, slot)
+
+
+# ---------------------------------------------------------------------------
+# Stand-alone demo:  streamlit run frontend/chatbot.py
+# ---------------------------------------------------------------------------
+
+if __name__ == "__main__":
+    st.set_page_config(page_title="Chatbot demo", layout="wide")
+    st.title("Dashboard")
+    st.caption("Demo page - the robot button is at the bottom right.")
+
+    render(
+        "demo",
+        {"name": "Alwyna Lopez", "role": "teacher"},
+        [
+            {
+                "id": "CL-1043",
+                "room": "CL 1",
+                "unit": 3,
+                "issues": ["Slow performance"],
+                "status": "progress",
+                "date": "Oct 02, 2026",
+            },
+            {
+                "id": "CL-1042",
+                "room": "CL 2",
+                "unit": 7,
+                "issues": ["No internet"],
+                "status": "resolved",
+                "date": "Sep 28, 2026",
+            },
+            {
+                "id": "CL-1041",
+                "room": "CL 1",
+                "unit": 15,
+                "issues": ["Won't turn on"],
+                "status": "followup",
+                "date": "Sep 20, 2026",
+            },
+        ],
+        navigate=lambda page: st.toast(f"Would open: {page}"),
+    )
