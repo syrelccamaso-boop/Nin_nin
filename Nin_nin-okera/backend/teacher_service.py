@@ -18,7 +18,7 @@ from . import users_repository as users
 # Speed: the computers list (with hardware and software) is the same for
 # every teacher, so it is shared for this many seconds. Any change clears it
 # at once (main.py).
-COMPUTERS_CACHE_SECONDS = 10
+COMPUTERS_CACHE_SECONDS = 60
 
 # database.py exports get_client; alias it so every call below is unchanged.
 get_supabase = get_client
@@ -1039,7 +1039,7 @@ def _load_computers() -> List[Dict[str, Any]]:
 # Any change (POST / PATCH / DELETE) clears them at once (main.py), so a new
 # report or a status change shows on the next load.
 
-TEACHER_DATA_CACHE_SECONDS = 10
+TEACHER_DATA_CACHE_SECONDS = 60
 
 # Reports that no longer mark a computer on the live map.
 CLOSED_STATUS_NAMES = {"fixed", "cancelled", "canceled"}

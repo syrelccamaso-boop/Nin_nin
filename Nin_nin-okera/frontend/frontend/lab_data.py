@@ -65,6 +65,7 @@ STATUS = {
     "repair": ("Under repair", "b-repair"),
     "escalated": ("Escalated", "b-escalated"),
     "fixed": ("Fixed", "b-fixed"),
+    "cancelled": ("Cancelled", "b-neutral"),
 }
 OPEN = ("reported", "repair", "escalated")
 
@@ -488,6 +489,8 @@ _LIVE_STATUS = {
     "followup": "escalated",
     "follow up": "escalated",
     "follow-up": "escalated",
+    "cancelled": "cancelled",  # added
+    "canceled": "cancelled",
 }
 
 
@@ -561,7 +564,7 @@ def report_from_backend(r: dict) -> dict:
         # the label shows it as a follow-up.
         step("reported", "The teacher followed up: still waiting for a technician",
              follow_at, False, label="Follow-up")
-    if status != "reported" or repair_at:
+    if (status not in ("reported", "cancelled")) or repair_at:
         step("repair", f"{handled or 'Technician'} started the repair", repair_at,
              status == "repair" and not escalated_at)
     # The Admin's decisions on escalations (ReportDecisions table), oldest first.
@@ -589,6 +592,9 @@ def report_from_backend(r: dict) -> dict:
         kind, label = labels.get(str(d.get("decision")), ("repair", "Admin decision"))
         step(kind, str(d.get("note") or label), parse_dt(d.get("decided_at")), False, label=label)
 
+    if status == "cancelled":
+        step("cancelled", "Cancelled by the teacher", None, True)
+  
     if status == "fixed" and not (resolved_by_admin and (not fixed_at_ or fixed_at_ == decided_at)):
         # (when the admin resolved it, the decision above is the "fixed" step)
         step("fixed", note or STATUS["fixed"][0], fixed_at_, True)
@@ -948,23 +954,35 @@ def open_reports(store: dict) -> list[dict]:
     return [r for r in store["reports"] if r["status"] in OPEN]
 
 
+def _report_index(store: dict) -> dict:
+    """{(lab, pc): [reports]} for the store's reports, built once.
+
+    Speed: pc_report() / pc_reports() used to scan EVERY report for each call,
+    and drawing the live map calls them several times for each of its ~156
+    computers on every click. The index holds the same report dicts (not
+    copies), so a status change made in place is seen at once; it is rebuilt
+    when the reports list is replaced (refresh, attach) or its length changes
+    (a report added or removed)."""
+    reports = store.get("reports") or []
+    cached = store.get("_ridx")
+    if cached is not None and cached[0] is reports and cached[1] == len(reports):
+        return cached[2]
+    by_pc: dict = {}
+    for r in reports:
+        by_pc.setdefault((r.get("lab"), r.get("pc")), []).append(r)
+    store["_ridx"] = (reports, len(reports), by_pc)
+    return by_pc
+
+
 def pc_report(store: dict, lab: int, pc: int) -> dict | None:
-    mine = [
-        r
-        for r in store["reports"]
-        if r["lab"] == lab and r["pc"] == pc and r["status"] in OPEN
-    ]
+    mine = [r for r in _report_index(store).get((lab, pc), ()) if r["status"] in OPEN]
     return max(mine, key=lambda r: r["created"]) if mine else None
 
 
 def pc_reports(store: dict, lab: int, pc: int) -> list[dict]:
     """Every report for one computer, each one separately: open reports first,
     then closed ones; newest first within each group."""
-    mine = [
-        r
-        for r in store.get("reports") or []
-        if r.get("lab") == lab and r.get("pc") == pc
-    ]
+    mine = _report_index(store).get((lab, pc), [])
     return sorted(
         mine,
         key=lambda r: (
@@ -1484,6 +1502,7 @@ STATUS_ORDER = {
     "fixed": 4,
     "ok": 5,
     "inactive": 6,
+    "cancelled": 7,
 }
 
 REPORT_SORTS = {

@@ -13,11 +13,11 @@ computer   One computer     - details, hardware, software, maintenance, reports
 issues     Maintenance & issues - reports and maintenance work in a date range
 
 Every report has a title, the report date, Printed by, Printed at, the filters
-used, a summary and the matching records. The page header is centred, with a
-logo on each side (e.g. the ISU seal on the left and the department logo on
-the right - see report_logos.py); the header lines can be changed or left
-out, signature lines can be added, and the page can be portrait or landscape,
-A4 or Letter.
+used, a summary and the matching records. The page header is centred: the
+logos (e.g. the ISU seal and the department logo - see report_logos.py) sit
+side by side, centred above the header lines; the header lines can be changed
+or left out, signature lines can be added, and the page can be portrait or
+landscape, A4 or Letter.
 
 Data
 ----
@@ -454,18 +454,28 @@ def to_html(rep: dict, layout: dict, printable: bool = True) -> str:
     paper = layout.get("paper", "A4")
     head = ""
     if layout.get("header", True):
+        # The logos sit side by side, centred above the header lines.
         left, right = (report_logos.data_uri(i) for i in _logo_ids(layout))
-        head = (
-            '<header class="rh">'
-            f'<div class="lg">{f"<img src={chr(34)}{left}{chr(34)} alt={chr(34)}{chr(34)}>" if left else ""}</div>'
+        uris = [u for u in (left, right) if u]
+        text = (
             '<div class="ht">'
             + (f'<div class="inst">{e(layout.get("institution") or "")}</div>' if layout.get("institution") else "")
             + (f'<div class="subt">{e(layout.get("subtitle") or "")}</div>' if layout.get("subtitle") else "")
             + (f'<div class="addr">{e(layout.get("address") or "")}</div>' if layout.get("address") else "")
             + "</div>"
-            f'<div class="lg">{f"<img src={chr(34)}{right}{chr(34)} alt={chr(34)}{chr(34)}>" if right else ""}</div>'
-            "</header>"
         )
+
+        def logo(u):
+            return f'<div class="lgbox">{f"<img src={chr(34)}{u}{chr(34)} alt={chr(34)}{chr(34)}>" if u else ""}</div>'
+
+        if len(uris) == 2:
+            # Two logos: one on each side of the header text.
+            head = f'<header class="rh side">{logo(left)}{text}{logo(right)}</header>'
+        elif len(uris) == 1:
+            # One logo: a small logo centred above the header text.
+            head = f'<header class="rh solo">{logo(uris[0])}{text}</header>'
+        else:
+            head = f'<header class="rh solo">{text}</header>'
     sign = ""
     if layout.get("signatures"):
         sign = '<div class="sign">' + "".join(
@@ -501,19 +511,22 @@ def to_html(rep: dict, layout: dict, printable: bool = True) -> str:
         if printable else ""
     )
     return f"""<!doctype html><html><head><meta charset="utf-8"><title>{e(rep['title'])}</title><style>
-@page {{ size: {paper} {orient}; margin: 14mm 12mm 16mm; }}
+@page {{ size: {paper} {orient}; margin: 8mm 12mm 16mm; }}
 * {{ box-sizing: border-box; }}
 body {{ font: 10.5pt/1.45 'Segoe UI', Roboto, Arial, sans-serif; color: #1c2433; margin: 0; background: #eef1f6; }}
-.page {{ background: #fff; margin: 12px auto; padding: 14mm 12mm; max-width: {'297mm' if orient == 'landscape' else '210mm'};
+.page {{ background: #fff; margin: 12px auto; padding: 8mm 12mm 14mm; max-width: {'297mm' if orient == 'landscape' else '210mm'};
   box-shadow: 0 4px 18px rgba(20,33,61,.12); }}
-.rh {{ display: grid; grid-template-columns: 22mm 1fr 22mm; gap: 10px; align-items: center;
-  border-bottom: 3px double #14213d; padding-bottom: 8px; margin-bottom: 16px; }}
-.rh .lg {{ height: 22mm; display: flex; align-items: center; justify-content: center; }}
-.rh .lg img {{ max-height: 22mm; max-width: 22mm; object-fit: contain; }}
+.rh {{ border-bottom: 3px double #14213d; padding-bottom: 8px; margin-bottom: 14px; }}
+.rh.side {{ display: grid; grid-template-columns: 28mm 1fr 28mm; gap: 10px; align-items: center; }}
+.rh.solo {{ display: flex; flex-direction: column; align-items: center; gap: 4px; }}
+.rh .lgbox {{ display: flex; align-items: center; justify-content: center; }}
+.rh .lgbox img {{ max-width: 100%; max-height: 100%; object-fit: contain; }}
+.rh.side .lgbox {{ width: 28mm; height: 26mm; }}
+.rh.solo .lgbox {{ width: 30mm; height: 16mm; }}
 .rh .ht {{ text-align: center; line-height: 1.3; }}
-.inst {{ font: 700 14pt 'Poppins', 'Segoe UI', sans-serif; color: #14213d; letter-spacing: .02em; text-transform: uppercase; }}
-.subt {{ font: 600 11pt 'Segoe UI', Roboto, Arial, sans-serif; color: #2b3a5c; margin-top: 2px; }}
-.addr {{ font-size: 9pt; color: #6b7385; margin-top: 2px; }}
+.inst {{ font: 700 18pt 'Poppins', 'Segoe UI', sans-serif; color: #14213d; letter-spacing: .02em; text-transform: uppercase; }}
+.subt {{ font: 600 13.5pt 'Segoe UI', Roboto, Arial, sans-serif; color: #2b3a5c; margin-top: 2px; }}
+.addr {{ font-size: 10.5pt; color: #6b7385; margin-top: 2px; }}
 h1 {{ font: 700 14.5pt 'Poppins', 'Segoe UI', sans-serif; color: #14213d; margin: 0 0 10px; text-align: center;
   text-transform: uppercase; letter-spacing: .04em; }}
 .meta {{ border: 1px solid #dfe4ee; border-radius: 6px; padding: 7px 10px; }}
@@ -578,7 +591,7 @@ def to_pdf(rep: dict, layout: dict) -> bytes:
     buf = io.BytesIO()
     margin = 12 * mm
     doc = SimpleDocTemplate(buf, pagesize=size, leftMargin=margin, rightMargin=margin,
-                            topMargin=14 * mm, bottomMargin=16 * mm, title=rep["title"],
+                            topMargin=8 * mm, bottomMargin=16 * mm, title=rep["title"],
                             author=dict(rep["meta"]).get("Printed by", ""))
     width = size[0] - 2 * margin
     ss_ = getSampleStyleSheet()
@@ -600,10 +613,10 @@ def to_pdf(rep: dict, layout: dict) -> bytes:
         from reportlab.lib.enums import TA_CENTER
         from reportlab.lib.utils import ImageReader
 
-        c_inst = ParagraphStyle("cinst", parent=st_inst, alignment=TA_CENTER, fontSize=13, leading=16)
+        c_inst = ParagraphStyle("cinst", parent=st_inst, alignment=TA_CENTER, fontSize=17, leading=21)
         c_sub = ParagraphStyle("csub", parent=st_sub, alignment=TA_CENTER, fontName="Helvetica-Bold",
-                               textColor=colors.HexColor("#2b3a5c"), fontSize=10.5, leading=13)
-        c_addr = ParagraphStyle("caddr", parent=st_sub, alignment=TA_CENTER, fontSize=8.5, leading=11, textColor=grey)
+                               textColor=colors.HexColor("#2b3a5c"), fontSize=13, leading=16)
+        c_addr = ParagraphStyle("caddr", parent=st_sub, alignment=TA_CENTER, fontSize=10, leading=13, textColor=grey)
         text = []
         if layout.get("institution"):
             text.append(Paragraph(x(layout["institution"]).upper(), c_inst))
@@ -611,7 +624,10 @@ def to_pdf(rep: dict, layout: dict) -> bytes:
             text.append(Paragraph(x(layout["subtitle"]), c_sub))
         if layout.get("address"):
             text.append(Paragraph(x(layout["address"]), c_addr))
-        side = 22 * mm
+        left_id, right_id = _logo_ids(layout)
+        n_logos = sum(1 for i in (left_id, right_id) if report_logos.path_of(i))
+        # Two logos -> one on each side; one logo -> small, centred on top.
+        box_w, box_h = (28 * mm, 26 * mm) if n_logos == 2 else (30 * mm, 16 * mm)
 
         def logo_cell(logo_id):
             path = report_logos.path_of(logo_id)
@@ -619,13 +635,22 @@ def to_pdf(rep: dict, layout: dict) -> bytes:
                 return ""
             try:
                 iw, ih = ImageReader(str(path)).getSize()
-                k = min(side / iw, side / ih)
+                k = min(box_w / iw, box_h / ih)
                 return Image(str(path), width=iw * k, height=ih * k)
             except Exception:
                 return ""
 
+        # The logos sit side by side, centred above the header lines.
         left, right = _logo_ids(layout)
-        tbl = Table([[logo_cell(left), text or "", logo_cell(right)]], colWidths=[side + 4, width - 2 * side - 8, side + 4])
+        pics = [c for c in (logo_cell(left), logo_cell(right)) if c != ""]
+        if len(pics) == 2:
+            # Logos on the left and right of the header text.
+            tbl = Table([[pics[0], text or "", pics[1]]],
+                        colWidths=[box_w + 4, width - 2 * box_w - 8, box_w + 4])
+        else:
+            rows = [[pics[0]]] if pics else []
+            rows.append([text or ""])
+            tbl = Table(rows, colWidths=[width])
         tbl.setStyle(TableStyle([("VALIGN", (0, 0), (-1, -1), "MIDDLE"), ("ALIGN", (0, 0), (-1, -1), "CENTER"),
                                  ("LEFTPADDING", (0, 0), (-1, -1), 0), ("RIGHTPADDING", (0, 0), (-1, -1), 0),
                                  ("BOTTOMPADDING", (0, 0), (-1, -1), 6)]))
@@ -944,10 +969,23 @@ class ReportCenter:
                     lay[f"logo_{side}"] = st.selectbox(label, ids, format_func=names.get, key=key,
                                                         label_visibility="collapsed")
                 ui.remember(key)
+
         def slot(side: str) -> str:
             uri = report_logos.data_uri(lay[f"logo_{side}"])
-            pic = f'<img src="{uri}" alt="">' if uri else "<span>No logo</span>"
-            return f'<div class="lp-slot">{pic}<small>{side.title()}</small></div>'
+            pic = (
+                f'<img src="{uri}" alt="" style="'
+                "width:auto !important;height:auto !important;"
+                "max-width:170px !important;max-height:110px !important;"
+                'object-fit:contain !important;display:block;margin:0 auto">'
+                if uri else "<span>No logo</span>"
+            )
+            return (
+                '<div class="lp-slot" style="'
+                "width:180px !important;min-width:180px !important;"
+                "min-height:120px !important;flex:0 0 180px !important;"
+                'display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px">'
+                f'{pic}<small>{side.title()}</small></div>'
+            )
 
         html(
             f'<div class="lp-prev">{slot("left")}<div class="lp-mid">'
@@ -1015,12 +1053,12 @@ class ReportCenter:
     # ---- page --------------------------------------------------------------
     def page(self, s: dict) -> None:
         p = self.p
-        with box(f"{p}_rp_grid", "g2"):
+        with box(f"{p}_rp_grid", "stack"):          # one column: cards stacked
             with box(f"{p}_rp_what", "card"):
                 html('<div class="card-h"><div><h3>What to report on</h3><div class="sub">The records come '
                      "from the database and follow the filters below.</div></div></div>")
                 o, _ = self._options(s)
-            with box(f"{p}_rp_how", "card"):
+            with box(f"{p}_rp_how", "card", "mt"):  # "mt" adds space above Page layout
                 html('<div class="card-h"><div><h3>Page layout</h3><div class="sub">Title, header and '
                      "orientation of the printed report.</div></div></div>")
                 lay = self._layout(o["type"])

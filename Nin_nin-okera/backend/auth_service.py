@@ -1,40 +1,4 @@
-"""
-Centrum Laboratory - Authentication Service
-
-Responsibilities:
-- Registration
-- Email verification
-- Supabase Auth account creation
-- Login
-- Access-token validation
-- Password change
-- Password reset
-- Admin user management
-
-Database architecture:
-
-Supabase Auth
-    auth.users.id
-          |
-          v
-Users.AuthId
-          |
-          +-- Users.UserId
-          +-- Users.Email
-          +-- Users.FirstName
-          +-- Users.LastName
-          +-- Users.RoleId ------> Role.RoleId
-          +-- Users.Department
-          +-- Users.ContactNumber
-          +-- Users.Status
-          +-- Users.CreatedAt
-          +-- Users.UpdatedAt
-
-Passwords are stored ONLY in Supabase Auth.
-
-Application profile information is stored in the "Users" table
-and accessed through users_repository.py.
-"""
+# auth_service.py
 
 import logging
 import os
@@ -43,9 +7,21 @@ import secrets
 import string
 import threading
 from datetime import datetime, timedelta, timezone
+from types import SimpleNamespace
 
+import requests
+from requests.adapters import HTTPAdapter
+
+from . import perf
 from . import users_repository as users
-from .database import DatabaseConfigError, get_client, new_auth_client
+from .database import (
+    ANON_KEY,
+    SERVICE_ROLE_KEY,
+    SUPABASE_URL,
+    DatabaseConfigError,
+    get_client,
+    new_auth_client,
+)
 from .email_service import (
     EmailSendError,
     send_password_reset_email,
@@ -90,23 +66,6 @@ LOGIN_ALLOWED_STATUSES = {
     "active",
     "approved",
 }
-
-
-# =========================================================
-# FIXED ADMIN ACCOUNT
-# =========================================================
-#
-# Optional administrator account that does not require a
-# corresponding row in the Users table.
-#
-# .env:
-#
-# ADMIN_EMAIL=admin@yourschool.edu.ph
-# ADMIN_USERNAME=admin
-# ADMIN_NAME=Administrator
-#
-# The password is stored in Supabase Auth.
-# =========================================================
 
 
 def _fixed_admin_email() -> str:
@@ -679,7 +638,119 @@ def verify_verification_code(
 # =========================================================
 # SUPABASE AUTH HELPERS
 # =========================================================
+# ---------------------------------------------------------
+# Password sign-in over a shared HTTP session (speed)
+# ---------------------------------------------------------
+#
+# new_auth_client() built a brand-new Supabase client (and a new HTTPS
+# connection) on EVERY login. This calls Supabase Auth's password grant
+# directly over one shared keep-alive session. It keeps no session state,
+# so it is safe to share between users and threads.
 
+_auth_http = requests.Session()
+_auth_http.mount(
+    "https://",
+    HTTPAdapter(pool_connections=4, pool_maxsize=20),
+)
+
+
+class _AuthHttpError(RuntimeError):
+    """Supabase Auth refused the request. The message carries the Supabase
+    error code and 'status=<http status>', which authenticate() matches on
+    (invalid_credentials, email_not_confirmed, status=429...)."""
+
+
+def _password_sign_in(email: str, password: str) -> dict:
+    """
+    Check email + password with Supabase Auth.
+
+    Returns {"user_id": <auth.users.id>, "access_token": <jwt>}.
+    Raises _AuthHttpError when Supabase refuses, or another exception when
+    it can't be reached (authenticate() treats those as 'not a wrong
+    password' and refunds the attempt).
+    """
+
+    key = ANON_KEY or SERVICE_ROLE_KEY
+
+    if not SUPABASE_URL or not key:
+        raise DatabaseConfigError(
+            "SUPABASE_URL and SUPABASE_KEY (or SUPABASE_SERVICE_ROLE_KEY) "
+            "are required."
+        )
+
+    response = _auth_http.post(
+        f"{SUPABASE_URL}/auth/v1/token",
+        params={"grant_type": "password"},
+        headers={"apikey": key, "Content-Type": "application/json"},
+        json={"email": email, "password": password},
+        timeout=15,
+    )
+
+    if response.status_code == 200:
+        data = response.json()
+        auth_user = data.get("user") or {}
+
+        if not auth_user.get("id") or not data.get("access_token"):
+            raise _AuthHttpError("unexpected_response status=502")
+
+        return {
+            "user_id": auth_user["id"],
+            "access_token": data["access_token"],
+        }
+
+    try:
+        body = response.json()
+    except ValueError:
+        body = {}
+
+    code = body.get("error_code") or body.get("error") or ""
+    message = (
+        body.get("msg") or body.get("error_description") or body.get("message") or ""
+    )
+
+    # e.g. "invalid_credentials Invalid login credentials status=400"
+    raise _AuthHttpError(f"{code} {message} status={response.status_code}")
+
+
+def _prefetch_dashboard(role: str) -> None:
+    """
+    Speed: warm the shared dashboard cache while the browser is still
+    switching from the login screen to the dashboard, so the dashboard's
+    first request finds the data already loaded (or loading).
+
+    Admin and Technician dashboards both read technician_service's data.
+    Best effort: a failure here never affects the login.
+    """
+
+    role = str(role or "").strip().lower()
+
+    if role not in (
+        "admin",
+        "administrator",
+        "technician",
+        "teacher",
+    ):
+        return
+
+    def run() -> None:
+        try:
+            # Imported here: these services import auth_service.
+            if role in ("admin", "administrator"):
+                from . import admin_service
+                admin_service.get_dashboard_data()
+                
+            elif role == "teacher":
+                from . import teacher_service
+                teacher_service._report_data()
+                
+            else:
+                from . import technician_service
+                technician_service.get_dashboard_data()
+                
+        except Exception:
+            logger.exception("Dashboard prefetch failed.")
+
+    threading.Thread(target=run, name="prefetch", daemon=True).start()
 
 def _is_permission_error(error: Exception) -> bool:
     text = error_text(error).lower()
@@ -1286,20 +1357,27 @@ def authenticate(
     """
     Authenticate the user through Supabase Auth.
 
-    Supabase Auth verifies:
-        Email + Password
+    Speed:
+      * the Users row is read at the same time as the attempt-counter check
+        (they don't depend on each other), instead of after the password check;
+      * the password is checked over a shared keep-alive HTTP session
+        (_password_sign_in) instead of building a new Supabase client;
+      * the dashboard data starts loading right away (_prefetch_dashboard).
 
-    Users table provides:
-        Role
-        RoleId
-        Status
-        Department
-        Name
-        ContactNumber
-        AuthId
+    Security is unchanged: the attempt is reserved BEFORE the password is
+    checked, the profile is only used after the password is correct, and the
+    Users.AuthId must still match the signed-in Supabase user.
     """
 
     email = _login_email(email)
+
+    fixed_admin = _is_fixed_admin(email)
+
+    # Start reading the Users row now; it runs while the attempt counter is
+    # checked below. (The built-in Admin has no Users row.)
+    profile_future = (
+        None if fixed_admin else perf.submit(users.get_user_by_email, email)
+    )
 
     # -----------------------------------------------------
     # 0. Password attempt limit (5 consecutive failures).
@@ -1325,12 +1403,7 @@ def authenticate(
 
     try:
 
-        response = new_auth_client().auth.sign_in_with_password(
-            {
-                "email": email,
-                "password": password,
-            }
-        )
+        signed_in = _password_sign_in(email, password)
 
     except Exception as error:
 
@@ -1380,33 +1453,19 @@ def authenticate(
             "error": ("We couldn't log you in right now. " "Please try again later."),
         }
 
-    if not response or not response.user:
-        try:
-            locked = _login_failed(email)
-        except _LoginLimitUnavailable:
-            locked = None
+    # Correct password: reset the consecutive-failure counter
+    # (after the response; the user doesn't wait for it).
+    perf.background(_login_clear, email)
 
-        return {
-            "success": False,
-            "error": locked or ("Email or password is incorrect."),
-        }
+    auth_user_id = signed_in["user_id"]
 
-    # Correct password: reset the consecutive-failure counter.
-    # Speed: done after the response (it doesn't change the answer); the
-    # user no longer waits for this extra round trip on every login.
-    from .perf import background
-
-    background(_login_clear, email)
-
-    auth_user_id = response.user.id
-
-    access_token = response.session.access_token if response.session else None
+    access_token = signed_in["access_token"]
 
     # -----------------------------------------------------
     # Fixed Admin
     # -----------------------------------------------------
 
-    if _is_fixed_admin(email):
+    if fixed_admin:
 
         user = _fixed_admin_user(
             email,
@@ -1414,6 +1473,8 @@ def authenticate(
         )
 
         _remember_token(access_token, user)
+
+        _prefetch_dashboard(user["role"])
 
         return {
             "success": True,
@@ -1424,22 +1485,40 @@ def authenticate(
     # -----------------------------------------------------
     # 2. Find application profile.
     #
-    # AuthId is the preferred relationship.
+    # The row was already requested by e-mail (profile_future). It is only
+    # accepted when its AuthId matches the signed-in Supabase user (or is
+    # still empty, as before). Otherwise the full lookup is used: AuthId
+    # first, then the e-mail with the same AuthId check.
     # -----------------------------------------------------
 
+    row = None
+
     try:
+        row = profile_future.result()
+    except DatabaseError:
+        row = None  # the full lookup below tries again and reports the error
 
-        row = _get_application_user(
-            auth_user_id=auth_user_id,
-            email=email,
-        )
+    if row:
+        stored_auth_id = row.get(users.AUTH_ID_COLUMN)
 
-    except DatabaseError as error:
+        if stored_auth_id and str(stored_auth_id).lower() != str(auth_user_id).lower():
+            row = None
 
-        return {
-            "success": False,
-            "error": str(error),
-        }
+    if not row:
+
+        try:
+
+            row = _get_application_user(
+                auth_user_id=auth_user_id,
+                email=email,
+            )
+
+        except DatabaseError as error:
+
+            return {
+                "success": False,
+                "error": str(error),
+            }
 
     if not row:
 
@@ -1476,6 +1555,8 @@ def authenticate(
         }
 
     _remember_token(access_token, user)
+
+    _prefetch_dashboard(user["role"])
 
     return {
         "success": True,
@@ -1903,12 +1984,7 @@ def change_password(
 
     try:
 
-        response = new_auth_client().auth.sign_in_with_password(
-            {
-                "email": email,
-                "password": current_password,
-            }
-        )
+        signed_in = _password_sign_in(email, current_password)
 
     except Exception as error:
 
@@ -1947,25 +2023,12 @@ def change_password(
             ),
         }
 
-    auth_user = getattr(
-        response,
-        "user",
-        None,
-    )
-
-    if not auth_user:
-        try:
-            locked = _login_failed(email)
-        except _LoginLimitUnavailable:
-            locked = None
-
-        return {
-            "success": False,
-            "error": locked or ("Your current password is incorrect."),
-        }
+    # _password_sign_in() raises when the password is wrong, so reaching this
+    # line means it was correct (the old "if not auth_user" block is gone).
+    auth_user = SimpleNamespace(id=signed_in["user_id"])
 
     _login_clear(email)
-
+    
     # -----------------------------------------------------
     # 2. Update password in Supabase Auth.
     # -----------------------------------------------------
@@ -2132,11 +2195,9 @@ def change_own_email(
 
     if blocked:
         return _fail(blocked)
-
+    
     try:
-        response = new_auth_client().auth.sign_in_with_password(
-            {"email": email, "password": current_password}
-        )
+        signed_in = _password_sign_in(email, current_password)
     except Exception as error:
         text = error_text(error).lower()
 
@@ -2151,14 +2212,7 @@ def change_own_email(
         logger.error("Password check failed: %s", error_text(error))
         return _fail("We couldn't check your password right now. Please try again.")
 
-    auth_user = getattr(response, "user", None)
-
-    if not auth_user:
-        try:
-            locked = _login_failed(email)
-        except _LoginLimitUnavailable:
-            locked = None
-        return _fail(locked or "Your current password is incorrect.")
+    auth_user = SimpleNamespace(id=signed_in["user_id"])
 
     _login_clear(email)
 

@@ -44,7 +44,6 @@ Just to look at it (no login needed), from the project root:
 from __future__ import annotations
 
 import sys
-import time
 from datetime import timedelta
 
 import streamlit as st
@@ -68,6 +67,7 @@ from frontend.portal import (
     sort_select,
     stat,
 )
+
 ROLE = "Technician"
 P = "tech"  # session-state prefix for this dashboard (cleared on log out)
 ss = st.session_state
@@ -113,14 +113,6 @@ def _fetch(token: str | None, preview: bool) -> dict:
     )
 
 
-# Speed: store() is called many times per click (find(), callbacks, the
-# inventory, the report center, every page). lab_store.attach() was run on
-# every one of those calls. The attached store is now reused for a few
-# seconds - long enough to cover one click and its redraw, short enough
-# that reports other people add to the shared lab store still show up.
-_ATTACH_TTL_SECONDS = 3.0
-
-
 def store() -> dict:
     if f"{P}_data" not in ss:
         with ui.loading("Loading lab data...", "Getting the latest reports"):
@@ -128,12 +120,6 @@ def store() -> dict:
                 ss.get(ui.TOKEN_KEY), ss.get(f"{P}_preview", False)
             )
     data = ss[f"{P}_data"]
-
-    cached = ss.get(f"{P}_attached")
-    now = time.monotonic()
-    if cached is not None and cached[0] is data and now - cached[1] < _ATTACH_TTL_SECONDS:
-        return cached[2]
-
     # When connected, the inventory comes from Supabase (Computers /
     # ComputerHardware / ComputerSoftware), exactly as on the Admin dashboard.
     # lab_store.attach() must not replace it with the local data/centrum_lab.json
@@ -142,13 +128,11 @@ def store() -> dict:
     s = lab_store.attach(data)
     if db_computers is not None:
         s["computers"] = db_computers
-    ss[f"{P}_attached"] = (data, now, s)
     return s
 
 
 def refresh() -> None:
     ss.pop(f"{P}_data", None)
-    ss.pop(f"{P}_attached", None)
     toast("Data refreshed")
 
 
@@ -177,7 +161,10 @@ def _save(r: dict, status: str, note: str, tech_note: str = "") -> bool:
     s = store()
     if s["live"] and not r.get("local"):
         result = backend_client.update_report_status(
-            ss.get(ui.TOKEN_KEY), r["db_id"], D.BACKEND_STATUS[status], tech_note.strip()
+            ss.get(ui.TOKEN_KEY),
+            r["db_id"],
+            D.BACKEND_STATUS[status],
+            tech_note.strip(),
         )
         if not result.get("success"):
             toast(result.get("error") or "Could not save the change.", False)
@@ -230,7 +217,9 @@ def do_fixed(rid: str) -> None:
     r = find(rid)
     note = (ss.get(f"{P}_note") or "").strip()
     if not note:
-        return toast("Write what you did - it is saved as the report's resolution note.", False)
+        return toast(
+            "Write what you did - it is saved as the report's resolution note.", False
+        )
     if r and _save(r, "fixed", note, tech_note=note):
         toast(f"{r['id']} marked fixed. The teacher can see it now.")
         close_modal()
@@ -254,7 +243,9 @@ def open_report(rid: str) -> None:
 def pc_clicked(lab: int, pc: int) -> None:
     """A computer on the map: one open report -> that report; several open
     reports -> pick which one; none -> the computer's details."""
-    open_reps = [r for r in D.pc_problem_rows(store(), lab, pc) if r["status"] in D.OPEN]
+    open_reps = [
+        r for r in D.pc_problem_rows(store(), lab, pc) if r["status"] in D.OPEN
+    ]
     if len(open_reps) > 1:
         return open_modal("pcreports", (lab, pc))
     if open_reps:
@@ -401,6 +392,7 @@ Q_FILTERS = [
     ("repair", "Under repair"),
     ("escalated", "Escalated"),
     ("fixed", "Fixed"),
+    ("cancelled", "Cancelled"),
 ]
 
 
@@ -415,7 +407,9 @@ def _reset_page() -> None:
 def _report_from_list(lab: int, flt: str, period=("all", 0, 0)) -> None:
     """Reports page -> "Generate report" (Maintenance & issues, same filters and period)."""
     rst = ["reported", "repair", "escalated"] if flt == "open" else [flt]
-    report_print.open_generator(SHELL, "issues", lab=lab or 0, rstatuses=rst, period=period)
+    report_print.open_generator(
+        SHELL, "issues", lab=lab or 0, rstatuses=rst, period=period
+    )
 
 
 def _menu_do(fn, *args) -> None:
@@ -430,16 +424,40 @@ def _report_menu(r: dict) -> None:
     rid = r["id"]
     k = r.get("row_key", rid)  # one row per problem -> keys per row
     if r["status"] == "reported":
-        btn("Start repair", f"{P}_qm_go_{k}", "menuitem", icon=":material/build:",
-            on_click=_menu_do, args=(start_repair, rid))
+        btn(
+            "Start repair",
+            f"{P}_qm_go_{k}",
+            "menuitem",
+            icon=":material/build:",
+            on_click=_menu_do,
+            args=(start_repair, rid),
+        )
     if r["status"] in ("repair", "escalated"):
-        btn("Mark fixed", f"{P}_qm_fx_{k}", "menuitemok", icon=":material/check_circle:",
-            on_click=_menu_do, args=(ask, "fixed", rid))
+        btn(
+            "Mark fixed",
+            f"{P}_qm_fx_{k}",
+            "menuitemok",
+            icon=":material/check_circle:",
+            on_click=_menu_do,
+            args=(ask, "fixed", rid),
+        )
     if r["status"] == "repair":
-        btn("Escalate to admin", f"{P}_qm_es_{k}", "menuitem", icon=":material/arrow_upward:",
-            on_click=_menu_do, args=(ask, "escalate", rid))
-    btn("View details", f"{P}_qm_v_{k}", "menuitem", icon=":material/visibility:",
-        on_click=_menu_do, args=(open_report, k))
+        btn(
+            "Escalate to admin",
+            f"{P}_qm_es_{k}",
+            "menuitem",
+            icon=":material/arrow_upward:",
+            on_click=_menu_do,
+            args=(ask, "escalate", rid),
+        )
+    btn(
+        "View details",
+        f"{P}_qm_v_{k}",
+        "menuitem",
+        icon=":material/visibility:",
+        on_click=_menu_do,
+        args=(open_report, k),
+    )
 
 
 def page_reports(s: dict) -> None:
@@ -478,7 +496,10 @@ def page_reports(s: dict) -> None:
                     on_change=_reset_page,
                 )
                 q_per = portal.period_filter(
-                    P, "q", [r.get("created") for r in s["reports"]], on_change=_reset_page
+                    P,
+                    "q",
+                    [r.get("created") for r in s["reports"]],
+                    on_change=_reset_page,
                 )
                 how = sort_select(
                     f"{P}_q_sort__selwide__",
@@ -588,9 +609,12 @@ def page_labs(s: dict) -> None:
 
 def page_analytics(s: dict) -> None:
     now = D.now()
+    live = [r for r in s["reports"] if r.get("status") != "cancelled"]
     with box(f"{P}_an_filter", "cardh"):
-        html('<p class="muted" style="margin:0">Analytics for <b>all laboratories</b> or one laboratory, '
-             "for any year and month that has reports.</p>")
+        html(
+            '<p class="muted" style="margin:0">Analytics for <b>all laboratories</b> or one laboratory, '
+            "for any year and month that has reports.</p>"
+        )
         with box(f"{P}_an_filter_r", "row"):
             labs = [0] + [lab for lab, _ in D.LABS]
             key = ui.sticky(f"{P}_an_lab__selwide__", labs)
@@ -603,12 +627,12 @@ def page_analytics(s: dict) -> None:
             )
             ui.remember(key)
             per = portal.period_filter(
-                P, "an", [r.get("created") for r in s["reports"]]
+                P, "an", [r.get("created") for r in live]
             )
     period, in_period = per.label, per.match
-    reports = [r for r in s["reports"] if not lab_f or r["lab"] == lab_f]
+    reports = [r for r in live if not lab_f or r["lab"] == lab_f]
     scope = D.lab_name(lab_f) if lab_f else "All laboratories"
-    p_all = [r for r in s["reports"] if r.get("created") and in_period(r["created"])]
+    p_all = [r for r in live if r.get("created") and in_period(r["created"])]
     in_p = [r for r in reports if r.get("created") and in_period(r["created"])]
     fixed = [r for r in in_p if D.fixed_at(r)]
     times = [(D.fixed_at(r) - r["created"]).total_seconds() for r in fixed]
@@ -618,12 +642,24 @@ def page_analytics(s: dict) -> None:
     )
     portal.stats(
         stat("list", "ic-violet", len(in_p), f"Reports · {period}"),
-        stat("clock", "ic-blue", D.dur(sum(times) / len(times)) if times else "–", "Average time to fix"),
+        stat(
+            "clock",
+            "ic-blue",
+            D.dur(sum(times) / len(times)) if times else "–",
+            "Average time to fix",
+        ),
         stat("check", "ic-green", len(fixed), "Fixed"),
-        stat("alert", "ic-amber", sum(r["status"] in D.OPEN for r in reports), "Open right now"),
+        stat(
+            "alert",
+            "ic-amber",
+            sum(r["status"] in D.OPEN for r in reports),
+            "Open right now",
+        ),
         cols=4,
     )
-    trend, trend_sub = portal.period_trend([r.get("created") for r in reports], per, now)
+    trend, trend_sub = portal.period_trend(
+        [r.get("created") for r in reports], per, now
+    )
     html(
         '<div class="card mt"><div class="card-h"><div><h3>Reports over time</h3>'
         f'<div class="sub">{h(scope)} · {h(trend_sub)}</div></div></div>'
@@ -633,7 +669,9 @@ def page_analytics(s: dict) -> None:
         (D.lab_name(lab), D.lab_name(lab), sum(r["lab"] == lab for r in p_all))
         for lab, _ in D.LABS
     ]
-    issues = list(D.ISSUES) + sorted({r.get("issue") for r in in_p if r.get("issue")} - set(D.ISSUES))
+    issues = list(D.ISSUES) + sorted(
+        {r.get("issue") for r in in_p if r.get("issue")} - set(D.ISSUES)
+    )
     by_issue = sorted(
         ((x, x, sum(r.get("issue") == x for r in in_p)) for x in issues),
         key=lambda t: -t[2],
@@ -748,7 +786,9 @@ def modal_report(s: dict, rid: str) -> None:
                 '<div class="m-sub" style="margin-top:-6px">Each report is kept separately. '
                 "Pick another one to see its details and history.</div>"
             )
-            portal.pc_report_list(P, s, r["lab"], r["pc"], open_report, "m", current=r["row_key"])
+            portal.pc_report_list(
+                P, s, r["lab"], r["pc"], open_report, "m", current=r["row_key"]
+            )
         with box(f"{P}_m_act", "mactions"):
             _actions(r, "m", small=False)
             btn("Close", f"{P}_m_close", "ghost", on_click=close_modal)

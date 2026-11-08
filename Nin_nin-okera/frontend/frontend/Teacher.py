@@ -518,7 +518,10 @@ def _report_from_db(r: dict) -> dict:
             else "You cancelled this report"
         ),
     }
+    updated_at = D.parse_dt(r.get("updated_at") or r.get("UpdatedAt"))
+
     if status in notes:
+        when = updated_at if (status == "cancelled" and updated_at) else created
         history.append({"s": status, "t": created, "note": notes[status]})
 
     return {

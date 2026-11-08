@@ -101,7 +101,17 @@ _NO_DATA_CHANGE_PATHS = {
     "/auth/verify-code",
     "/auth/signup",
     "/auth/forgot-password",
+    "/notifications/read",
 }
+
+from . import database
+
+
+@app.on_event("startup")
+def _warm_up():
+    for _ in range(8):
+        perf.background(database.round_trip_ms)
+    perf.background(roles_problem)  # loads the Role table
 
 
 @app.middleware("http")
@@ -369,6 +379,10 @@ class SubmitReportRequest(BaseModel):
     comment: str = ""
     # "Hardware" or "Software", as picked on the teacher's form (Reports.CategoryId)
     category: str = ""
+
+
+class CancelReportRequest(BaseModel):
+    reason: str = ""
 
 
 # =========================================================
@@ -1277,6 +1291,22 @@ def teacher_follow_up_report(
         "message": "Follow-up sent to the technicians.",
         "report": updated,
     }
+
+
+@app.post("/teacher/reports/{report_id}/cancel")
+def teacher_cancel_report(
+    report_id: str,
+    data: CancelReportRequest,
+    authorization: str | None = Header(default=None),
+):
+    teacher = _require_teacher(authorization)
+    try:
+        updated = teacher_service.cancel_report(teacher, report_id, data.reason)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from None
+    except RuntimeError as exc:
+        raise HTTPException(status_code=500, detail=str(exc)) from None
+    return {"success": True, "message": "Report cancelled.", "report": updated}
 
 
 @app.get("/teacher/profile")

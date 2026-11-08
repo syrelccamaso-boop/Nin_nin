@@ -3235,7 +3235,7 @@
    "desc": "missing",
    "by": "juan dela cruz",
    "created": "2026-10-04T22:42:05",
-   "status": "escalated",
+   "status": "fixed",
    "urgency": "Normal",
    "tech": "Ailyn Agustin",
    "esc_note": "damaged wire ng mouse",
@@ -3255,6 +3255,11 @@
      "s": "escalated",
      "t": "2026-10-18T16:18:39",
      "note": "Escalated: damaged wire ng mouse"
+    },
+    {
+     "s": "fixed",
+     "t": "2026-11-08T18:28:52",
+     "note": "replaced the keayboard and mouse"
     }
    ]
   }
@@ -3746,6 +3751,58 @@
    "actor": "Centrum Admin",
    "to": "",
    "ref": null
+  },
+  {
+   "id": "3ae764b71e25",
+   "t": "2026-10-24T22:48:37",
+   "kind": "inventory",
+   "title": "CL1-PC36 · added to the inventory",
+   "sub": "Centrum 1 PC 36 · by Ailyn Agustin",
+   "roles": [
+    "admin",
+    "technician"
+   ],
+   "actor": "Ailyn Agustin",
+   "to": "",
+   "ref": [
+    "pc",
+    1,
+    36
+   ]
+  },
+  {
+   "id": "ce4409593b01",
+   "t": "2026-10-24T23:14:59",
+   "kind": "inventory",
+   "title": "CL2-PC29 · added to the inventory",
+   "sub": "Centrum 2 PC 29 · by Centrum Admin",
+   "roles": [
+    "admin",
+    "technician"
+   ],
+   "actor": "Centrum Admin",
+   "to": "",
+   "ref": [
+    "pc",
+    2,
+    29
+   ]
+  },
+  {
+   "id": "58a4b4ca56fe",
+   "t": "2026-11-08T18:28:52",
+   "kind": "status",
+   "title": "Your report R-1003 is fixed",
+   "sub": "Centrum 3 PC 30 · Keyboard / mouse · Ailyn Agustin",
+   "roles": [
+    "teacher"
+   ],
+   "actor": "Ailyn Agustin",
+   "to": "juan dela cruz",
+   "ref": [
+    "report",
+    "R-1003"
+   ]
   }
  ],
  "read": {
@@ -3778,7 +3835,8 @@
    "db:35",
    "db:43",
    "db:48",
-   "db:122"
+   "db:122",
+   "db:169"
   ],
   "itsallinthemind729@gmail.com": [
    "esc:CL-0032:20261018162331",
@@ -3836,7 +3894,9 @@
  "accounts": {
   "24": {
    "deactivated_at": "2026-10-24T21:06:44",
-   "deactivated_by": "Centrum Admin"
+   "deactivated_by": "Centrum Admin",
+   "reactivated_at": "2026-10-24T23:29:22",
+   "reactivated_by": "Centrum Admin"
   }
  },
  "temp_pw": {}

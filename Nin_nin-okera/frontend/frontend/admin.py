@@ -17,34 +17,6 @@ repository/database layer
     ↓
 Supabase PostgreSQL
 
-Important
----------
-- Supabase PostgreSQL is the source of truth.
-- Admin does NOT maintain a separate database or local copy.
-- Admin does NOT directly access Supabase.
-- Streamlit session state is used only for UI state/cache.
-- lab_store.py is NOT used by Admin as a persistence layer.
-- Teacher and Technician records are read from the same database records.
-- Existing Admin UI/layout is preserved.
-
-Pages
------
-Dashboard       stats, live monitoring map, laboratory analytics (filter by lab)
-Reports         report list (rows per page: 10 / 25 / 50 / 100)
-Inventory       computers + Add computer + Add laboratory
-Analytics       charts, filtered by laboratory
-Escalation
-Users           account requests (Confirm / Cancel) and every account:
-                first & last name, email, role (more than one Admin allowed),
-                date created / confirmed / cancelled / deactivated,
-                Edit (incl. email), Deactivate, Reactivate
-Print reports   preview, print and PDF export (frontend/report_print.py)
-My Profile
-
-How it is opened:
-
-    from frontend import admin
-    admin.render(user)
 """
 
 from __future__ import annotations
@@ -1489,6 +1461,7 @@ R_FILTERS = [
     ("repair", "Under repair"),
     ("escalated", "Escalated"),
     ("fixed", "Fixed"),
+    ("cancelled", "Cancelled"),
 ]
 
 
@@ -1514,6 +1487,7 @@ _CHIP_RSTATUS = {
     "repair": ["repair"],
     "escalated": ["escalated"],
     "fixed": ["fixed"],
+    "cancelled": ["cancelled"],
 }
 
 
@@ -1795,7 +1769,7 @@ def page_reports(s: dict) -> None:
 
 def page_analytics(s: dict) -> None:
     now = D.now()
-    all_reports = _rows(s, "reports")
+    all_reports = [r for r in _rows(s, "reports") if r.get("status") != "cancelled"]
 
     # ------------------------------------------------------------------
     # Filters: laboratory + year + month. The year and month lists come from

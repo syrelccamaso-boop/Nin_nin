@@ -1712,7 +1712,7 @@ def lab_analytics(p: str, s: dict, ctx: str = "dash", title: str = "Laboratory a
 # ===========================================================================
 # Notifications stored in the database (Notifications table)
 # ===========================================================================
-DB_NOTIF_TTL = 20  # seconds the bell keeps the fetched list before asking again
+DB_NOTIF_TTL = 60  # seconds the bell keeps the fetched list before asking again
 
 
 def _db_notif_style(title: str) -> tuple[str, str]:
@@ -2032,6 +2032,7 @@ class Shell:
         without logging out."""
         cb()
         lab_store.sync_labs()
+        ss.pop(f"{self.p}_dbnotif", None)  # also fetch the notifications again
         ss[f"{self.p}_synced"] = D.now()
 
     def _topbar(self, user: dict, s: dict, items: list, on_refresh=None) -> None:

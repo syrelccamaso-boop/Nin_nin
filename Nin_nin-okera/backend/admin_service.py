@@ -385,8 +385,9 @@ def get_dashboard_data() -> dict:
 
     # Speed: the user list is read at the same time as the laboratory data
     # (it was read only after the laboratory data had finished).
-    users_future = perf.submit(auth_service.admin_list_users)
-
+    users_future = perf.submit(
+        lambda: perf.cached("admin_users", 30, auth_service.admin_list_users)
+    )
     # =====================================================
     # SHARED LABORATORY DATA
     # =====================================================
@@ -394,30 +395,11 @@ def get_dashboard_data() -> dict:
     try:
         raw_lab = technician_service.get_dashboard_data()
 
+        # _normalize_lab_data() already fills in operating_system / system
+        # for every computer, so it is not repeated here.
         lab = _normalize_lab_data(raw_lab)
 
         computers = _get_computers_from_lab(lab)
-
-        # Ensure the computer records retain the operating system
-        # fetched from the Computers table by technician_service.
-        for computer in computers:
-            if not isinstance(computer, dict):
-                continue
-
-            system = computer.get("system")
-            if not isinstance(system, dict):
-                system = {}
-
-            operating_system = (
-                computer.get("operating_system")
-                or system.get("operating_system")
-                or computer.get("OperatingSystem")
-                or ""
-            )
-
-            computer["operating_system"] = operating_system
-            system["operating_system"] = operating_system
-            computer["system"] = system
 
         logger.info(
             "Admin dashboard laboratory data loaded: "
@@ -487,18 +469,16 @@ def get_dashboard_data() -> dict:
     # RESPONSE
     # =====================================================
 
+    # Speed: the computers used to be sent three times (lab.units,
+    # lab.computers - the same list - and a top-level "computers").
+    # Only send what the frontend reads.
+    payload_lab = {k: v for k, v in lab.items() if k != "computers"}
+
     return {
         "success": True,
-        "lab": lab,
+        "lab": payload_lab,
         "requests": requests,
         "problems": problems,
-        # -------------------------------------------------
-        # Convenience field for Admin frontend.
-        #
-        # This prevents the frontend from having to guess
-        # whether computers are under "computers" or "units".
-        # -------------------------------------------------
-        "computers": _get_computers_from_lab(lab),
     }
 
 

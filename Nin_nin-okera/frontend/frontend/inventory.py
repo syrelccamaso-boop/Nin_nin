@@ -11,7 +11,9 @@ get exactly the same tools:
     - computer details: hardware, software, maintenance history, and every
       report of the computer (one entry per problem, the same as the Reports
       page; several reports -> pick which one to open)
-    - Add computer (validated form)
+    - Add computer (validated form); typing several seat numbers
+      ("3, 7, 12" or "20-29") adds identical units at once (same specs and
+      software, one per seat)
     - Add laboratory (Admin): name, code, building, floor, room, number of
       computer units, seats per row, specs to copy - the units are saved in
       the database (Computers: Room + UnitNumber)
@@ -48,7 +50,15 @@ from frontend import lab_store
 from frontend import portal
 from frontend import report_print
 from frontend import ui
-from frontend.portal import comp_badge, ic, lab_tile, page_slice, pager, sort_select, stat
+from frontend.portal import (
+    comp_badge,
+    ic,
+    lab_tile,
+    page_slice,
+    pager,
+    sort_select,
+    stat,
+)
 
 ss = st.session_state
 html, btn, hit, box, h = ui.html, ui.btn, ui.hit, ui.box, ui.h
@@ -68,6 +78,9 @@ CHIP_STATUSES = {
     "attention": ["reported", "repair", "escalated", "maint"],
     "inactive": ["inactive"],
 }
+
+# The most computers "Add computer" saves in one go.
+MAX_BATCH = 50
 
 
 class Inventory:
@@ -137,7 +150,10 @@ class Inventory:
     def _saved(self, result: dict) -> bool:
         if result.get("success"):
             return True
-        self.toast(result.get("error") or "The change could not be saved to the database.", False)
+        self.toast(
+            result.get("error") or "The change could not be saved to the database.",
+            False,
+        )
         return False
 
     def _comp(self, lab: int, pc: int) -> dict | None:
@@ -212,7 +228,11 @@ class Inventory:
         if tab == "software":
             rows = "".join(
                 f'<dt>{h(x["name"])}</dt><dd>{h(x["version"] or "—")}'
-                + (f' <small>· installed {D.sent_date(x["installed"])}</small>' if x.get("installed") else "")
+                + (
+                    f' <small>· installed {D.sent_date(x["installed"])}</small>'
+                    if x.get("installed")
+                    else ""
+                )
                 + "</dd>"
                 for x in comp["software"]
             )
@@ -326,7 +346,12 @@ class Inventory:
                         on_click=self.open_pc,
                         args=(lab, pc),
                     )
-                btn("Close", f"{self.p}_pcr_close", "ghost", on_click=self.shell.close_modal)
+                btn(
+                    "Close",
+                    f"{self.p}_pcr_close",
+                    "ghost",
+                    on_click=self.shell.close_modal,
+                )
 
     # ------------------------------------------------------------------ edit (callbacks)
     def open_edit(self, lab: int, pc: int, tab: str = "details") -> None:
@@ -439,7 +464,9 @@ class Inventory:
     def _software_id(self, comp: dict, name: str):
         item = next((x for x in comp["software"] if x["name"] == name), None)
         if item is None or not item.get("id"):
-            self.toast(f"{name} isn't linked to a database record. Refresh the data.", False)
+            self.toast(
+                f"{name} isn't linked to a database record. Refresh the data.", False
+            )
             return None
         return item["id"]
 
@@ -542,28 +569,65 @@ class Inventory:
         for label, value in zip(D.HW_FIELDS, self._lab_specs(lab)):
             ss[ek("add hw " + label)] = value
 
+    # ------------------------------------------------------------------ add several at once
     @staticmethod
-    def _lab_specs(lab: int) -> list[str]:
-        """Default hardware for the "Add computer" form of a laboratory."""
-        if lab in D.SPECS:
-            return D.SPECS[lab]
-        specs = (D.LAB_INFO.get(lab) or {}).get("specs")
-        if isinstance(specs, dict):
-            return [str(specs.get(f, "")) for f in D.HW_FIELDS]
-        return [""] * len(D.HW_FIELDS)
+    def _parse_seats(text: str) -> tuple[list[int], str | None]:
+        """The seat numbers typed in "Seat numbers", in order and without
+        repeats. Accepts one seat (41), a range (41-50) or any mix separated
+        by commas or spaces (3, 7, 12-15). Returns (seats, error)."""
+        text = re.sub(r"\s*(?:-|–|—|\bto\b)\s*", "-", str(text or "").strip().lower())
+        if not text:
+            return [], "Enter the seat number(s) for the new computer(s)."
+        seats: list[int] = []
+        for part in re.split(r"[,;\s]+", text):
+            if not part:
+                continue
+            m = re.fullmatch(r"(\d{1,3})(?:-(\d{1,3}))?", part)
+            if not m:
+                return [], (
+                    f'"{part}" is not a seat number. Use numbers like 5, a range '
+                    "like 5-10, or a list like 3, 7, 12."
+                )
+            a = int(m.group(1))
+            b = int(m.group(2)) if m.group(2) else a
+            if a > b:
+                a, b = b, a
+            if a < 1 or b > 999:
+                return [], "Seat numbers go from 1 to 999."
+            for n in range(a, b + 1):
+                if n not in seats:
+                    seats.append(n)
+            if len(seats) > MAX_BATCH:
+                return [], f"Add at most {MAX_BATCH} computers at a time."
+        return sorted(seats), None
 
-    def _save_add(self) -> None:
-        s, ek = self.store(), self._ek
-        if not self._live():
-            return
-        lab = int(ss.get(ek("add lab")) or 1)
-        raw = str(ss.get(ek("add pc")) or "").strip()
-        if not raw.isdigit() or not 1 <= int(raw) <= 999:
-            return self.toast(
-                "Enter the computer's seat number in the laboratory (1–999).", False
-            )
-        pc = int(raw)
-        hw = {label: ss.get(ek("add hw " + label), "") or "" for label in D.HW_FIELDS}
+    @staticmethod
+    def _span(seats: list[int]) -> str:
+        """Seats written short: 3, 7, 12–15."""
+        out, i = [], 0
+        seats = sorted(seats)
+        while i < len(seats):
+            j = i
+            while j + 1 < len(seats) and seats[j + 1] == seats[j] + 1:
+                j += 1
+            out.append(str(seats[i]) if i == j else f"{seats[i]}–{seats[j]}")
+            i = j + 1
+        return ", ".join(out)
+
+    @staticmethod
+    def _free_seats(s: dict, lab: int, limit: int = 12) -> list[int]:
+        """The first free seat numbers in a laboratory (for the form's hint)."""
+        free = []
+        for n in range(1, 1000):
+            if (lab, n) not in s["computers"]:
+                free.append(n)
+                if len(free) >= limit:
+                    break
+        return free
+
+    def _add_software(self) -> list[dict]:
+        """The software chosen on the "Add computer" form."""
+        ek = self._ek
         defaults = dict(D.DEFAULT_SOFTWARE)
         software = [
             {"name": n, "version": defaults.get(n, "")}
@@ -581,50 +645,164 @@ class Inventory:
                 name = parts[0] if ver else item
                 if not any(x["name"].lower() == name.lower() for x in software):
                     software.append({"name": name, "version": ver})
-        # Checked on a copy of the inventory; the computer is saved in the
-        # database and read back from it.
+        return software
+
+    def _add_payload(self, lab: int, pc: int, comp: dict) -> dict:
+        """What POSTs one new computer to the backend."""
+        return {
+            "room": D.lab_room(lab),
+            "unit_number": pc,
+            "brand": comp.get("brand", ""),
+            "model": comp.get("model", ""),
+            "serial": comp.get("serial", ""),
+            "status": comp.get("status") or "Working",
+            "hardware": comp["hardware"],
+            "software": [
+                {"name": x["name"], "version": x.get("version", "")}
+                for x in comp["software"]
+            ],
+            "history": self._lines(comp, 0),
+        }
+
+    @staticmethod
+    def _lab_specs(lab: int) -> list[str]:
+        """Default hardware for the "Add computer" form of a laboratory."""
+        if lab in D.SPECS:
+            return D.SPECS[lab]
+        specs = (D.LAB_INFO.get(lab) or {}).get("specs")
+        if isinstance(specs, dict):
+            return [str(specs.get(f, "")) for f in D.HW_FIELDS]
+        return [""] * len(D.HW_FIELDS)
+
+    def _save_add(self) -> None:
+        s, ek = self.store(), self._ek
+        if not self._live():
+            return
+        lab = int(ss.get(ek("add lab")) or 1)
+        seats, problem = self._parse_seats(ss.get(ek("add pc")))
+        if problem:
+            return self.toast(problem, False)
+        count = len(seats)
+
+        # Every seat typed must be free before anything is saved.
+        taken = [n for n in seats if (lab, n) in s["computers"]]
+        if taken:
+            free = self._free_seats(s, lab, 8)
+            return self.toast(
+                f"Already in {D.lab_name(lab)}: seat {self._span(taken)}. "
+                f"Free seats include {self._span(free)}.",
+                False,
+            )
+
+        hw = {label: ss.get(ek("add hw " + label), "") or "" for label in D.HW_FIELDS}
+        software = self._add_software()
+        # A serial number belongs to one machine only, so it is left blank when
+        # several computers are added (fill it in later with Edit computer).
+        serial = (ss.get(ek("add serial"), "") or "") if count == 1 else ""
+
+        # Every computer is checked on a copy of the inventory first; nothing
+        # is sent to the database unless all of them pass.
         check = {"computers": dict(s["computers"])}
-        ok, msg = D.add_computer(
-            check,
-            lab=lab,
-            pc=pc,
-            name="",  # the computer is named by its asset ID
-            hardware=hw,
-            software=software,
-            notes="",
-            by=self.me(),
-            brand=ss.get(ek("add brand"), "") or "",
-            model=ss.get(ek("add model"), "") or "",
-            serial=ss.get(ek("add serial"), "") or "",
-            status=ss.get(ek("add status")) or "Working",
-        )
-        if not ok:
-            return self.toast(msg, False)
-        comp = check["computers"][(lab, pc)]
+        made: list[tuple[int, dict]] = []
+        for pc in seats:
+            ok, msg = D.add_computer(
+                check,
+                lab=lab,
+                pc=pc,
+                name="",  # the computer is named by its asset ID
+                hardware=dict(hw),
+                software=copy.deepcopy(software),
+                notes="",
+                by=self.me(),
+                brand=ss.get(ek("add brand"), "") or "",
+                model=ss.get(ek("add model"), "") or "",
+                serial=serial,
+                status=ss.get(ek("add status")) or "Working",
+            )
+            if not ok:
+                return self.toast(
+                    msg if count == 1 else f"{D.asset_tag(lab, pc)}: {msg}", False
+                )
+            made.append((pc, check["computers"][(lab, pc)]))
+
+        if count > 1:
+            return self._save_add_many(lab, made)
+
+        pc, comp = made[0]
         result = backend_client.inv_add_computer(
-            self._token(),
-            {
-                "room": D.lab_room(lab),
-                "unit_number": pc,
-                "brand": comp.get("brand", ""),
-                "model": comp.get("model", ""),
-                "serial": comp.get("serial", ""),
-                "status": comp.get("status") or "Working",
-                "hardware": comp["hardware"],
-                "software": [
-                    {"name": x["name"], "version": x.get("version", "")}
-                    for x in comp["software"]
-                ],
-                "history": self._lines(comp, 0),
-            },
+            self._token(), self._add_payload(lab, pc, comp)
         )
         if not self._saved(result):
             return
         self._changed(comp, "added to the inventory")
-        self.toast(result.get("message") if result.get("message") not in (None, "", "Computer added") else msg)
+        self.toast(
+            result.get("message")
+            if result.get("message") not in (None, "", "Computer added")
+            else msg
+        )
         ss[f"{self.p}_pctab"] = "hardware"
         ss[f"{self.p}_inv_sel"] = (lab, pc)
         self.shell.open_modal("pc", (lab, pc))
+
+    def _save_add_many(self, lab: int, made: list[tuple[int, dict]]) -> None:
+        """Save several checked computers to the database, one backend call
+        each (the same route as a single computer). Computers that fail are
+        reported; the ones already saved stay saved."""
+        p = self.p
+        added: list[tuple[int, dict]] = []
+        failed: list[tuple[int, str]] = []
+        for pc, comp in made:
+            try:
+                result = backend_client.inv_add_computer(
+                    self._token(), self._add_payload(lab, pc, comp)
+                )
+            except Exception:
+                result = {"success": False, "error": "Could not connect to the server."}
+            if result.get("success"):
+                added.append((pc, comp))
+            else:
+                failed.append(
+                    (pc, result.get("error") or "The computer could not be saved.")
+                )
+
+        if not added:
+            # Nothing was saved: keep the form open so it can be tried again.
+            return self.toast(
+                (
+                    f"No computers were added. {failed[0][1]}"
+                    if failed
+                    else "No computers were added."
+                ),
+                False,
+            )
+
+        first_pc = added[0][0]
+        span = f"seats {self._span([n for n, _ in added])}"
+        self._reload()
+        lab_store.add_event(
+            "inventory",
+            f"{len(added)} computers added to the inventory",
+            f"{D.lab_name(lab)} · {span} · by {self.me()}",
+            roles=("admin", "technician"),
+            actor=self.me(),
+            ref=("pc", lab, first_pc),
+        )
+
+        # Show the laboratory the computers were added to.
+        for k in (f"{p}_i_lab__sel__", f"_keep_{p}_i_lab__sel__"):
+            ss[k] = lab
+        ss[f"{p}_ifilter"] = "all"
+        ss[f"{p}_ipage"] = 0
+        ss[f"{p}_inv_sel"] = (lab, first_pc)
+        self.shell.close_modal()
+
+        if failed:
+            return self.toast(
+                f"{len(added)} of {len(made)} computers added ({span}). "
+                f"Not saved: seat {self._span([n for n, _ in failed])} — {failed[0][1]}",
+                False,
+            )
+        self.toast(f"{len(added)} computers added to {D.lab_name(lab)} ({span}).")
 
     # ------------------------------------------------------------------ the page
     def _reset_page(self) -> None:
@@ -699,7 +877,11 @@ class Inventory:
         pending = ss.get(f"{p}_i_lab_pending")
         if pending:
             lab_id = next(
-                (l for l, i in D.LAB_INFO.items() if str(i.get("room") or "").lower() == str(pending).lower()),
+                (
+                    l
+                    for l, i in D.LAB_INFO.items()
+                    if str(i.get("room") or "").lower() == str(pending).lower()
+                ),
                 None,
             )
             if lab_id is not None:
@@ -898,7 +1080,8 @@ class Inventory:
                     f'{h(hw.get("Graphics", ""))}</div></div>'
                     f'<div class="tt-hide-sm small" style="color:var(--muted)">'
                     f'{h(hw.get("Operating system") or "Not specified")}'
-                    f'</div>'f'<div>{comp_badge(statuses[(c["lab"], c["pc"])])}</div>'
+                    f"</div>"
+                    f'<div>{comp_badge(statuses[(c["lab"], c["pc"])])}</div>'
                     f'<div class="small" style="color:var(--muted)">{D.date_only(c.get("added"))}</div></div>',
                     f"{p}_i_{c['lab']}_{c['pc']}",
                     self.open_pc,
@@ -1135,13 +1318,42 @@ class Inventory:
         with self.shell.window(wide=True):
             html(
                 '<h3>Add computer</h3><div class="m-sub">Register a new computer in a laboratory. It is added to the inventory '
-                "and the live map for everyone, and its maintenance history starts today.</div>"
+                "and the live map for everyone, and its maintenance history starts today. "
+                "To add several identical units at once, type more than one seat number, "
+                "for example <b>3, 7, 12</b> or <b>20-29</b>.</div>"
                 '<div class="form-note">Fields marked <span class="req">*</span> are required.</div>'
             )
             labs = [l for l, _ in D.LABS]
             if ss.get(ek("add lab")) not in labs:
                 ss[ek("add lab")] = labs[0]
             lab = ss[ek("add lab")]
+            seats, problem = self._parse_seats(ss.get(ek("add pc")))
+            count = len(seats) if not problem else 1
+            many = count > 1
+            free = self._free_seats(s, lab, 10)
+            taken = [n for n in seats if (lab, n) in s["computers"]]
+            if problem and str(ss.get(ek("add pc")) or "").strip():
+                preview = f"⚠ {problem}"
+            elif taken:
+                preview = f"⚠ Already in {D.lab_name(lab)}: seat {self._span(taken)}."
+            elif many:
+                preview = f"Will add {count} computers: seats {self._span(seats)}."
+            elif seats:
+                preview = f"Will add {D.asset_tag(lab, seats[0])}."
+            else:
+                preview = ""
+            seat_help = (
+                "One seat (41), a range (41-50) or several (3, 7, 12-15), "
+                f"up to {MAX_BATCH}. "
+                + (
+                    f"Free seats in {D.lab_name(lab)}: {self._span(free)}…"
+                    if free
+                    else ""
+                )
+                + (f" {preview}" if preview else "")
+            )
+            if D.on_floor_map(lab):
+                seat_help += f" Seats 1–{D.MAP_SEATS} are drawn on the floor map."
             with box(f"{p}_add_grid", "formgrid"):
                 with box(f"{p}_add_lab", "field"):
                     html(
@@ -1156,14 +1368,12 @@ class Inventory:
                         on_change=self._add_lab_changed,
                     )
                 field(
-                    "Seat number",
+                    "Seat number(s)",
                     ek("add pc"),
-                    "e.g. 41",
+                    "e.g. 41  or  3, 7, 12  or  20-29",
                     required=True,
-                    max_chars=3,
-                    help_text=f"Asset ID will be {D.asset_tag(lab, 0)[:-2]}NN. Next free seat in {D.lab_name(lab)}: "
-                    f"{D.next_free_pc(s, lab)}."
-                    + (f" Seats 1–{D.MAP_SEATS} are drawn on the floor map." if D.on_floor_map(lab) else ""),
+                    max_chars=200,
+                    help_text=seat_help,
                 )
                 field(
                     "Record status",
@@ -1174,7 +1384,17 @@ class Inventory:
                 )
                 field("Brand", ek("add brand"), "e.g. Dell")
                 field("Model", ek("add model"), "e.g. OptiPlex 3080")
-                field("Serial number", ek("add serial"), "Unique serial / service tag")
+                if many:
+                    html(
+                        '<div class="field"><div class="adm-label">Serial number</div>'
+                        '<div class="adm-help">Serial numbers are unique to each machine, so they are '
+                        "left blank when several computers are added. Fill them in later with "
+                        "<b>Edit computer</b>.</div></div>"
+                    )
+                else:
+                    field(
+                        "Serial number", ek("add serial"), "Unique serial / service tag"
+                    )
                 for label in D.HW_FIELDS:
                     field(label, ek("add hw " + label), required=label in D.REQUIRED_HW)
             with box(f"{p}_add_sw", "field"):
@@ -1199,7 +1419,7 @@ class Inventory:
                     on_click=self.shell.close_modal,
                 )
                 btn(
-                    "Add computer",
+                    f"Add {count} computers" if many else "Add computer",
                     f"{p}_add_save",
                     "primary",
                     icon=":material/add:",
@@ -1223,7 +1443,6 @@ class Inventory:
         ss[ek("lab specs")] = 0
         self.shell.open_modal("addlab")
 
-
     def _save_lab(self) -> None:
         s, ek = self.store(), self._ek
         if not self._live():
@@ -1238,14 +1457,23 @@ class Inventory:
         desc = str(ss.get(ek("lab desc")) or "").strip()
         units = int(ss.get(ek("lab units")) or 0)
         cols = int(ss.get(ek("lab cols")) or 8)
-        layout = ss.get(ek("lab layout")) if ss.get(ek("lab layout")) in lab_layouts.TEMPLATES else lab_layouts.DEFAULT
+        layout = (
+            ss.get(ek("lab layout"))
+            if ss.get(ek("lab layout")) in lab_layouts.TEMPLATES
+            else lab_layouts.DEFAULT
+        )
         copy_from = int(ss.get(ek("lab specs")) or 0)
         if not name or not code or not building:
-            return self.toast("Fill in the laboratory name, code and building / wing.", False)
+            return self.toast(
+                "Fill in the laboratory name, code and building / wing.", False
+            )
         if len(name) > 60:
             return self.toast("Keep the laboratory name under 60 characters.", False)
         if not re.fullmatch(r"[A-Z0-9][A-Z0-9-]{1,11}", code):
-            return self.toast("The code should be 2–12 letters or numbers, e.g. CL5 or ICT-LAB.", False)
+            return self.toast(
+                "The code should be 2–12 letters or numbers, e.g. CL5 or ICT-LAB.",
+                False,
+            )
         # Only laboratories that exist in the database (D.LAB_INFO is built
         # from the Computers rooms) and rooms of loaded computers count.
         taken = {
@@ -1255,21 +1483,27 @@ class Inventory:
         if name.lower() in taken["name"]:
             return self.toast(f"There is already a laboratory called {name}.", False)
         if code.lower() in taken["code"]:
-            return self.toast(f"The code {code} is already used by another laboratory.", False)
-        used_rooms = taken["room"] | taken["name"] | {
-            str(c.get("room") or "").strip().lower()
-            for c in s["computers"].values()
-            if c.get("room")
-        }
+            return self.toast(
+                f"The code {code} is already used by another laboratory.", False
+            )
+        used_rooms = (
+            taken["room"]
+            | taken["name"]
+            | {
+                str(c.get("room") or "").strip().lower()
+                for c in s["computers"].values()
+                if c.get("room")
+            }
+        )
         if room.lower() in used_rooms:
-            return self.toast(f"The room {room} is already used by another laboratory.", False)
+            return self.toast(
+                f"The room {room} is already used by another laboratory.", False
+            )
         if not 1 <= units <= 200:
             return self.toast("Number of computer units: 1 to 200.", False)
         if not 2 <= cols <= 12:
             return self.toast("Seats per row: 2 to 12.", False)
-        specs = (
-            dict(zip(D.HW_FIELDS, self._lab_specs(copy_from))) if copy_from else {}
-        )
+        specs = dict(zip(D.HW_FIELDS, self._lab_specs(copy_from))) if copy_from else {}
         # The computer units go to public."Computers" first: if the database
         # refuses them, nothing is added and the form stays open.
         result = backend_client.admin_create_laboratory(
@@ -1312,7 +1546,11 @@ class Inventory:
         extra = str(result.get("message") or "")
         self.toast(
             f"{lab['name']} added with {made} computer unit(s) (saved to the database)"
-            + (f". {extra.split('saved.', 1)[-1].strip()}" if "could not" in extra else "")
+            + (
+                f". {extra.split('saved.', 1)[-1].strip()}"
+                if "could not" in extra
+                else ""
+            )
         )
         ss[f"{self.p}_i_lab_pending"] = room
         ss[f"{self.p}_ipage"] = 0
@@ -1328,7 +1566,13 @@ class Inventory:
                 '<div class="form-note">Fields marked <span class="req">*</span> are required.</div>'
             )
             with box(f"{p}_lab_grid", "formgrid"):
-                field("Laboratory name", ek("lab name"), "e.g. IT Laboratory or CSSC Laboratory", required=True, max_chars=60)
+                field(
+                    "Laboratory name",
+                    ek("lab name"),
+                    "e.g. IT Laboratory or CSSC Laboratory",
+                    required=True,
+                    max_chars=60,
+                )
                 field(
                     "Laboratory code",
                     ek("lab code"),
@@ -1337,7 +1581,13 @@ class Inventory:
                     max_chars=12,
                     help_text="Used in asset IDs, e.g. CL5-PC01.",
                 )
-                field("Building / wing", ek("lab building"), "e.g. Main Building, 2nd floor", required=True, max_chars=60)
+                field(
+                    "Building / wing",
+                    ek("lab building"),
+                    "e.g. Main Building, 2nd floor",
+                    required=True,
+                    max_chars=60,
+                )
                 field("Floor", ek("lab floor"), "e.g. 2nd", max_chars=20)
                 field(
                     "Room number / name",
@@ -1347,7 +1597,9 @@ class Inventory:
                     help_text="Saved as the computers' room in the database.",
                 )
                 with box(f"{p}_lab_units", "field"):
-                    html('<div class="adm-label">Number of computer units <span class="req">*</span></div>')
+                    html(
+                        '<div class="adm-label">Number of computer units <span class="req">*</span></div>'
+                    )
                     st.number_input(
                         "Number of computer units",
                         min_value=1,
@@ -1356,9 +1608,13 @@ class Inventory:
                         key=ek("lab units"),
                         label_visibility="collapsed",
                     )
-                    html('<div class="adm-help">The units are saved in the database (Computers table).</div>')
+                    html(
+                        '<div class="adm-help">The units are saved in the database (Computers table).</div>'
+                    )
                 with box(f"{p}_lab_cols", "field"):
-                    html('<div class="adm-label">Seats per row (layout width) <span class="req">*</span></div>')
+                    html(
+                        '<div class="adm-label">Seats per row (layout width) <span class="req">*</span></div>'
+                    )
                     st.number_input(
                         "Seats per row",
                         min_value=2,
@@ -1368,7 +1624,9 @@ class Inventory:
                         label_visibility="collapsed",
                     )
                 with box(f"{p}_lab_specs", "field"):
-                    html('<div class="adm-label">Hardware specs for the new units</div>')
+                    html(
+                        '<div class="adm-label">Hardware specs for the new units</div>'
+                    )
                     opts = [0] + [lab for lab, _ in D.LABS]
                     if ss.get(ek("lab specs")) not in opts:
                         ss[ek("lab specs")] = 0
@@ -1377,7 +1635,11 @@ class Inventory:
                         opts,
                         key=ek("lab specs"),
                         label_visibility="collapsed",
-                        format_func=lambda x: f"Same as {D.lab_name(x)}" if x else "Leave blank (fill in later)",
+                        format_func=lambda x: (
+                            f"Same as {D.lab_name(x)}"
+                            if x
+                            else "Leave blank (fill in later)"
+                        ),
                     )
             self._layout_picker()
             field(
@@ -1393,7 +1655,12 @@ class Inventory:
                     "can only be added when its computer units can be saved to the database.</span></div>"
                 )
             with box(f"{p}_lab_btns", "mactions"):
-                btn("Cancel", f"{p}_lab_cancel", "ghost", on_click=self.shell.close_modal)
+                btn(
+                    "Cancel",
+                    f"{p}_lab_cancel",
+                    "ghost",
+                    on_click=self.shell.close_modal,
+                )
                 btn(
                     "Add laboratory",
                     f"{p}_lab_save",
@@ -1413,13 +1680,20 @@ class Inventory:
         cur = ss.get(ek("lab layout"))
         if cur not in lab_layouts.TEMPLATES:
             cur = ss[ek("lab layout")] = lab_layouts.DEFAULT
-        html('<div class="adm-label" style="margin-top:6px">Room layout template <span class="req">*</span></div>'
-             '<div class="adm-help" style="margin:0 0 8px">Pick how the computers are arranged. The live monitoring '
-             "map draws the laboratory this way. The preview follows the number of units and seats per row.</div>")
+        html(
+            '<div class="adm-label" style="margin-top:6px">Room layout template <span class="req">*</span></div>'
+            '<div class="adm-help" style="margin:0 0 8px">Pick how the computers are arranged. The live monitoring '
+            "map draws the laboratory this way. The preview follows the number of units and seats per row.</div>"
+        )
         with box(f"{p}_lab_tpls", "chips"):
             for tid, (name, _) in lab_layouts.TEMPLATES.items():
-                btn(name, f"{p}_lab_tpl_{tid}", "chipon" if tid == cur else "chip",
-                    on_click=self._set_layout, args=(tid,))
+                btn(
+                    name,
+                    f"{p}_lab_tpl_{tid}",
+                    "chipon" if tid == cur else "chip",
+                    on_click=self._set_layout,
+                    args=(tid,),
+                )
         name, desc = lab_layouts.TEMPLATES[cur]
         try:
             units = int(ss.get(ek("lab units")) or 0)

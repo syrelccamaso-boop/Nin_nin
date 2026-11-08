@@ -159,7 +159,25 @@ RESET_CODE_WITH_PASSWORD = False
 BG_IMAGE = BASE_DIR / "isu.jpg"
 
 # Optional logo. If missing, a simple built-in wordmark is drawn instead.
+# Optional logo. If missing, a simple built-in wordmark is drawn instead.
 LOGO_IMAGE = BASE_DIR / "assets" / "logo.png"
+
+# Speed: the campus photo can be served as a normal file instead of being
+# embedded in the page's CSS as base64 (about 33% bigger, resent in every
+# page load, never cached as an image). Needs, in .streamlit/config.toml:
+#
+#     [server]
+#     enableStaticServing = true
+#
+# and the (compressed) photo at <project>/static/isu.jpg. If either is
+# missing, the photo is embedded as before.
+STATIC_DIR = PROJECT_DIR / "static"
+STATIC_URL = "app/static"  # relative on purpose: also works under a base URL path
+
+# Speed: Google Fonts (Poppins, Open Sans) are fetched from the internet
+# before the page can be styled. False = use the fonts already installed on
+# the computer (Segoe UI, Arial...). Set True to get the Poppins look back.
+USE_WEB_FONTS = False
 
 MIN_PASSWORD_LENGTH = 8
 
@@ -721,6 +739,25 @@ def _set_role(role: str) -> None:
     ss.signup_role = role
 
 
+def _is_credential_failure(result: dict) -> bool:
+    """True only when the backend says the email/password is wrong.
+
+    Server crashes (5xx), an unreachable backend, pending/rejected accounts and
+    the backend's own lockout message are NOT wrong passwords, so they must not
+    use up one of the user's attempts.
+    """
+    status = result.get("status_code")
+    if status == 0 or (isinstance(status, int) and status >= 500):
+        return False
+
+    text = (result.get("error") or "").lower()
+    if "too many" in text:  # backend lockout: already handled there
+        return False
+
+    # Backend wording: "Email or password is incorrect."
+    return "incorrect" in text
+
+
 @_safe_callback
 def _do_login():
 
@@ -744,19 +781,26 @@ def _do_login():
     if wait:
         return _notify("err", _locked_message(wait))
 
-    # Send login request to backend
+        # Send login request to backend
     result = login_user(email, password)
 
     # Backend says login failed
     if not result.get("success"):
+        error = result.get("error") or _GENERIC_ERROR
+
+        # Not a wrong password (server error, offline, pending account, backend
+        # lock...): show the message as-is and keep the attempt counter untouched.
+        if not _is_credential_failure(result):
+            return _notify("err", error)
+
+        # Real wrong email/password: count it.
         left = _rl_register_failure("login", email)
         if left == 0:
             return _notify("err", _locked_message(LOCKOUT_SECONDS))
-        error = result.get("error") or "Incorrect email or password."
         return _notify(
             "err", f"{error} ({left} attempt{'s' if left != 1 else ''} left)"
         )
-
+        
     # Correct credentials: clear the failed-attempt counter
     _rl_reset("login", email)
 
@@ -1429,17 +1473,47 @@ body[data-cl-otp] .st-key-rs_code [data-testid="stTextInputRootElement"] {
 """
 
 
+def _static_photo_url() -> str | None:
+    """URL of the photo in <project>/static/, or None when it can't be served
+    (file missing, or enableStaticServing is off: the URL would be a 404 that
+    the navy gradient on top would hide)."""
+    try:
+        if not st.get_option("server.enableStaticServing"):
+            return None
+    except Exception:
+        return None
+    path = STATIC_DIR / BG_IMAGE.name
+    if not path.is_file():
+        return None
+    return f"{STATIC_URL}/{path.name}?v={int(path.stat().st_mtime)}"
+
+
 @functools.lru_cache(maxsize=1)
 def _build_css() -> str:
-    photo = _find_image(BG_IMAGE, ("background", "bg", "campus", "gate"))
-    if photo:
+    gradient = (
+        "linear-gradient(160deg, rgba(15, 26, 51, .93) 0%, rgba(15, 26, 51, .97) 60%)"
+    )
+    static_url = _static_photo_url()
+    photo = (
+        None
+        if static_url
+        else _find_image(BG_IMAGE, ("background", "bg", "campus", "gate"))
+    )
+    if static_url:
+        bg = f'{gradient}, url("{static_url}") center / cover no-repeat'
+    elif photo:
         bg = (
-            "linear-gradient(160deg, rgba(15, 26, 51, .93) 0%, rgba(15, 26, 51, .97) 60%), "
+            f"{gradient}, "
             f'url("{_file_data_uri(str(photo), photo.stat().st_mtime)}") center / cover no-repeat'
         )
     else:
         bg = "radial-gradient(700px 520px at 20% 30%, #182a52 0%, #0f1a33 65%)"
-    return _CSS.replace("__PANEL_BG__", bg)
+
+    css = _CSS.replace("__PANEL_BG__", bg)
+    if not USE_WEB_FONTS:
+        # Drop the Google Fonts @import (see USE_WEB_FONTS above).
+        css = re.sub(r"@import url\([^)]*\);\s*", "", css, count=1)
+    return css
 
 
 # ---------------------------------------------------------------------------

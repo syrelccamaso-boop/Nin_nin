@@ -1,33 +1,3 @@
-"""
-Centrum Laboratory - Technician business logic.
-
-This service is aligned with the current PostgreSQL/Supabase schema.
-
-Database tables used by this module:
-
-    Users
-    Computers
-    ComputerHardware
-    ComputerSoftware
-    Reports
-    ReportStatus
-    ReportIssues
-    MaintenanceHistory
-    HardwareReplacements
-    SoftwareUpdates
-
-Important:
-    The frontend does not need to know the database schema directly.
-    This service converts database records into the normalized structure
-    expected by the Technician frontend.
-
-Authentication and user/profile operations continue to reuse:
-
-    database.py
-    users_repository.py
-    auth_service.py
-"""
-
 from __future__ import annotations
 
 import logging
@@ -44,7 +14,7 @@ from .users_repository import DatabaseError, _run
 # Speed: how long the full dashboard data (shared by every technician and
 # admin) is reused. Any change clears it at once (main.py), so this only
 # saves reloading the same tables on repeated reads.
-DASHBOARD_CACHE_SECONDS = 10
+DASHBOARD_CACHE_SECONDS = 60
 
 # ReportStatus / ReportIssues almost never change.
 LOOKUP_CACHE_SECONDS = 300
@@ -638,7 +608,6 @@ def _unit_from_row(
     }
 
 
-
 # =========================================================
 # MAINTENANCE HISTORY
 # =========================================================
@@ -868,6 +837,19 @@ def _normalize_report_status(status_name: str) -> str:
         "new",
     }:
         return "Under repair"
+    
+    if normalized in {
+        "cancelled",
+        "canceled",
+        "cancel",
+    }:
+        return "Cancelled"
+    if normalized in {
+        "cancelled",
+        "canceled",
+        "cancel",
+    }:
+        return "Cancelled"
 
     if normalized in {
         "resolved",
@@ -1423,12 +1405,35 @@ def update_report_status(
             "error": "Your technician account could not be identified.",
         }
 
+    current = get_report(number)
+    if current is None:
+        return {"success": False, "error": "That report no longer exists."}
+    if current.get("status") == "Cancelled":
+        return {"success": False, "error": "This report was cancelled by the teacher."}
     # -----------------------------------------------------
     # Get actual ReportStatus rows (cached - they rarely change)
     # -----------------------------------------------------
 
     status_rows = _status_rows()
 
+    current = _run(
+        "reading a report",
+        lambda client: client.table(REPORTS_TABLE)
+        .select("StatusId")
+        .eq("ReportId", number)
+        .limit(1)
+        .execute()
+        .data
+        or [],
+    )
+    if current:
+        name = _load_report_statuses().get(_parse_int(current[0].get("StatusId")), "")
+        if _normalize_report_status(name) == "Cancelled":
+            return {
+                "success": False,
+                "error": "This report was cancelled by the teacher.",
+            }
+            
     status_id = _find_status_id(
         requested_status,
         status_rows,

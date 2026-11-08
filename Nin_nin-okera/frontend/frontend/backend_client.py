@@ -1,55 +1,10 @@
-"""
-Computer Laboratory - Streamlit → FastAPI HTTP client.
-
-Responsibilities
-----------------
-This module is the HTTP bridge between the Streamlit frontend and the
-FastAPI backend.
-
-It contains:
-    - Authentication helpers
-    - User-management helpers
-    - Computer/inventory helpers
-    - Hardware/software helpers
-    - Maintenance helpers
-    - Report helpers
-    - Technician API helpers
-    - Teacher API helpers
-    - Admin API helpers
-
-IMPORTANT
----------
-This file must NOT contain:
-
-    - Supabase client code
-    - PostgreSQL/database queries
-    - Database credentials
-    - Business logic that belongs in the backend
-
-The backend is the source of truth. This module only sends HTTP requests
-and returns backend responses to the frontend.
-
-Authentication
---------------
-Authenticated endpoints use:
-
-    Authorization: Bearer <access_token>
-
-Some legacy administrative endpoints still use:
-
-    X-Admin-Token: <ADMIN_API_TOKEN>
-
-Those legacy headers are retained here for compatibility with existing
-backend routes. They should only be removed after the corresponding
-backend routes are migrated to authenticated Admin access-token
-authorization.
-"""
-
 from __future__ import annotations
 
 import logging
 import os
+import time
 from urllib.parse import quote
+import threading
 
 import requests
 from requests.adapters import HTTPAdapter
@@ -94,6 +49,39 @@ def _make_session() -> requests.Session:
 
 
 _SESSION = _make_session()
+
+# =========================================================
+# TIMING (measure which backend calls are slow)
+# =========================================================
+#
+# Every call to the backend is timed and written to the terminal, e.g.
+#
+#     HTTP GET /admin/dashboard -> ok in 1840 ms  <-- SLOW
+#
+# Only the method, the path and the time are logged: never the query string,
+# the payload or the token.
+#
+# Turn it off when you are done measuring (.env):
+#
+#     CL_TIMING=0
+
+TIMING = os.getenv("CL_TIMING", "1").strip().lower() not in {"0", "false", "no", "off"}
+
+SLOW_MS = 500  # calls at or above this are marked SLOW
+
+# Per-script-run totals, read by app.py ([rerun] line). Thread-local, so one
+# user's run never mixes with another's.
+_timing = threading.local()
+
+
+def reset_http_time() -> None:
+    _timing.calls = 0
+    _timing.ms = 0.0
+
+
+def http_time() -> tuple[int, float]:
+    """(number of backend calls, total milliseconds) since reset_http_time()."""
+    return getattr(_timing, "calls", 0), getattr(_timing, "ms", 0.0)
 
 
 # =========================================================
@@ -183,7 +171,7 @@ def _auth_headers(token: str) -> dict:
     return {"Authorization": f"Bearer {token}"} if token else {}
 
 
-def _request(
+def _request_inner(
     method,
     path,
     payload=None,
@@ -223,6 +211,7 @@ def _request(
         return {
             "success": False,
             "error": "Unable to connect to the backend.",
+            "status_code": 0,  # 0 = never reached the backend
         }
 
     # -----------------------------------------------------
@@ -262,7 +251,44 @@ def _request(
     return {
         "success": False,
         "error": _get_error(response),
+        "status_code": response.status_code,
     }
+
+
+def _request(
+    method,
+    path,
+    payload=None,
+    params=None,
+    headers=None,
+    timeout=15,
+) -> dict:
+    """
+    Same as _request_inner(), plus one timing line per call (see TIMING).
+    """
+
+    if not TIMING:
+        return _request_inner(method, path, payload, params, headers, timeout)
+
+    start = time.perf_counter()
+    result = None
+
+    try:
+        result = _request_inner(method, path, payload, params, headers, timeout)
+        return result
+    finally:
+        ms = (time.perf_counter() - start) * 1000
+        _timing.calls = getattr(_timing, "calls", 0) + 1
+        _timing.ms = getattr(_timing, "ms", 0.0) + ms
+        state = "ok" if isinstance(result, dict) and result.get("success") else "FAIL"
+        logger.warning(
+            "HTTP %s %s -> %s in %.0f ms%s",
+            method,
+            path,
+            state,
+            ms,
+            "  <-- SLOW" if ms >= SLOW_MS else "",
+        )
 
 
 def _post(path, payload, timeout=15) -> dict:
@@ -286,12 +312,19 @@ def email_exists(email: str) -> bool:
     """
     Check whether an email already exists.
     """
+    start = time.perf_counter()
+
     try:
         response = _SESSION.get(
             f"{_backend_url()}/auth/email-exists",
             params={"email": email},
             timeout=10,
         )
+        if TIMING:
+            logger.warning(
+                "HTTP GET /auth/email-exists in %.0f ms",
+                (time.perf_counter() - start) * 1000,
+            )
 
         if response.status_code == 200:
             return bool(response.json().get("exists", False))
@@ -1085,6 +1118,17 @@ def follow_up_teacher_report(
         "POST",
         f"/teacher/reports/{quote(str(report_id), safe='')}/follow-up",
         payload={"message": message or ""},
+        headers=_auth_headers(token),
+        timeout=15,
+    )
+
+
+def cancel_teacher_report(token: str, report_id, reason: str = "") -> dict:
+    """POST /teacher/reports/{report_id}/cancel"""
+    return _request(
+        "POST",
+        f"/teacher/reports/{quote(str(report_id), safe='')}/cancel",
+        payload={"reason": reason or ""},
         headers=_auth_headers(token),
         timeout=15,
     )
