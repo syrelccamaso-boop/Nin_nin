@@ -43,9 +43,8 @@ from . import notification_service as notify
 from . import perf
 
 from . import technician_service
+from . import users_repository as users
 from .users_repository import DatabaseError, _run
-
-
 
 logger = logging.getLogger("centrum.admin")
 
@@ -93,6 +92,7 @@ ESCALATION_DECISIONS = (
 # ACCESS CHECK
 # =========================================================
 
+
 def is_admin(user: dict | None) -> bool:
     """
     Return True when the authenticated user's role is Admin.
@@ -101,9 +101,7 @@ def is_admin(user: dict | None) -> bool:
     The frontend must not be trusted to supply the role.
     """
 
-    role = str(
-        (user or {}).get("role") or ""
-    ).strip().lower()
+    role = str((user or {}).get("role") or "").strip().lower()
 
     return role in ADMIN_ROLES
 
@@ -146,21 +144,15 @@ def current_admin(access_token: str) -> dict:
 # HELPERS
 # =========================================================
 
+
 def _full_name(user: dict) -> str:
     """
     Build a display name from the authenticated Users data.
     """
 
-    name = (
-        f"{user.get('first_name') or ''} "
-        f"{user.get('last_name') or ''}"
-    ).strip()
+    name = (f"{user.get('first_name') or ''} " f"{user.get('last_name') or ''}").strip()
 
-    return (
-        name
-        or (user.get("email") or "").split("@")[0]
-        or "User"
-    )
+    return name or (user.get("email") or "").split("@")[0] or "User"
 
 
 def _request_from_user(user: dict) -> dict | None:
@@ -171,21 +163,11 @@ def _request_from_user(user: dict) -> dict | None:
     Only Teacher and Technician accounts are included.
     """
 
-    role = str(
-        user.get("role") or ""
-    ).strip().lower()
+    role = str(user.get("role") or "").strip().lower()
 
-    status = REQUEST_STATUS.get(
-        str(
-            user.get("status") or ""
-        ).strip().lower()
-    )
+    status = REQUEST_STATUS.get(str(user.get("status") or "").strip().lower())
 
-    if (
-        role not in REQUEST_ROLES
-        or not status
-        or user.get("user_id") in (None, "")
-    ):
+    if role not in REQUEST_ROLES or not status or user.get("user_id") in (None, ""):
         return None
 
     return {
@@ -205,6 +187,7 @@ def _request_from_user(user: dict) -> dict | None:
 # =========================================================
 # NORMALIZE LAB DATA
 # =========================================================
+
 
 def _normalize_lab_data(lab: dict | None) -> dict:
     """
@@ -305,7 +288,7 @@ def _normalize_lab_data(lab: dict | None) -> dict:
         computers = normalized["Computers"]
     else:
         computers = units  # real data, not []
-    
+
     # -----------------------------------------------------
     # Normalize operating-system fields.
     #
@@ -377,6 +360,7 @@ def _get_computers_from_lab(lab: dict | None) -> list:
 # DASHBOARD DATA
 # =========================================================
 
+
 def get_dashboard_data() -> dict:
     """
     Load all shared Admin dashboard data.
@@ -444,9 +428,7 @@ def get_dashboard_data() -> dict:
         )
 
     except DatabaseError as error:
-        logger.exception(
-            "Unable to load Admin laboratory data."
-        )
+        logger.exception("Unable to load Admin laboratory data.")
 
         lab = {
             "computers": [],
@@ -454,14 +436,10 @@ def get_dashboard_data() -> dict:
             "reports": [],
         }
 
-        problems.append(
-            f"Lab data: {error}"
-        )
+        problems.append(f"Lab data: {error}")
 
     except Exception as error:
-        logger.exception(
-            "Unexpected Admin laboratory-data error."
-        )
+        logger.exception("Unexpected Admin laboratory-data error.")
 
         lab = {
             "computers": [],
@@ -469,9 +447,7 @@ def get_dashboard_data() -> dict:
             "reports": [],
         }
 
-        problems.append(
-            f"Lab data: {error}"
-        )
+        problems.append(f"Lab data: {error}")
 
     # =====================================================
     # USER REQUESTS
@@ -488,34 +464,24 @@ def get_dashboard_data() -> dict:
         requests = [
             record
             for record in (
-                _request_from_user(user)
-                for user in users
-                if isinstance(user, dict)
+                _request_from_user(user) for user in users if isinstance(user, dict)
             )
             if record
         ]
 
     except DatabaseError as error:
-        logger.exception(
-            "Unable to load Admin user requests."
-        )
+        logger.exception("Unable to load Admin user requests.")
 
         requests = None
 
-        problems.append(
-            f"User requests: {error}"
-        )
+        problems.append(f"User requests: {error}")
 
     except Exception as error:
-        logger.exception(
-            "Unexpected Admin user-request error."
-        )
+        logger.exception("Unexpected Admin user-request error.")
 
         requests = None
 
-        problems.append(
-            f"User requests: {error}"
-        )
+        problems.append(f"User requests: {error}")
 
     # =====================================================
     # RESPONSE
@@ -523,20 +489,15 @@ def get_dashboard_data() -> dict:
 
     return {
         "success": True,
-
         "lab": lab,
-
         "requests": requests,
-
         "problems": problems,
-
         # -------------------------------------------------
         # Convenience field for Admin frontend.
         #
         # This prevents the frontend from having to guess
         # whether computers are under "computers" or "units".
         # -------------------------------------------------
-
         "computers": _get_computers_from_lab(lab),
     }
 
@@ -544,6 +505,7 @@ def get_dashboard_data() -> dict:
 # =========================================================
 # USER REQUESTS
 # =========================================================
+
 
 def decide_user_request(
     user_id,
@@ -560,9 +522,7 @@ def decide_user_request(
         Users.Status -> rejected
     """
 
-    decision = (
-        decision or ""
-    ).strip().lower()
+    decision = (decision or "").strip().lower()
 
     if decision not in DECISIONS:
         return {
@@ -580,25 +540,27 @@ def decide_user_request(
     # GET CURRENT USER
     # =====================================================
 
-    found = auth_service.admin_get_user(user_id)
+    # Speed: the Users row is read ONCE and handed to update_status (it used
+    # to be read here, then again inside the status update).
+    try:
+        row = users.get_user_by_id(user_id)
+    except DatabaseError as error:
+        return {"success": False, "error": str(error)}
 
-    if not found.get("success"):
+    if not row:
         return {
             "success": False,
             "error": "That user no longer exists.",
         }
 
-    user = found.get("user") or {}
+    user = users.to_app_user(row) or {}
 
     request = _request_from_user(user)
 
     if request is None:
         return {
             "success": False,
-            "error": (
-                "Only Teacher and Technician requests "
-                "can be changed here."
-            ),
+            "error": ("Only Teacher and Technician requests " "can be changed here."),
         }
 
     # =====================================================
@@ -615,13 +577,16 @@ def decide_user_request(
     # UPDATE USERS.STATUS
     # =====================================================
 
-    result = auth_service.admin_set_status(
-        user_id,
-        DECISIONS[decision],
-    )
+    # Same as auth_service.admin_set_status(), reusing the row read above.
+    try:
+        updated_row = users.update_status(user_id, DECISIONS[decision], current=row)
+    except DatabaseError as error:
+        return {"success": False, "error": str(error)}
 
-    if not result.get("success"):
-        return result
+    if not updated_row:
+        return {"success": False, "error": "User not found."}
+
+    result = {"success": True, "user": users.to_app_user(updated_row)}
 
     name = request["full_name"]
 
@@ -631,9 +596,7 @@ def decide_user_request(
 
     if decision == "cancel":
 
-        reason = (
-            reason or ""
-        ).strip()
+        reason = (reason or "").strip()
 
         if reason:
             logger.info(
@@ -642,15 +605,11 @@ def decide_user_request(
                 reason[:500],
             )
 
-        message = (
-            f"{name}'s request was cancelled"
-        )
+        message = f"{name}'s request was cancelled"
 
     else:
 
-        message = (
-            f"{name} confirmed — they can log in now"
-        )
+        message = f"{name} confirmed — they can log in now"
 
     updated_user = result.get("user") or {}
 
@@ -664,6 +623,7 @@ def decide_user_request(
 # =========================================================
 # ADMIN ESCALATION
 # =========================================================
+
 
 def _has_decisions_table() -> bool:
     """True when the ReportDecisions table exists."""
@@ -731,7 +691,9 @@ def decide_escalation(
     try:
         report = technician_service.get_report(number)
     except Exception as error:
-        logger.exception("Unable to load report %s for an escalation decision.", report_id)
+        logger.exception(
+            "Unable to load report %s for an escalation decision.", report_id
+        )
         return {"success": False, "error": f"Unable to load the report: {error}"}
 
     if report is None:
@@ -739,7 +701,10 @@ def decide_escalation(
 
     # technician_service shows a technician escalation ("Follow Up") as "Follow Up"
     if "follow" not in str(report.get("status") or "").lower():
-        return {"success": False, "error": "This report is not escalated any more. Refresh the data."}
+        return {
+            "success": False,
+            "error": "This report is not escalated any more. Refresh the data.",
+        }
 
     # ---- new report status ---------------------------------------------
     wanted = "resolved" if decision == "resolve" else "progress"
@@ -841,31 +806,55 @@ def decide_escalation(
             )
         except DatabaseError:
             # The report is already updated; keep the decision in its note.
-            logger.exception("Decision on report %s not saved in ReportDecisions.", report_id)
+            logger.exception(
+                "Decision on report %s not saved in ReportDecisions.", report_id
+            )
             try:
                 save({"ResolutionNote": note})
             except DatabaseError:
                 pass
 
     # ---- the computer's escalation status (best effort) ----------------
+    # Speed: one UPDATE by ComputerId. technician_service.set_escalation_status()
+    # also re-read the computer's hardware and software afterwards (two more
+    # round trips) to build a result this function never used.
     try:
-        technician_service.set_escalation_status(
-            report.get("room"), report.get("unit_number"), escalation_status
-        )
+        computer_id = report.get("computer_id")
+        if computer_id is not None:
+            _run(
+                "updating escalation status",
+                lambda client: client.table(technician_service.COMPUTERS_TABLE)
+                .update({"EscalationStatus": escalation_status, "UpdatedAt": now})
+                .eq("ComputerId", computer_id)
+                .execute(),
+            )
+        else:
+            technician_service.set_escalation_status(
+                report.get("room"), report.get("unit_number"), escalation_status
+            )
     except Exception:
-        logger.exception("Escalation status of report %s's computer not updated.", report_id)
+        logger.exception(
+            "Escalation status of report %s's computer not updated.", report_id
+        )
 
     # ---- notifications (best effort; preferences decide) ---------------
     code = report.get("code") or f"CL-{number:04d}"
     where = f"{report.get('room') or 'Laboratory'} PC {int(report.get('unit_number') or 0):02d}"
-    label = {"approve": "replacement approved", "resolve": "fixed", "send_back": "sent back"}[decision]
+    label = {
+        "approve": "replacement approved",
+        "resolve": "fixed",
+        "send_back": "sent back",
+    }[decision]
     details = f"{code} · {report.get('issue') or 'Report'} · {note}"
     # Sent after the response, so the admin doesn't wait for them.
     perf.background(
         notify.notify_user,
         row.get("ReportedBy"),
         "report_update",
-        notify.message(f"Your report is {'fixed' if decision == 'resolve' else 'under repair'} · {where}", details),
+        notify.message(
+            f"Your report is {'fixed' if decision == 'resolve' else 'under repair'} · {where}",
+            details,
+        ),
     )
     if row.get("HandledBy") is not None:
         perf.background(
@@ -894,6 +883,7 @@ def decide_escalation(
 # PROFILE / PASSWORD
 # =========================================================
 
+
 def update_contact_number(
     admin: dict,
     contact_number: str,
@@ -906,9 +896,7 @@ def update_contact_number(
     Users update flow.
     """
 
-    if auth_service._is_fixed_admin(
-        admin.get("email") or ""
-    ):
+    if auth_service._is_fixed_admin(admin.get("email") or ""):
         return {
             "success": False,
             "error": (
@@ -1000,13 +988,19 @@ def _lab_rows(room: str) -> list[dict]:
         )
 
     try:
-        return _run("reading the laboratory's computers", lambda c: read(c, _COMPUTER_READ_COLUMNS))
+        return _run(
+            "reading the laboratory's computers",
+            lambda c: read(c, _COMPUTER_READ_COLUMNS),
+        )
     except DatabaseError as error:
         if error.code != "missing_column":
             raise
         return _run(
             "reading the laboratory's computers",
-            lambda c: read(c, "ComputerId,Room,UnitNumber,Status,EscalationStatus,CreatedAt,UpdatedAt"),
+            lambda c: read(
+                c,
+                "ComputerId,Room,UnitNumber,Status,EscalationStatus,CreatedAt,UpdatedAt",
+            ),
         )
 
 
@@ -1036,7 +1030,10 @@ def create_laboratory(admin: dict, room, units, hardware: dict | None = None) ->
     try:
         units = int(units)
     except (TypeError, ValueError):
-        return {"success": False, "error": "The number of computer units must be a whole number."}
+        return {
+            "success": False,
+            "error": "The number of computer units must be a whole number.",
+        }
 
     # A laboratory exists in the database through its computers, so it
     # needs at least one unit.
@@ -1057,10 +1054,7 @@ def create_laboratory(admin: dict, room, units, hardware: dict | None = None) ->
         return {"success": False, "error": str(error)}
 
     key = room.lower()
-    taken = [
-        row for row in existing
-        if _clean_room(row.get("Room")).lower() == key
-    ]
+    taken = [row for row in existing if _clean_room(row.get("Room")).lower() == key]
 
     if taken:
         return {
@@ -1118,13 +1112,22 @@ def create_laboratory(admin: dict, room, units, hardware: dict | None = None) ->
 
     # The hardware specs picked on the form, for every new unit.
     hw_failed = 0
-    if saved and isinstance(hardware, dict) and any(str(v or "").strip() for v in hardware.values()):
+    if (
+        saved
+        and isinstance(hardware, dict)
+        and any(str(v or "").strip() for v in hardware.values())
+    ):
         from . import inventory_service
 
         # Speed: the specs are saved for all units at the same time (one
         # after another, a 40-unit laboratory took 40 round trips).
         futures = [
-            (row.get("ComputerId"), perf.submit(inventory_service._save_hardware, row.get("ComputerId"), hardware))
+            (
+                row.get("ComputerId"),
+                perf.submit(
+                    inventory_service._save_hardware, row.get("ComputerId"), hardware
+                ),
+            )
             for row in saved
         ]
         for computer_id, future in futures:
@@ -1132,7 +1135,9 @@ def create_laboratory(admin: dict, room, units, hardware: dict | None = None) ->
                 future.result()
             except DatabaseError as error:
                 hw_failed += 1
-                logger.warning("Hardware not saved for computer %s: %s", computer_id, error)
+                logger.warning(
+                    "Hardware not saved for computer %s: %s", computer_id, error
+                )
 
     if read_error is not None:
         error = read_error
@@ -1166,7 +1171,11 @@ def create_laboratory(admin: dict, room, units, hardware: dict | None = None) ->
             for row in saved
         ],
         "message": f"{len(saved)} computer unit(s) saved."
-        + (f" The hardware specs could not be saved for {hw_failed} of them." if hw_failed else ""),
+        + (
+            f" The hardware specs could not be saved for {hw_failed} of them."
+            if hw_failed
+            else ""
+        ),
     }
 
 

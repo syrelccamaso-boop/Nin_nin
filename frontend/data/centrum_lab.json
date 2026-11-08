@@ -3777,10 +3777,14 @@
    "new:CL-0034",
    "db:35",
    "db:43",
-   "db:48"
+   "db:48",
+   "db:122",
+   "db:111"
   ],
   "itsallinthemind729@gmail.com": [
-   "esc:CL-0032:20261018162331"
+   "esc:CL-0032:20261018162331",
+   "db:123",
+   "db:117"
   ]
  },
  "labs": [
@@ -3830,6 +3834,11 @@
    "created": "2026-10-18T17:39:09"
   }
  ],
- "accounts": {},
+ "accounts": {
+  "24": {
+   "deactivated_at": "2026-10-24T21:06:44",
+   "deactivated_by": "Centrum Admin"
+  }
+ },
  "temp_pw": {}
 }

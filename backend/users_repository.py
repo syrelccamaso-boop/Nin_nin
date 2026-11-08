@@ -416,10 +416,10 @@ def _roles_from_table() -> dict:
 
     global _roles_table_cache
 
-    if _roles_table_cache is not None:
+    if _roles_table_cache:
         return _roles_table_cache
 
-    _roles_table_cache = {}
+    loaded: dict = {}
 
     try:
         response = (
@@ -436,12 +436,12 @@ def _roles_from_table() -> dict:
             if role_id is None or not role_name:
                 continue
 
-            _roles_table_cache[str(role_name).strip()] = role_id
+            loaded[str(role_name).strip()] = role_id
 
-        if _roles_table_cache:
+        if loaded:
             logger.info(
                 "Loaded %d roles from the Role table.",
-                len(_roles_table_cache),
+                len(loaded),
             )
 
     except Exception as error:
@@ -450,7 +450,13 @@ def _roles_from_table() -> dict:
             error_text(error),
         )
 
-    return _roles_table_cache
+    # Only a successful read is kept. (Before, a failed or empty read was
+    # cached as {} for the life of the server, so every user's role stayed
+    # blank until a restart.)
+    if loaded:
+        _roles_table_cache = loaded
+
+    return loaded
 
 
 def _all_roles() -> dict:
@@ -559,6 +565,7 @@ def create_user(
     contact_number: str = "",
     auth_id=None,
     role_id=None,
+    check_email: bool = True,
 ) -> dict:
     """
     Create a Users row.
@@ -601,7 +608,9 @@ def create_user(
             code="validation",
         )
 
-    if email_exists(email):
+    # check_email=False when the caller has just checked it (create_account
+    # does), so the same lookup isn't run twice in one sign-up.
+    if check_email and email_exists(email):
         raise DatabaseError(
             "An account with this email already exists.",
             code="duplicate",
@@ -979,6 +988,36 @@ def status_value(
     if not canonical:
         return "active"
 
+    style = _status_style()
+
+    if style == "upper":
+        return canonical.upper()
+
+    if style == "capital":
+        return canonical.capitalize()
+
+    return canonical
+
+
+# Speed: how Users.Status is written ("active" / "Active" / "ACTIVE") was
+# worked out by reading 20 Users rows on EVERY status change (account
+# confirmation, deactivation...). It doesn't change, so it is remembered.
+_STATUS_STYLE_SECONDS = 600
+_status_style_cache: tuple[float, str] | None = None
+
+
+def _status_style() -> str:
+    """'upper', 'capital' or 'lower': the casing used in Users.Status."""
+
+    import time
+
+    global _status_style_cache
+
+    now = time.monotonic()
+
+    if _status_style_cache and _status_style_cache[0] > now:
+        return _status_style_cache[1]
+
     try:
 
         rows = _run(
@@ -990,17 +1029,20 @@ def status_value(
 
     except DatabaseError:
 
-        return canonical
+        return "lower"  # not remembered: try again next time
 
     samples = [str(row.get("Status") or "") for row in rows if row.get("Status")]
 
     if any(sample.isupper() for sample in samples):
-        return canonical.upper()
+        style = "upper"
+    elif any(sample[:1].isupper() for sample in samples):
+        style = "capital"
+    else:
+        style = "lower"
 
-    if any(sample[:1].isupper() for sample in samples):
-        return canonical.capitalize()
+    _status_style_cache = (now + _STATUS_STYLE_SECONDS, style)
 
-    return canonical
+    return style
 
 
 # =========================================================
@@ -1119,6 +1161,7 @@ def update_user(
 def update_status(
     user_id,
     status: str,
+    current: dict | None = None,
 ) -> dict | None:
     """
     Update Users.Status.
@@ -1127,6 +1170,9 @@ def update_status(
     Users.DateConfirmed is set to the current time - but only if it is
     still NULL, so an existing confirmation date is never overwritten
     (reactivating a deactivated account does not touch it).
+
+    current: the user's Users row when the caller has just read it (saves
+    reading it again).
     """
 
     value = status_value(status)
@@ -1134,7 +1180,8 @@ def update_status(
     if value.strip().lower() != "active":
         return update_user(user_id, {"status": value})
 
-    current = get_user_by_id(user_id)
+    if current is None or str(current.get("UserId")) != str(user_id):
+        current = get_user_by_id(user_id)
 
     if current is None:
         return None

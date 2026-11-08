@@ -15,7 +15,6 @@ from . import reports_repository as reports_repo
 from . import technician_service
 from . import users_repository as users
 
-
 # Speed: the computers list (with hardware and software) is the same for
 # every teacher, so it is shared for this many seconds. Any change clears it
 # at once (main.py).
@@ -99,7 +98,12 @@ FOLLOW_UP_EVERY_HOURS = 24
 MIN_REASON = 5
 
 # Statuses that count as "still open" for the duplicate check.
-OPEN_STATUS_IDS = {STATUS_REPORTED, STATUS_UNDER_REPAIR, STATUS_ESCALATED, STATUS_FOLLOW_UP}
+OPEN_STATUS_IDS = {
+    STATUS_REPORTED,
+    STATUS_UNDER_REPAIR,
+    STATUS_ESCALATED,
+    STATUS_FOLLOW_UP,
+}
 
 # "same day" is judged in the school's time zone.
 LOCAL_TZ = "Asia/Manila"
@@ -340,7 +344,11 @@ def _get_initial_status() -> Dict[str, Any]:
 
     # Cached ReportStatus rows (they rarely change) instead of a query per report.
     row = next(
-        (r for r in _status_rows() if str(r.get("StatusId")) == str(INITIAL_REPORT_STATUS_ID)),
+        (
+            r
+            for r in _status_rows()
+            if str(r.get("StatusId")) == str(INITIAL_REPORT_STATUS_ID)
+        ),
         None,
     )
 
@@ -406,15 +414,15 @@ def _get_issue(issue_name: str) -> Dict[str, Any]:
     return row
 
 
-
-
 def _category_write_error(exc: Exception) -> Optional[RuntimeError]:
     """A clear error when the database refuses to store Reports.CategoryId
     because the column is still an identity column (or the id is unknown)."""
     text = str(exc)
     low = text.lower()
-    if "428c9" in low or ("non-default value" in low and "categoryid" in low) or (
-        "can only be updated to default" in low and "categoryid" in low
+    if (
+        "428c9" in low
+        or ("non-default value" in low and "categoryid" in low)
+        or ("can only be updated to default" in low and "categoryid" in low)
     ):
         return RuntimeError(
             'The database won\'t let the app set Reports."CategoryId" because the column '
@@ -428,6 +436,8 @@ def _category_write_error(exc: Exception) -> Optional[RuntimeError]:
             f"({text})"
         )
     return None
+
+
 # ReportCategory holds two categories: "Hardware" and "Software".
 # Every problem is sorted into one of them by its name (see _problem_category);
 # the report's category comes from its first selected problem.
@@ -438,15 +448,54 @@ SOFTWARE_CATEGORY = "Software"
 # the words of the problem name ("PeripheralMalfunction" -> peripheral,
 # malfunction; "Keyboard / mouse" -> keyboard, mouse). Hardware is checked first.
 HARDWARE_WORDS = (
-    "hardware", "display", "monitor", "screen", "keyboard", "mouse", "peripheral",
-    "power", "turn", "cable", "printer", "speaker", "headset", "headphone", "port",
-    "usb", "fan", "battery", "missing", "broken", "damaged", "physical",
+    "hardware",
+    "display",
+    "monitor",
+    "screen",
+    "keyboard",
+    "mouse",
+    "peripheral",
+    "power",
+    "turn",
+    "cable",
+    "printer",
+    "speaker",
+    "headset",
+    "headphone",
+    "port",
+    "usb",
+    "fan",
+    "battery",
+    "missing",
+    "broken",
+    "damaged",
+    "physical",
 )
 SOFTWARE_WORDS = (
-    "software", "os", "operating", "program", "application", "app", "virus",
-    "malware", "update", "install", "slow", "freez", "hang", "crash", "error",
-    "internet", "connect", "network", "wifi", "browser", "login", "password",
-    "license", "performance",
+    "software",
+    "os",
+    "operating",
+    "program",
+    "application",
+    "app",
+    "virus",
+    "malware",
+    "update",
+    "install",
+    "slow",
+    "freez",
+    "hang",
+    "crash",
+    "error",
+    "internet",
+    "connect",
+    "network",
+    "wifi",
+    "browser",
+    "login",
+    "password",
+    "license",
+    "performance",
 )
 # Problems that match neither list (e.g. "Other") are saved as:
 DEFAULT_CATEGORY = HARDWARE_CATEGORY
@@ -457,7 +506,10 @@ def _words(text: Any) -> List[str]:
     "Won't turn on" -> ['won', 't', 'turn', 'on']."""
     import re
 
-    return [w.lower() for w in re.findall(r"[A-Z]+(?![a-z])|[A-Z]?[a-z]+|\d+", _clean_text(text))]
+    return [
+        w.lower()
+        for w in re.findall(r"[A-Z]+(?![a-z])|[A-Z]?[a-z]+|\d+", _clean_text(text))
+    ]
 
 
 def _problem_category(issue_name: str) -> str:
@@ -511,10 +563,14 @@ def _resolve_category_id(
     try:
         # Kept for a few minutes: the categories (Hardware / Software) rarely change.
         category_rows = perf.lookup(
-            "report_categories", technician_service.LOOKUP_CACHE_SECONDS, read_categories
+            "report_categories",
+            technician_service.LOOKUP_CACHE_SECONDS,
+            read_categories,
         )
     except Exception as exc:
-        raise RuntimeError(f"Could not read the {REPORT_CATEGORY_TABLE} table: {exc}") from exc
+        raise RuntimeError(
+            f"Could not read the {REPORT_CATEGORY_TABLE} table: {exc}"
+        ) from exc
 
     picked = _simple(category)
     if picked == _simple(HARDWARE_CATEGORY):
@@ -525,7 +581,9 @@ def _resolve_category_id(
         wanted = _problem_category(issue_name)
 
     for row in category_rows:
-        if row.get("CategoryId") is not None and _simple(row.get("Category")) == _simple(wanted):
+        if row.get("CategoryId") is not None and _simple(
+            row.get("Category")
+        ) == _simple(wanted):
             return int(row["CategoryId"])
 
     raise ValueError(
@@ -544,7 +602,9 @@ def _check_issue_names(issues: List[str]) -> None:
     """
     for name in issues:
         if len(name) > MAX_ISSUE_LENGTH:
-            raise ValueError(f"The problem name is too long (max {MAX_ISSUE_LENGTH} characters).")
+            raise ValueError(
+                f"The problem name is too long (max {MAX_ISSUE_LENGTH} characters)."
+            )
 
 
 def _where(computer: Optional[Dict[str, Any]]) -> str:
@@ -749,7 +809,9 @@ def _status_rows() -> List[Dict[str, Any]]:
     return technician_service._status_rows()
 
 
-def _find_cancelled_status_id(rows: Optional[List[Dict[str, Any]]] = None) -> Optional[int]:
+def _find_cancelled_status_id(
+    rows: Optional[List[Dict[str, Any]]] = None,
+) -> Optional[int]:
     """StatusId of the 'Cancelled' row, found by name (not by a fixed number)."""
     for row in rows if rows is not None else _status_rows():
         if _clean_text(row.get("CurrentStatus")).lower() in ("cancelled", "canceled"):
@@ -907,7 +969,9 @@ def _load_computers() -> List[Dict[str, Any]]:
             # as technician_service).
             hardware_map[int(cid)] = hardware
 
-    for software in sorted(data["software"], key=lambda r: str(r.get("SoftwareName") or "")):
+    for software in sorted(
+        data["software"], key=lambda r: str(r.get("SoftwareName") or "")
+    ):
         cid = software.get("ComputerId")
 
         if cid is None:
@@ -955,38 +1019,62 @@ def _load_computers() -> List[Dict[str, Any]]:
 # ============================================================
 
 
-def get_reports(user: Any = None) -> List[Dict[str, Any]]:
-    """
-    Get reports.
+# ------------------------------------------------------------
+# Shared, short-lived reads (speed)
+# ------------------------------------------------------------
+#
+# The Teacher dashboard used to make two separate chains of reads, one after
+# another inside each chain:
+#     Reports (this teacher) -> Computers -> Users
+#     Reports (everyone)     -> Computers -> Users     (for the live map)
+# plus Computers + ComputerHardware + ComputerSoftware for the computers.
+#
+# Now the dashboard reads FOUR tables at the same time, once:
+#     Computers, Reports, Users (names), and the cached ReportStatus rows
+# and builds both report lists from that one read. The hardware/software
+# tables are no longer read for the dashboard: no Teacher screen shows them
+# (GET /teacher/computers still returns them).
+#
+# These reads are shared by every teacher for TEACHER_DATA_CACHE_SECONDS.
+# Any change (POST / PATCH / DELETE) clears them at once (main.py), so a new
+# report or a status change shows on the next load.
 
-    If a teacher user is supplied, only reports created by that
-    teacher are returned.
-    """
+TEACHER_DATA_CACHE_SECONDS = 10
 
-    client = get_supabase()
+# Reports that no longer mark a computer on the live map.
+CLOSED_STATUS_NAMES = {"fixed", "cancelled", "canceled"}
 
-    base_columns = REPORT_BASE_COLUMNS
+_COMPUTER_COLUMNS = (
+    "ComputerId,Room,UnitNumber,Status,EscalationStatus,CreatedAt,UpdatedAt"
+)
 
-    user_id = None
 
-    if user is not None:
+def _columns(text: str) -> str:
+    return ",".join(part.strip() for part in text.split(","))
 
-        user_id = _get_user_id(user)
 
-        if user_id is None:
-            raise ValueError("Unable to determine the application UserId.")
+def _load_computer_rows() -> List[Dict[str, Any]]:
+    return technician_service._select_all(
+        COMPUTERS_TABLE, _COMPUTER_COLUMNS, "ComputerId"
+    )
 
-    def run(columns: str):
-        query = client.table(REPORTS_TABLE).select(columns)
 
-        if user_id is not None:
-            query = query.eq("ReportedBy", user_id)
+def _cached_computer_rows() -> List[Dict[str, Any]]:
+    return perf.cached(
+        "teacher_computer_rows", TEACHER_DATA_CACHE_SECONDS, _load_computer_rows
+    )
 
-        return query.order("CreatedAt", desc=True).execute()
 
+def _load_report_rows() -> List[Dict[str, Any]]:
+    """Every Reports row (read in pages, so nothing is cut off at Supabase's
+    1000-row limit), newest first."""
+    select_all = technician_service._select_all
     try:
-        response = run(base_columns + ", " + REPORT_EXTRA_COLUMNS)
-
+        rows = select_all(
+            REPORTS_TABLE,
+            _columns(REPORT_BASE_COLUMNS) + "," + _columns(REPORT_EXTRA_COLUMNS),
+            "ReportId",
+        )
     except Exception as exc:
         # teacher_migration.sql has not been run yet: keep the dashboard
         # working (without cancel/edit reasons and follow-up times).
@@ -996,84 +1084,71 @@ def get_reports(user: Any = None) -> List[Dict[str, Any]]:
             REPORT_EXTRA_COLUMNS,
             exc,
         )
-        response = run(base_columns)
+        rows = select_all(REPORTS_TABLE, _columns(REPORT_BASE_COLUMNS), "ReportId")
+    rows.sort(key=lambda r: str(r.get("CreatedAt") or ""), reverse=True)
+    return rows
 
-    reports = _response_data(response)
 
-    if not reports:
-        return []
-
-    computer_ids = list(
-        {int(row["ComputerId"]) for row in reports if row.get("ComputerId") is not None}
+def _cached_report_rows() -> List[Dict[str, Any]]:
+    return perf.cached(
+        "teacher_report_rows", TEACHER_DATA_CACHE_SECONDS, _load_report_rows
     )
 
-    user_ids = list(
-        {int(row["HandledBy"]) for row in reports if row.get("HandledBy") is not None}
+
+def _load_user_names() -> Dict[int, Dict[str, Any]]:
+    rows = technician_service._select_all(
+        USERS_TABLE, "UserId,FirstName,LastName,Email", "UserId"
+    )
+    out: Dict[int, Dict[str, Any]] = {}
+    for row in rows:
+        try:
+            out[int(row["UserId"])] = row
+        except (KeyError, TypeError, ValueError):
+            continue
+    return out
+
+
+def _cached_user_names() -> Dict[int, Dict[str, Any]]:
+    return perf.cached(
+        "teacher_user_names", TEACHER_DATA_CACHE_SECONDS, _load_user_names
     )
 
-    computers_map: Dict[int, Dict[str, Any]] = {}
-    users_map: Dict[int, Dict[str, Any]] = {}
+
+def _report_data() -> Dict[str, Any]:
+    """Computers, Reports and Users names, read at the same time."""
+    return perf.parallel(
+        computers=_cached_computer_rows,
+        rows=_cached_report_rows,
+        users=_cached_user_names,
+    )
+
+
+def _computers_by_id(rows: List[Dict[str, Any]]) -> Dict[int, Dict[str, Any]]:
+    out: Dict[int, Dict[str, Any]] = {}
+    for row in rows:
+        try:
+            out[int(row["ComputerId"])] = row
+        except (KeyError, TypeError, ValueError):
+            continue
+    return out
+
+
+def _normalize_reports(
+    rows: List[Dict[str, Any]],
+    computers_map: Dict[int, Dict[str, Any]],
+    users_map: Dict[int, Dict[str, Any]],
+) -> List[Dict[str, Any]]:
+    """Reports rows -> the dicts Teacher.py reads (same shape as before)."""
+
     statuses_map: Dict[int, str] = {}
-
-    # --------------------------------------------------------
-    # Computers
-    # --------------------------------------------------------
-
-    if computer_ids:
-
-        computer_response = (
-            client.table(COMPUTERS_TABLE)
-            .select("ComputerId, Room, UnitNumber, Status")
-            .in_("ComputerId", computer_ids)
-            .execute()
-        )
-
-        for computer in _response_data(computer_response):
-
-            cid = computer.get("ComputerId")
-
-            if cid is not None:
-                computers_map[int(cid)] = computer
-
-    # --------------------------------------------------------
-    # Handlers
-    # --------------------------------------------------------
-
-    if user_ids:
-
-        users_response = (
-            client.table(USERS_TABLE)
-            .select("UserId, FirstName, LastName, Email")
-            .in_("UserId", user_ids)
-            .execute()
-        )
-
-        for person in _response_data(users_response):
-
-            uid = person.get("UserId")
-
-            if uid is not None:
-                users_map[int(uid)] = person
-
-    # --------------------------------------------------------
-    # Statuses
-    # --------------------------------------------------------
-
-    # Cached ReportStatus rows (they rarely change).
     for status in _status_rows():
-
         sid = status.get("StatusId")
-
         if sid is not None:
             statuses_map[int(sid)] = _clean_text(status.get("CurrentStatus"))
 
-    # --------------------------------------------------------
-    # Normalize
-    # --------------------------------------------------------
-
     result = []
 
-    for report in reports:
+    for report in rows:
 
         computer_id = report.get("ComputerId")
         status_id = report.get("StatusId")
@@ -1157,25 +1232,146 @@ def get_reports(user: Any = None) -> List[Dict[str, Any]]:
     return result
 
 
+def get_reports(
+    user: Any = None, data: Optional[Dict[str, Any]] = None
+) -> List[Dict[str, Any]]:
+    """
+    Get reports, newest first.
+
+    If a teacher user is supplied, only reports created by that teacher are
+    returned. `data`: the result of _report_data() when the caller already
+    has it (the dashboard), so nothing is read twice.
+    """
+
+    user_id = None
+
+    if user is not None:
+        user_id = _get_user_id(user)
+        if user_id is None:
+            raise ValueError("Unable to determine the application UserId.")
+
+    data = data or _report_data()
+
+    rows = data["rows"]
+
+    if user_id is not None:
+        rows = [r for r in rows if str(r.get("ReportedBy")) == str(user_id)]
+
+    return _normalize_reports(rows, _computers_by_id(data["computers"]), data["users"])
+
+
 # ============================================================
 # TEACHER DASHBOARD
 # ============================================================
 
 
+def _dashboard_computer(computer: Dict[str, Any]) -> Dict[str, Any]:
+    """A Computers row in the shape get_computers() returns, without the
+    hardware / software lists (no Teacher screen shows them)."""
+    cid = int(computer["ComputerId"])
+    return {
+        "computer_id": cid,
+        "ComputerId": cid,
+        "room": computer.get("Room"),
+        "Room": computer.get("Room"),
+        "unit_number": computer.get("UnitNumber"),
+        "UnitNumber": computer.get("UnitNumber"),
+        "status": computer.get("Status"),
+        "Status": computer.get("Status"),
+        "escalation_status": computer.get("EscalationStatus"),
+        "EscalationStatus": computer.get("EscalationStatus"),
+        "created_at": computer.get("CreatedAt"),
+        "CreatedAt": computer.get("CreatedAt"),
+        "updated_at": computer.get("UpdatedAt"),
+        "UpdatedAt": computer.get("UpdatedAt"),
+        "hardware": None,
+        "software": [],
+    }
+
+
 def get_dashboard_data(user: Any) -> Dict[str, Any]:
     """
-    Get all database-backed information required by Teacher.py.
+    Get all database-backed information required by Teacher.py, from ONE
+    set of reads made at the same time (see _report_data).
     """
 
-    # Speed: the teacher's reports are read while the computers are loaded
-    # (they used to be read one after the other).
-    reports_future = perf.submit(get_reports, user)
-    computers = get_computers()
+    user_id = _get_user_id(user)
+    if user_id is None:
+        raise ValueError("Unable to determine the application UserId.")
+
+    data = _report_data()
+    computers_map = _computers_by_id(data["computers"])
+
+    def room_unit(row):
+        try:
+            unit = int(row.get("UnitNumber") or 0)
+        except (TypeError, ValueError):
+            unit = 0
+        return (str(row.get("Room") or ""), unit)
+
+    computers = [
+        _dashboard_computer(row)
+        for row in sorted(computers_map.values(), key=room_unit)
+    ]
+
+    every_report = _normalize_reports(data["rows"], computers_map, data["users"])
 
     return {
         "computers": computers,
-        "reports": reports_future.result(),
+        # Only this teacher's reports (My Reports, Dashboard, notifications).
+        "reports": [
+            r for r in every_report if str(r.get("ReportedBy")) == str(user_id)
+        ],
+        # Every OPEN report, trimmed, for the Laboratory Status live map only
+        # (the same reports the Admin's map shows). Fixed and cancelled ones
+        # never mark a computer, so they are not sent.
+        "map_reports": [
+            {k: r.get(k) for k in MAP_REPORT_FIELDS}
+            for r in every_report
+            if _clean_text(r.get("status_name")).lower() not in CLOSED_STATUS_NAMES
+        ],
     }
+
+
+# Only what the live map needs (computer, problem, status, technician, dates).
+# Reporter names, comments and notes of other teachers are not sent.
+MAP_REPORT_FIELDS = (
+    "id",
+    "db_id",
+    "report_id",
+    "ReportId",
+    "computer_id",
+    "ComputerId",
+    "room",
+    "Room",
+    "unit_number",
+    "UnitNumber",
+    "issues",
+    "Issues",
+    "issue",
+    "Issue",
+    "handled_by",
+    "HandledBy",
+    "handled_by_name",
+    "HandledByName",
+    "status_id",
+    "StatusId",
+    "status_name",
+    "CurrentStatus",
+    "created_at",
+    "CreatedAt",
+    "updated_at",
+    "UpdatedAt",
+)
+
+
+def get_map_reports() -> List[Dict[str, Any]]:
+    """Every open report, trimmed to MAP_REPORT_FIELDS (kept for callers)."""
+    return [
+        {k: r.get(k) for k in MAP_REPORT_FIELDS}
+        for r in get_reports(None)
+        if _clean_text(r.get("status_name")).lower() not in CLOSED_STATUS_NAMES
+    ]
 
 
 # ============================================================
@@ -1390,12 +1586,16 @@ def submit_report(
     perf.background(
         notify.notify_technicians,
         "new_report",
-        notify.message(f"New report · {where}", f"{code} · {problems} · by {teacher_name}"),
+        notify.message(
+            f"New report · {where}", f"{code} · {problems} · by {teacher_name}"
+        ),
     )
     perf.background(
         notify.notify_admins,
         "activity",
-        notify.message(f"Report sent · {where}", f"{code} · {problems} · by {teacher_name}"),
+        notify.message(
+            f"Report sent · {where}", f"{code} · {problems} · by {teacher_name}"
+        ),
     )
 
     # --------------------------------------------------------
@@ -1503,10 +1703,15 @@ def follow_up_report(
     details = f"{code} · still waiting for a technician · from {who}"
     if text:
         details += f" · {text}"
+
     def send():
         where = _where(_computer_for(report))
-        notify.notify_technicians("follow_up", notify.message(f"Follow-up · {where}", details))
-        notify.notify_admins("activity", notify.message(f"Follow-up sent · {where}", details))
+        notify.notify_technicians(
+            "follow_up", notify.message(f"Follow-up · {where}", details)
+        )
+        notify.notify_admins(
+            "activity", notify.message(f"Follow-up sent · {where}", details)
+        )
 
     # Sent after the response, so the teacher doesn't wait for it.
     perf.background(send)
@@ -1546,8 +1751,7 @@ def update_report(
     category_id = _resolve_category_id(cleaned_issues[0], category=category)
 
     added = [
-        i for i in cleaned_issues
-        if not _issues_overlap(report.get("Issues"), [i])
+        i for i in cleaned_issues if not _issues_overlap(report.get("Issues"), [i])
     ]
 
     if added and _same_issue_reported_today(
@@ -1588,7 +1792,9 @@ def update_report(
 
     updated = _first(response)
     if not updated:
-        raise RuntimeError("The report was not updated (it may have just been picked up).")
+        raise RuntimeError(
+            "The report was not updated (it may have just been picked up)."
+        )
 
     def send():
         notify.notify_admins(
@@ -1647,7 +1853,9 @@ def cancel_report(
 
     updated = _first(response)
     if not updated:
-        raise RuntimeError("The report was not cancelled (it may have just been picked up).")
+        raise RuntimeError(
+            "The report was not cancelled (it may have just been picked up)."
+        )
 
     def send():
         notify.notify_admins(
@@ -1691,7 +1899,9 @@ def deactivate_account(user: Any, reason: str = "") -> Dict[str, Any]:
     if not updated:
         raise RuntimeError("The account was not deactivated.")
 
-    logger.info("Teacher UserId=%s deactivated their account. Reason: %s", user_id, reason)
+    logger.info(
+        "Teacher UserId=%s deactivated their account. Reason: %s", user_id, reason
+    )
 
     return updated
 

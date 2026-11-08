@@ -401,9 +401,7 @@ def _code_issue_error(purpose: str, email: str):
 # account exists.
 # =========================================================
 
-_LOGIN_UNAVAILABLE = (
-    "Login is temporarily unavailable. Please try again later."
-)
+_LOGIN_UNAVAILABLE = "Login is temporarily unavailable. Please try again later."
 
 
 class _LoginLimitUnavailable(RuntimeError):
@@ -506,7 +504,11 @@ def _login_clear(email: str) -> None:
 def start_email_verification(
     email: str,
     first_name: str = "",
+    check_taken: bool = True,
 ):
+    """check_taken=False when the caller has just checked the email itself
+    (POST /auth/signup does), so the same lookup isn't run twice."""
+
     email = users.normalize_email(email)
 
     if not valid_email(email):
@@ -516,7 +518,7 @@ def start_email_verification(
         }
 
     try:
-        if email_taken(email):
+        if check_taken and email_taken(email):
             return {
                 "success": False,
                 "error": ("An account with this email " "already exists."),
@@ -1125,6 +1127,8 @@ def create_account(email: str):
             contact_number=signup["contact_number"],
             auth_id=auth_user_id,
             role_id=role_id,
+            # email_taken() was checked a moment ago, above.
+            check_email=False,
         )
 
     except DatabaseError as error:
@@ -1202,15 +1206,25 @@ def create_account(email: str):
     try:
         from . import notification_service as notify
 
-        name = f"{user.get('first_name', '')} {user.get('last_name', '')}".strip() or email
+        name = (
+            f"{user.get('first_name', '')} {user.get('last_name', '')}".strip() or email
+        )
         details = f"{user.get('role') or signup['role']} · {user.get('department') or ''} · {email}"
         from .perf import background
 
         # Sent after the response, so the new user doesn't wait for it.
         if user["status"] == "pending":
-            background(notify.notify_admins, "account", notify.message(f"Account request · {name}", details))
+            background(
+                notify.notify_admins,
+                "account",
+                notify.message(f"Account request · {name}", details),
+            )
         else:
-            background(notify.notify_admins, "account", notify.message(f"New account · {name}", details))
+            background(
+                notify.notify_admins,
+                "account",
+                notify.message(f"New account · {name}", details),
+            )
     except Exception as exc:
         logger.warning("Could not notify admins about the new account: %s", exc)
 
@@ -1378,9 +1392,15 @@ def authenticate(
         }
 
     # Correct password: reset the consecutive-failure counter.
-    _login_clear(email)
+    # Speed: done after the response (it doesn't change the answer); the
+    # user no longer waits for this extra round trip on every login.
+    from .perf import background
+
+    background(_login_clear, email)
 
     auth_user_id = response.user.id
+
+    access_token = response.session.access_token if response.session else None
 
     # -----------------------------------------------------
     # Fixed Admin
@@ -1388,15 +1408,17 @@ def authenticate(
 
     if _is_fixed_admin(email):
 
+        user = _fixed_admin_user(
+            email,
+            auth_user_id,
+        )
+
+        _remember_token(access_token, user)
+
         return {
             "success": True,
-            "user": _fixed_admin_user(
-                email,
-                auth_user_id,
-            ),
-            "access_token": (
-                response.session.access_token if response.session else None
-            ),
+            "user": user,
+            "access_token": access_token,
         }
 
     # -----------------------------------------------------
@@ -1453,10 +1475,12 @@ def authenticate(
             "error": status_error,
         }
 
+    _remember_token(access_token, user)
+
     return {
         "success": True,
         "user": user,
-        "access_token": (response.session.access_token if response.session else None),
+        "access_token": access_token,
     }
 
 
@@ -1523,6 +1547,41 @@ def _token_expiry(token: str) -> float | None:
         return float(exp) if exp else None
     except Exception:
         return None
+
+
+def _remember_token(access_token: str | None, user: dict) -> None:
+    """
+    Speed: the login has just proven this token (Supabase signed it in) and
+    read the user's profile, so the dashboard's first request doesn't need to
+    ask Supabase Auth and the Users table again (two round trips). Same rules
+    as user_from_token(): TOKEN_CACHE_SECONDS, never past the token's expiry.
+    """
+
+    import copy
+    import time
+
+    token = (access_token or "").strip()
+
+    if not token or not user:
+        return
+
+    now = time.time()
+    until = now + TOKEN_CACHE_SECONDS
+    expiry = _token_expiry(token)
+
+    if expiry is not None:
+        until = min(until, expiry - 5)
+
+    if until <= now:
+        return
+
+    with _token_lock:
+        if len(_token_cache) >= _TOKEN_CACHE_MAX:
+            _token_cache.clear()
+        _token_cache[_token_key(token)] = (
+            until,
+            {"success": True, "user": copy.deepcopy(user)},
+        )
 
 
 def forget_cached_tokens() -> None:
@@ -1974,7 +2033,9 @@ def _change_email(row: dict, new_email: str, other_changes: dict | None = None) 
     try:
         auth_user_id = _find_auth_user_id(old_email, row)
     except Exception as error:
-        logger.error("Could not find the login for %s: %s", old_email, error_text(error))
+        logger.error(
+            "Could not find the login for %s: %s", old_email, error_text(error)
+        )
         auth_user_id = None
 
     if not auth_user_id:
@@ -2112,9 +2173,7 @@ def change_own_email(
     result = _change_email(row, new_email)
 
     if result.get("success"):
-        result["message"] = (
-            "Email updated. Use the new email the next time you log in."
-        )
+        result["message"] = "Email updated. Use the new email the next time you log in."
 
     return result
 

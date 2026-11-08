@@ -7,7 +7,13 @@ from fastapi import FastAPI, Header, HTTPException, Request
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
-from . import admin_service, inventory_service, perf, teacher_service, technician_service
+from . import (
+    admin_service,
+    inventory_service,
+    perf,
+    teacher_service,
+    technician_service,
+)
 from .auth_service import forget_cached_tokens
 from .auth_service import (
     admin_delete_user,
@@ -56,19 +62,56 @@ app = FastAPI(title="Centrum Laboratory API", version="1.1.0")
 #   X-Process-Time-Ms header.
 #
 # * Any request that can change data (POST, PATCH, PUT, DELETE) clears the
-#   short-lived read cache (perf.py) and the remembered token checks
-#   (auth_service.py), so the next read always sees the change.
+#   short-lived read cache (perf.py), so the next read always sees the
+#   change. Requests that change ACCOUNTS (see _ACCOUNT_WRITE_PREFIXES) also
+#   clear the remembered token checks (auth_service.py), so a deactivated
+#   account or a changed role takes effect on the very next request.
 
 SLOW_REQUEST_MS = 1000
 
 _READ_METHODS = ("GET", "HEAD", "OPTIONS")
+
+# Writes that can change who may sign in, or as what (account status, role,
+# email, deactivation, password). Only these clear the remembered token
+# checks; other changes (reports, inventory, notifications...) don't affect
+# them, so users keep their 60-second token check instead of paying two
+# extra round trips to Supabase on the next click after any save.
+_ACCOUNT_WRITE_PREFIXES = (
+    "/users",
+    "/admin/requests",
+    "/admin/email",
+    "/admin/change-password",
+    "/technician/change-password",
+    "/auth/reset-password",
+)
+
+
+def _changes_accounts(path: str) -> bool:
+    return path.startswith(_ACCOUNT_WRITE_PREFIXES) or "deactivate" in path
+
+
+# POST requests that change NO table the dashboards read: logging in and the
+# sign-up / reset code steps (codes are kept in memory, not in the database).
+# They used to clear the shared dashboard cache for everyone on every login.
+# /auth/create-account is not here: it adds a Users row.
+_NO_DATA_CHANGE_PATHS = {
+    "/auth/login",
+    "/auth/send-code",
+    "/auth/resend-code",
+    "/auth/verify-code",
+    "/auth/signup",
+    "/auth/forgot-password",
+}
 
 
 @app.middleware("http")
 async def timing_and_cache(request: Request, call_next):
 
     start = time.perf_counter()
-    is_write = request.method not in _READ_METHODS
+    is_write = (
+        request.method not in _READ_METHODS
+        and request.url.path not in _NO_DATA_CHANGE_PATHS
+    )
 
     if is_write:
         perf.invalidate()
@@ -81,11 +124,19 @@ async def timing_and_cache(request: Request, call_next):
     finally:
         if is_write:
             perf.invalidate()
-            forget_cached_tokens()
+            if _changes_accounts(request.url.path):
+                forget_cached_tokens()
 
         ms = (time.perf_counter() - start) * 1000
         level = logging.WARNING if ms >= SLOW_REQUEST_MS else logging.INFO
-        logger.log(level, "%s %s -> %s in %.0f ms", request.method, request.url.path, status_code, ms)
+        logger.log(
+            level,
+            "%s %s -> %s in %.0f ms",
+            request.method,
+            request.url.path,
+            status_code,
+            ms,
+        )
 
     response.headers["X-Process-Time-Ms"] = f"{ms:.0f}"
     return response
@@ -472,7 +523,10 @@ def signup(data: SignupRequest):
     # Send verification code
     # -----------------------------------------------
 
-    result = start_email_verification(email=data.email, first_name=data.first_name)
+    # The email was checked just above (email_taken), so it isn't checked again.
+    result = start_email_verification(
+        email=data.email, first_name=data.first_name, check_taken=False
+    )
 
     if not result["success"]:
 
@@ -851,7 +905,9 @@ def admin_create_laboratory(
 
     admin = _require_dashboard_admin(authorization)
 
-    result = admin_service.create_laboratory(admin, data.room, data.units, data.hardware)
+    result = admin_service.create_laboratory(
+        admin, data.room, data.units, data.hardware
+    )
 
     if not result.get("success"):
 
@@ -907,7 +963,9 @@ def _inventory_result(result: dict) -> dict:
 
         code = result.get("code")
 
-        _fail(result, 409 if code == "duplicate" else 404 if code == "not_found" else 400)
+        _fail(
+            result, 409 if code == "duplicate" else 404 if code == "not_found" else 400
+        )
 
     return result
 
@@ -930,7 +988,9 @@ def inventory_update_computer(
     user = _require_inventory_user(authorization)
 
     return _inventory_result(
-        inventory_service.update_computer(user, computer_id, _dump(data, exclude_unset=True))
+        inventory_service.update_computer(
+            user, computer_id, _dump(data, exclude_unset=True)
+        )
     )
 
 
@@ -943,7 +1003,9 @@ def inventory_install_software(
     user = _require_inventory_user(authorization)
 
     return _inventory_result(
-        inventory_service.install_software(user, computer_id, data.name, data.version, data.history)
+        inventory_service.install_software(
+            user, computer_id, data.name, data.version, data.history
+        )
     )
 
 
@@ -982,7 +1044,9 @@ def inventory_log_maintenance(
     user = _require_inventory_user(authorization)
 
     return _inventory_result(
-        inventory_service.log_maintenance(user, computer_id, data.kind, data.text, data.done_by)
+        inventory_service.log_maintenance(
+            user, computer_id, data.kind, data.text, data.done_by
+        )
     )
 
 
@@ -1027,9 +1091,7 @@ def admin_change_email(
 
     admin = _require_dashboard_admin(authorization)
 
-    result = admin_service.change_email(
-        admin, data.new_email, data.current_password
-    )
+    result = admin_service.change_email(admin, data.new_email, data.current_password)
 
     if not result["success"]:
 

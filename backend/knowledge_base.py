@@ -1,37 +1,45 @@
 """
-backend/knowledge_base.py - offline troubleshooting guide for the Computer
-Laboratory (Centrum, IT Laboratory and CSSC Laboratory).
+Offline knowledge base ("Lab Guide") for the Centrum Laboratory assistant.
 
-Used two ways by ai_service.py:
-  1. The best matching entries are given to Gemini so its answer follows the
-     lab's own procedures.
-  2. When Gemini is down or slower than the deadline, the matching entry is
-     shown to the teacher directly.
+It is used by ai_service.py ONLY when Gemini cannot answer (usage limit
+reached, service down). Then the user sees a numbered menu built from the
+entries below, and picks a topic by number or by describing the problem.
 
-Entry format
-------------
-{
-    "id":         unique short name
-    "category":   Hardware | Software | Network | System | Other
-    "priority":   Low | Medium | High
-    "keywords":   words/phrases that point to this problem, in English,
-                  Tagalog/Taglish and Bisaya, plus common misspellings.
-                  A keyword matches the start of a word ("print" also matches
-                  "printer"). Put "=" in front to match the whole word only
-                  ("=lines" does not match "guidelines").
-                  Typos of keywords with 5+ letters are matched automatically.
-    "cause":      {"en": ..., "tl": ...}
-    "steps":      [(action_en, check_en, action_tl, check_tl), ...]
-    "solution":   {"en": ..., "tl": ...}
-    "escalation": {"en": ..., "tl": ...}
-}
+Each entry has:
+  id          unique short name (also used by kb_custom.json to replace an entry)
+  title       {"en": ..., "tl": ...}  shown in the menu (keep it short)
+  category    Hardware / Software / Network / System / Other
+  priority    Low / Medium / High
+  keywords    English, Tagalog and Taglish phrases used for matching
+              - a keyword of 4 letters or fewer must match the whole word
+              - longer keywords match the start of a word ("print" -> "printing")
+              - multi-word phrases count more than single words
+  cause / solution / escalation   {"en": ..., "tl": ...}
+  steps       list of (en_action, en_check, tl_action, tl_check)
 
-Adding entries without editing this file
-----------------------------------------
-Put them in backend/kb_custom.json (a list of entries in the same format;
-steps may be lists or {"action", "check", "action_tl", "check_tl"} objects).
-An entry with the same id as a built-in one replaces it; {"id": "...",
-"disabled": true} removes one. Call ai_service.reload_knowledge() to apply.
+The order of the entries is the order (and the numbers) of the menu.
+The menu shows the first 12 entries (MENU_LIMIT in ai_service.py).
+
+You can ADD or CHANGE entries without touching this file: create
+`kb_custom.json` next to it, a list of entries with the same fields.
+An entry whose "id" already exists REPLACES the built-in one; a new "id"
+is added at the end of the menu.
+
+[
+  {
+    "id": "wifi_login",
+    "title": {"en": "Campus Wi-Fi login", "tl": "Login sa campus Wi-Fi"},
+    "category": "Network",
+    "priority": "Low",
+    "keywords": ["campus wifi", "wifi login", "captive portal"],
+    "cause": {"en": "...", "tl": "..."},
+    "steps": [["Action", "Check", "Aksyon", "Tingnan"]],
+    "solution": {"en": "...", "tl": "..."},
+    "escalation": {"en": "...", "tl": "..."}
+  }
+]
+
+Check your changes with:   python -m backend.knowledge_base
 """
 
 from __future__ import annotations
@@ -42,1221 +50,721 @@ from pathlib import Path
 
 log = logging.getLogger("centrum.kb")
 
-CUSTOM_KB_PATH = Path(__file__).with_name("kb_custom.json")
+PRIORITIES = ("Low", "Medium", "High")
 
-# Order matters only for ties: earlier entries win. Safety comes first.
-BUILTIN_KB: list[dict] = [
-    # --------------------------------------------------------------
-    {
-        "id": "electrical_hazard",
-        "category": "Hardware",
-        "priority": "High",
-        "keywords": [
-            "smoke", "smoking", "spark", "sparks", "sparking", "burning smell",
-            "smells burning", "burnt smell", "electric shock", "got shocked",
-            "=shock", "exposed wire", "naked wire", "melted", "fire",
-            "usok", "umuusok", "may usok", "amoy sunog", "amoy nasusunog",
-            "nasusunog", "nag spark", "nagspark", "kumislap ang saksakan",
-            "nakuryente", "kinuryente", "may kuryente", "sunog",
-            "naay aso", "nakuryentehan", "nasunog",
-        ],
-        "cause": {
-            "en": "A damaged cable, outlet, extension/AVR or power supply. This is an electrical hazard.",
-            "tl": "May sirang cable, saksakan, extension/AVR o power supply. Delikado ito sa kuryente.",
-        },
-        "steps": [
-            ("Do NOT touch the computer, cables or outlet.",
-             "Keep everyone, especially students, away from the area.",
-             "HUWAG hawakan ang computer, cable o saksakan.",
-             "Palayuin ang lahat, lalo na ang mga estudyante."),
-            ("Only if you can do it without touching the damaged part, switch off the AVR/extension switch or the room's breaker.",
-             "The smoke or sparks stop.",
-             "Kung kaya lang nang hindi hinahawakan ang sirang parte, i-off ang switch ng AVR/extension o ang breaker ng room.",
-             "Tumigil ang usok o spark."),
-            ("If there are flames, leave the room and call building security; use a fire extinguisher only if you are trained.",
-             "Everyone is out safely.",
-             "Kung may apoy, lumabas ng room at tawagan ang security; gumamit lang ng fire extinguisher kung marunong.",
-             "Ligtas na nakalabas ang lahat."),
-            ("Report it right away with the PC number and room.",
-             "The technician has been told.",
-             "I-report agad kasama ang PC number at room.",
-             "Nasabihan na ang technician."),
-        ],
-        "solution": {
-            "en": "Leave the unit unplugged and unused until a technician inspects and repairs it.",
-            "tl": "Huwag nang isaksak o gamitin hanggang ma-inspeksyon at maayos ng technician.",
-        },
-        "escalation": {
-            "en": "Always contact the laboratory technician or administrator immediately. Never try to fix it yourself.",
-            "tl": "Laging tawagan agad ang lab technician o administrator. Huwag itong subukang ayusin mag-isa.",
-        },
-    },
-    # --------------------------------------------------------------
+
+BUILTIN_KB = [
+    # ------------------------------------------------------------------ POWER
     {
         "id": "no_power",
+        "title": {"en": "Computer won't turn on", "tl": "Ayaw bumukas ang computer"},
         "category": "Hardware",
-        "priority": "High",
+        "priority": "Medium",
         "keywords": [
-            "won't turn on", "wont turn on", "will not turn on", "not turning on",
-            "doesn't turn on", "does not turn on", "won't power on", "no power",
-            "not powering", "dead pc", "pc is dead", "computer is dead",
-            "won't start", "wont start", "power button", "turned off by itself",
-            "ayaw mag on", "ayaw mag-on", "ayaw magon", "hindi mag on", "di mag on",
-            "hindi nag o-on", "hindi nag oon", "di nag oon", "walang power",
-            "ayaw bumukas", "hindi bumubukas", "di bumubukas", "ayaw magbukas",
-            "bumukas ang pc", "bumukas ng pc", "bumukas yung pc",
-            "bumukas ang computer", "bumukas ng computer", "bumukas yung computer",
-            "patay ang pc", "patay yung pc", "patay ang computer", "patay na pc",
-            "dili mo on", "dili mag on", "dili ma on", "walay power", "di mo abli",
+            "won't turn on", "wont turn on", "not turning on", "doesn't turn on",
+            "doesnt turn on", "no power", "power button", "dead pc", "does not start",
+            "won't start", "wont start", "ayaw bumukas", "ayaw mag on", "ayaw mag-on",
+            "ayaw mag open ang pc", "walang power", "patay", "di bumubukas",
+            "hindi bumubukas ang pc", "hindi bumubukas ang computer", "hindi nag on",
+            "namatay", "walang ilaw", "walang kuryente", "ayaw umandar",
         ],
         "cause": {
-            "en": "Loose or unplugged power cable, AVR/extension switched off, a dead outlet, or a failed power supply.",
-            "tl": "Maluwag o tanggal ang power cable, naka-off ang AVR/extension, walang kuryente ang saksakan, o sira ang power supply.",
+            "en": "Usually a loose or unpowered connection (outlet, extension, power cable), or a faulty power cable/button. Internal hardware faults are rare.",
+            "tl": "Kadalasan maluwag o walang kuryente ang koneksyon (outlet, extension, o power cable), o sira ang power cable/button. Bihira ang sira sa loob ng unit.",
         },
         "steps": [
-            ("Make sure the power cable is firmly plugged into the back of the PC and into the AVR/extension.",
-             "The cable does not move when gently pulled.",
-             "Siguraduhing mahigpit ang pagkakasaksak ng power cable sa likod ng PC at sa AVR/extension.",
-             "Hindi gumagalaw ang cable kapag bahagyang hinila."),
-            ("Check that the AVR/extension is switched ON.",
-             "Its light is on.",
-             "Tingnan kung naka-ON ang AVR/extension.",
-             "Nakailaw ito."),
-            ("If the PC has a switch on the back (marked I/O), set it to I. Do not open the case.",
-             "The switch is on I.",
-             "Kung may switch sa likod ng PC (may markang I/O), ilagay sa I. Huwag buksan ang case.",
-             "Nasa I ang switch."),
-            ("Press the power button once and wait 10 seconds.",
-             "The front light turns on or the fans spin.",
-             "Pindutin nang isang beses ang power button at maghintay ng 10 segundo.",
-             "Umiilaw ang ilaw sa harap o umiikot ang fan."),
-            ("Plug the PC into a different outlet that you know works.",
-             "The PC turns on from the other outlet.",
-             "Isaksak ang PC sa ibang saksakang sigurado kang gumagana.",
-             "Nag-on ang PC sa ibang saksakan."),
+            ("Make sure the PC and monitor power cables are fully plugged in on both ends.",
+             "Are the plugs firm, and are the cables free of damage or sharp bends?",
+             "Siguraduhing nakasaksak nang maayos ang power cable ng PC at monitor sa magkabilang dulo.",
+             "Mahigpit ba ang saksak at walang sira o baluktot na cable?"),
+            ("Test the wall outlet or extension cord with a device that you know works (lamp, phone charger).",
+             "Does the other device turn on? If not, the outlet, extension or breaker is the problem.",
+             "Subukan ang outlet o extension gamit ang ibang gumaganang gamit (hal. lamp o charger).",
+             "Bumukas ba ang ibang gamit? Kung hindi, ang outlet/extension/breaker ang problema."),
+            ("Swap in a known-good power cable and try a different outlet.",
+             "Do any case lights or fans respond when you press the power button?",
+             "Palitan ng gumaganang power cable at subukan ang ibang outlet.",
+             "May ilaw o umiikot na fan ba kapag pinindot ang power button?"),
+            ("Unplug the PC, hold the power button for 15 seconds, plug it back in and try again.",
+             "Any lights, fan spin or beeps?",
+             "I-unplug ang PC, pindutin nang 15 segundo ang power button, isaksak ulit at subukang buksan.",
+             "May ilaw, tunog ng fan, o beep ba?"),
+            ("Disconnect USB devices and extra peripherals, then try to power on again.",
+             "Does it start without them? If yes, reconnect them one at a time to find the faulty one.",
+             "Tanggalin ang mga USB device at iba pang nakakabit, saka subukang buksan ulit.",
+             "Bumukas ba kapag wala sila? Kung oo, isaksak isa-isa para malaman kung alin ang sira."),
         ],
         "solution": {
-            "en": "Fix the loose connection or use a working outlet. If the PC stays completely dead on a working outlet, the power supply or motherboard has likely failed.",
-            "tl": "Ayusin ang maluwag na koneksyon o gumamit ng gumaganang saksakan. Kung patay pa rin kahit gumagana ang saksakan, malamang sira ang power supply o motherboard.",
+            "en": "Replace the faulty cable or move to a working outlet/extension. If a peripheral blocked startup, keep it disconnected and report it.",
+            "tl": "Palitan ang sirang cable o lumipat sa gumaganang outlet/extension. Kung may device na pumipigil mag-start, huwag munang ikabit at i-report.",
         },
         "escalation": {
-            "en": "Report it to the technician if there are no lights or fan sounds on a working outlet. Stop and report immediately if you notice a burning smell or sparks.",
-            "tl": "I-report sa technician kung walang ilaw o tunog ng fan kahit gumagana ang saksakan. Itigil at i-report agad kung may amoy sunog o spark.",
+            "en": "Escalate to hardware repair if there are still no lights or fans with a confirmed good outlet and cable. Do not open the case or the power supply.",
+            "tl": "I-escalate sa hardware repair kung wala pa ring ilaw o fan kahit tama ang outlet at cable. Huwag buksan ang case o ang power supply.",
         },
     },
-    # --------------------------------------------------------------
+    # ---------------------------------------------------------------- DISPLAY
     {
         "id": "no_display",
+        "title": {"en": "No display / black screen", "tl": "Walang display / itim na screen"},
         "category": "Hardware",
         "priority": "Medium",
         "keywords": [
-            "no display", "black screen", "blank screen", "no signal",
-            "screen is black", "monitor is black", "monitor won't turn on",
-            "monitor not working", "nothing on the screen", "check signal cable",
-            "no input", "=monitor", "monitors",
-            "walang display", "walang lumalabas sa monitor", "walang lumalabas sa screen",
-            "itim ang screen", "itim yung screen", "itim lang", "black lang",
-            "ayaw lumabas ng display", "patay ang monitor", "walay display",
-            "itom ang screen", "walay mogawas",
+            "no display", "black screen", "blank screen", "no signal", "no video",
+            "monitor", "screen is black", "screen went black", "walang display",
+            "walang signal", "itim ang screen", "blangko", "walang lumalabas",
+            "hindi nag display", "di nag display", "walang image", "itim na screen",
+            "namatay ang screen", "nawala ang screen",
         ],
         "cause": {
-            "en": "Monitor off or asleep, loose video cable (HDMI/VGA/DisplayPort), wrong input, or a display hardware fault.",
-            "tl": "Naka-off o naka-sleep ang monitor, maluwag ang video cable (HDMI/VGA/DisplayPort), maling input, o sira ang display hardware.",
+            "en": "Usually a loose or wrong video cable, wrong monitor input, or the monitor is not powered. Less often a graphics output problem.",
+            "tl": "Kadalasan maluwag o maling video cable, maling input ng monitor, o walang power ang monitor. Mas bihira ang problema sa graphics output.",
         },
         "steps": [
-            ("Press the monitor's own power button.",
-             "The monitor's power light turns on.",
-             "Pindutin ang power button ng monitor mismo.",
-             "Umiilaw ang power light ng monitor."),
-            ("Move the mouse or press a key to wake the PC from sleep.",
-             "The screen lights up.",
-             "Igalaw ang mouse o pumindot ng key para magising ang PC.",
-             "Lumiwanag ang screen."),
-            ("Check that the video cable is firmly connected at both the monitor and the PC.",
-             "Both ends are tight; the 'No signal' message disappears.",
-             "Tingnan kung mahigpit ang video cable sa monitor at sa PC.",
-             "Mahigpit ang dalawang dulo; nawala ang 'No signal'."),
-            ("Use the monitor's Input/Source button to pick the input the cable uses (HDMI, VGA or DP).",
-             "The desktop appears.",
-             "Gamitin ang Input/Source button ng monitor para piliin ang tamang input (HDMI, VGA o DP).",
-             "Lumabas ang desktop."),
-            ("Restart the PC.",
-             "The startup logo appears on screen.",
-             "I-restart ang PC.",
-             "Lumabas ang logo sa pag-start."),
+            ("Check the monitor's power light and press its power button.",
+             "Is the LED on? Does it say 'No Signal'?",
+             "Tingnan ang power light ng monitor at pindutin ang power button nito.",
+             "Naka-on ba ang LED? May lumalabas bang 'No Signal'?"),
+            ("Reseat the video cable (HDMI/VGA/DisplayPort) on both the monitor and the PC. Tighten the screws on VGA.",
+             "Did the picture appear or did the message change?",
+             "Tanggalin at isaksak ulit ang video cable (HDMI/VGA/DisplayPort) sa monitor at PC. Higpitan ang turnilyo ng VGA.",
+             "Lumabas ba ang larawan o nagbago ba ang mensahe?"),
+            ("Use the monitor's Input/Source button and select the matching input (HDMI, VGA or DP).",
+             "Does the image show up on the correct input?",
+             "Gamitin ang Input/Source button ng monitor at piliin ang tamang input (HDMI, VGA o DP).",
+             "Lumabas ba ang image sa tamang input?"),
+            ("Try another known-good video cable, or connect the PC to another monitor.",
+             "Does it display on the other cable/monitor? If yes, the original cable or monitor is faulty.",
+             "Subukan ang ibang gumaganang video cable, o ikabit ang PC sa ibang monitor.",
+             "Nag-display ba sa ibang cable/monitor? Kung oo, sira ang orihinal na cable o monitor."),
+            ("Confirm the PC is really on (fans, Caps Lock light). Then press Win+Ctrl+Shift+B, or Win+P and choose 'PC screen only'.",
+             "Does the screen flicker or come back?",
+             "Tiyaking naka-on talaga ang PC (fan, Caps Lock light). Pindutin ang Win+Ctrl+Shift+B, o Win+P at piliin ang 'PC screen only'.",
+             "Nag-flicker o bumalik ba ang screen?"),
         ],
         "solution": {
-            "en": "Reconnect the cable or select the correct input. If the screen stays black while the PC is on, the monitor, cable or graphics card needs checking.",
-            "tl": "Ikabit muli ang cable o piliin ang tamang input. Kung itim pa rin habang naka-on ang PC, kailangang tingnan ang monitor, cable o graphics card.",
+            "en": "Replace the faulty cable/monitor or select the correct input source.",
+            "tl": "Palitan ang sirang cable/monitor o piliin ang tamang input source.",
         },
         "escalation": {
-            "en": "Contact the technician if the display stays black after these steps, or if the monitor will not power on at all.",
-            "tl": "Tawagan ang technician kung itim pa rin pagkatapos ng mga hakbang, o kung hindi talaga nag-o-on ang monitor.",
+            "en": "Escalate if the PC is on, the cable and monitor are both confirmed good, and there is still no image.",
+            "tl": "I-escalate kung naka-on ang PC, tiyak na gumagana ang cable at monitor, pero wala pa ring image.",
         },
     },
-    # --------------------------------------------------------------
-    {
-        "id": "display_quality",
-        "category": "Hardware",
-        "priority": "Low",
-        "keywords": [
-            "flicker", "flickering", "=lines", "lines on the screen", "line on screen",
-            "blurry", "blurred", "too dark", "=dim", "brightness", "resolution",
-            "stretched", "upside down", "rotated", "sideways", "icons too big",
-            "text too small", "wrong colors", "wrong colours", "dead pixel",
-            "screen tearing",
-            "kumukurap", "kumikislap ang screen", "may linya", "may guhit",
-            "malabo", "madilim ang screen", "baliktad ang screen", "nakabaliktad",
-            "masyadong malaki", "lumaki ang icons", "kurap", "naay linya", "labo",
-        ],
-        "cause": {
-            "en": "Loose video cable, wrong resolution or scaling, monitor settings, or a failing monitor.",
-            "tl": "Maluwag ang video cable, maling resolution o scaling, setting ng monitor, o nasisira na ang monitor.",
-        },
-        "steps": [
-            ("Push the video cable in firmly at both ends.",
-             "Flickering or wrong colors stop.",
-             "Idiin nang mahigpit ang video cable sa dalawang dulo.",
-             "Nawala ang pagkurap o maling kulay."),
-            ("Right-click the desktop > Display settings, and pick the Recommended resolution and scale.",
-             "Text and icons look sharp and normal size.",
-             "I-right-click ang desktop > Display settings, at piliin ang Recommended na resolution at scale.",
-             "Malinaw at normal ang laki ng text at icons."),
-            ("If the screen is upside down or sideways, set Display orientation to Landscape in the same window.",
-             "The screen is upright.",
-             "Kung baliktad o patagilid, gawing Landscape ang Display orientation sa parehong window.",
-             "Tuwid na ang screen."),
-            ("Use the monitor's menu button to adjust brightness or choose Reset.",
-             "Brightness and colors look normal.",
-             "Gamitin ang menu button ng monitor para ayusin ang brightness o piliin ang Reset.",
-             "Normal na ang liwanag at kulay."),
-        ],
-        "solution": {
-            "en": "Correct the cable and display settings. Lines or flicker that stay after this usually mean the monitor or cable must be replaced.",
-            "tl": "Ayusin ang cable at display settings. Kung may linya o kurap pa rin, kadalasan kailangang palitan ang monitor o cable.",
-        },
-        "escalation": {
-            "en": "Report it to the technician if lines, flicker or dead spots remain.",
-            "tl": "I-report sa technician kung may linya, kurap o patay na bahagi pa rin.",
-        },
-    },
-    # --------------------------------------------------------------
+    # ------------------------------------------------------------------- SLOW
     {
         "id": "slow_pc",
+        "title": {"en": "Slow or laggy computer", "tl": "Mabagal o nagla-lag na computer"},
         "category": "System",
-        "priority": "Medium",
+        "priority": "Low",
         "keywords": [
-            "slow", "very slow", "laggy", "lagging", "=lag", "lags", "hang", "hangs",
-            "hanging", "freeze", "freezes", "freezing", "frozen", "not responding",
-            "takes forever", "loading forever", "stuck", "unresponsive",
-            "mabagal", "bagal", "ang bagal", "nagla-lag", "naglalag", "nag lag",
-            "nag hang", "naghahang", "nag-hang", "nagha-hang", "nagloloko",
-            "nag freeze", "nagfreeze", "di gumagalaw", "hindi gumagalaw",
-            "hinay", "hinay kaayo", "nag hang na", "ga hang", "ga lag",
+            "slow", "lag", "laggy", "sluggish", "takes forever", "mabagal", "bagal",
+            "matagal mag open", "matagal mag-open", "matagal mag load", "nagla lag",
+            "nagla-lag", "sobrang bagal", "mabagal ang computer", "mabagal ang pc",
+            "high cpu", "100% disk",
         ],
         "cause": {
-            "en": "Too many programs or browser tabs open, low memory, a full disk, background updates, or one program not responding.",
-            "tl": "Sobrang daming bukas na programs o browser tabs, kulang ang memory, puno ang disk, may update sa background, o may isang program na hindi nagre-respond.",
+            "en": "Often too many background apps, low free disk space, pending updates, or a background scan. Sometimes malware or low RAM.",
+            "tl": "Kadalasan sobrang daming background apps, kulang ang free space ng disk, may pending update, o may background scan. Minsan malware o kulang sa RAM.",
         },
         "steps": [
-            ("Save your work, then close programs and browser tabs you are not using.",
-             "The PC responds faster.",
-             "I-save ang ginagawa, tapos isara ang mga program at browser tab na hindi ginagamit.",
-             "Bumilis ang PC."),
-            ("Press Ctrl+Shift+Esc to open Task Manager and look at the CPU, Memory and Disk columns.",
-             "You can see which program is using the most.",
-             "Pindutin ang Ctrl+Shift+Esc para buksan ang Task Manager at tingnan ang CPU, Memory at Disk.",
-             "Makikita kung aling program ang pinakamaraming ginagamit."),
-            ("Select a program marked 'Not responding' (one you opened, not a Windows process) and click End task.",
-             "The frozen window closes.",
-             "Piliin ang program na 'Not responding' (yung binuksan mo, hindi Windows process) at i-click ang End task.",
-             "Nagsara ang nag-freeze na window."),
-            ("Restart the PC (Start > Power > Restart).",
-             "It runs normally after restarting.",
-             "I-restart ang PC (Start > Power > Restart).",
-             "Normal na ang takbo pagkatapos mag-restart."),
-            ("If 'Working on updates' appears, let it finish before using the PC.",
-             "The update completes and speed returns.",
-             "Kung may 'Working on updates', hayaang matapos bago gamitin ang PC.",
-             "Natapos ang update at bumalik ang bilis."),
+            ("Save work and restart the PC.",
+             "Is it faster right after restarting?",
+             "I-save ang trabaho at i-restart ang PC.",
+             "Bumilis ba pagkatapos mag-restart?"),
+            ("Open Task Manager (Ctrl+Shift+Esc) and sort by CPU, Memory and Disk.",
+             "Is any app constantly using more than 80%?",
+             "Buksan ang Task Manager (Ctrl+Shift+Esc) at i-sort ayon sa CPU, Memory at Disk.",
+             "May app ba na palaging gumagamit ng higit 80%?"),
+            ("Close unneeded apps and browser tabs. Only 'End task' apps you recognise, never system processes.",
+             "Does usage drop and does the PC respond better?",
+             "Isara ang mga hindi kailangang app at browser tab. 'End task' lang ang mga kilalang app, huwag ang system process.",
+             "Bumaba ba ang usage at gumanda ba ang response ng PC?"),
+            ("Open This PC and check free space on drive C:. Run Disk Cleanup if space is low.",
+             "Is there at least 15% free space?",
+             "Buksan ang This PC at tingnan ang free space ng drive C:. Mag-run ng Disk Cleanup kung kulang.",
+             "May kahit 15% na free space ba?"),
+            ("Check for running Windows updates or antivirus scans and let them finish. Then check Task Manager > Startup and disable unneeded startup apps.",
+             "Does the slowness stop once updates or scans complete?",
+             "Tingnan kung may tumatakbong Windows update o antivirus scan at hayaang matapos. Tingnan ang Task Manager > Startup at i-disable ang hindi kailangan.",
+             "Nawala ba ang bagal pagkatapos matapos ang update o scan?"),
         ],
         "solution": {
-            "en": "Keep only the programs you need open and restart the PC at least once a day. A PC that stays slow after a restart may need cleanup, more memory or a disk check.",
-            "tl": "Buksan lang ang mga kailangang program at i-restart ang PC kahit isang beses kada araw. Kung mabagal pa rin pagka-restart, maaaring kailangan ng cleanup, dagdag na memory o disk check.",
+            "en": "Free disk space, disable heavy startup apps, finish updates, and run a full antivirus scan. Consider a RAM or SSD upgrade if usage stays high.",
+            "tl": "Magbakante ng disk space, i-disable ang mabibigat na startup app, tapusin ang updates, at mag-full antivirus scan. Isaalang-alang ang RAM o SSD upgrade kung mataas pa rin ang usage.",
         },
         "escalation": {
-            "en": "Report it to the technician if the PC is still slow right after a restart, freezes often, or Disk stays at 100%.",
-            "tl": "I-report sa technician kung mabagal pa rin kahit kaka-restart, madalas mag-freeze, o laging 100% ang Disk.",
+            "en": "Escalate if it stays slow after cleanup, disk usage is always at 100%, or you suspect malware or a failing drive.",
+            "tl": "I-escalate kung mabagal pa rin pagkatapos ng cleanup, laging 100% ang disk, o may hinala ng malware o sirang drive.",
         },
     },
-    # --------------------------------------------------------------
+    # ---------------------------------------------------------------- NETWORK
     {
-        "id": "blue_screen",
-        "category": "System",
-        "priority": "High",
-        "keywords": [
-            "blue screen", "bsod", "stop code", "ran into a problem",
-            "critical process died", "memory management", "irql", "kernel",
-            "restarts by itself", "restarting by itself", "keeps restarting",
-            "random restart", "shuts down by itself", "turns off by itself",
-            "blue na screen", "asul na screen", "nag blue screen", "nagbluescreen",
-            "kusang nagre-restart", "kusang nagrerestart", "nagre-restart mag-isa",
-            "namamatay mag-isa", "kusang namamatay", "kusang nag-o-off",
-            "kalit ra mo restart", "kalit mamatay",
-        ],
-        "cause": {
-            "en": "A driver, memory, disk or overheating problem made Windows stop to protect itself.",
-            "tl": "May problema sa driver, memory, disk o sobrang init kaya huminto ang Windows para protektahan ang sarili.",
-        },
-        "steps": [
-            ("Take a photo of the blue screen or write down the stop code.",
-             "You have the exact code (e.g. CRITICAL_PROCESS_DIED).",
-             "Kunan ng litrato ang blue screen o isulat ang stop code.",
-             "Nakuha ang eksaktong code (hal. CRITICAL_PROCESS_DIED)."),
-            ("Remove any USB device that was plugged in recently.",
-             "Only keyboard and mouse remain connected.",
-             "Tanggalin ang anumang USB device na kakakabit lang.",
-             "Keyboard at mouse na lang ang nakakabit."),
-            ("Let the PC restart once.",
-             "Windows starts normally.",
-             "Hayaang mag-restart nang isang beses ang PC.",
-             "Normal na nag-start ang Windows."),
-            ("Note what you were doing when it happened.",
-             "You can tell the technician the program or action.",
-             "Tandaan kung ano ang ginagawa nang mangyari ito.",
-             "Masasabi sa technician ang program o ginawa."),
-        ],
-        "solution": {
-            "en": "A single blue screen can be a one-off. If it repeats, the driver, memory or disk needs a technician's diagnosis.",
-            "tl": "Ang isang beses na blue screen ay maaaring nagkataon lang. Kung umuulit, kailangang suriin ng technician ang driver, memory o disk.",
-        },
-        "escalation": {
-            "en": "Report it with the stop code if it happens more than once, or if the PC restarts or shuts down by itself repeatedly.",
-            "tl": "I-report kasama ang stop code kung higit sa isang beses nangyari, o kung paulit-ulit na kusang nagre-restart o namamatay.",
-        },
-    },
-    # --------------------------------------------------------------
-    {
-        "id": "boot_failure",
-        "category": "System",
-        "priority": "High",
-        "keywords": [
-            "no bootable device", "boot device", "automatic repair",
-            "preparing automatic repair", "boot loop", "bootloop",
-            "stuck on logo", "stuck at logo", "stuck on loading", "stuck loading",
-            "operating system not found", "disk boot failure", "bios", "won't boot",
-            "not booting", "boot", "inaccessible boot device",
-            "ayaw mag boot", "hindi mag boot", "di mag boot", "stuck sa logo",
-            "stuck sa loading", "paikot-ikot lang", "umiikot lang", "loading lang",
-            "naka-stuck sa loading", "ayaw tumuloy",
-        ],
-        "cause": {
-            "en": "A USB drive left plugged in, an interrupted update, disk errors, or a damaged Windows installation.",
-            "tl": "May naiwang USB, naputol na update, error sa disk, o sira ang Windows installation.",
-        },
-        "steps": [
-            ("Remove all USB drives and discs, then restart.",
-             "Windows starts normally.",
-             "Tanggalin lahat ng USB at disc, tapos i-restart.",
-             "Normal na nag-start ang Windows."),
-            ("If it says 'Working on updates' or 'Automatic repair', wait at least 15 minutes without turning it off.",
-             "It finishes and reaches the login screen.",
-             "Kung 'Working on updates' o 'Automatic repair' ang nakalagay, maghintay ng 15 minuto nang hindi ino-off.",
-             "Natapos at umabot sa login screen."),
-            ("Write down or photograph the exact message on screen.",
-             "You have the exact text.",
-             "Isulat o kunan ng litrato ang eksaktong mensahe sa screen.",
-             "Nakuha ang eksaktong text."),
-            ("Do not change BIOS settings or try to reinstall Windows.",
-             "Settings are left as they were.",
-             "Huwag baguhin ang BIOS settings o subukang i-reinstall ang Windows.",
-             "Walang binago sa settings."),
-        ],
-        "solution": {
-            "en": "Removing a forgotten USB often fixes it. Otherwise the disk or Windows needs repair by the technician.",
-            "tl": "Madalas naaayos ito kapag tinanggal ang naiwang USB. Kung hindi, kailangang ayusin ng technician ang disk o Windows.",
-        },
-        "escalation": {
-            "en": "Report it with the exact message if the PC still does not reach the login screen. Use another PC in the meantime.",
-            "tl": "I-report kasama ang eksaktong mensahe kung hindi pa rin umaabot sa login screen. Gumamit muna ng ibang PC.",
-        },
-    },
-    # --------------------------------------------------------------
-    {
-        "id": "network",
+        "id": "no_internet",
+        "title": {"en": "No internet / network problems", "tl": "Walang internet / problema sa network"},
         "category": "Network",
+        "priority": "High",
+        "keywords": [
+            "no internet", "internet", "wifi", "wi fi", "network", "ethernet", "lan",
+            "cannot connect", "can't connect", "cant connect", "disconnected", "limited",
+            "walang internet", "walang connection", "walang net", "di maka connect",
+            "hindi maka connect", "mabagal ang internet", "nawala ang internet",
+            "walang koneksyon", "offline", "no network", "unidentified network",
+        ],
+        "cause": {
+            "en": "Could be a loose cable or dead port, a disabled adapter, a bad IP/DNS configuration, or an upstream switch/router/ISP problem.",
+            "tl": "Maaaring maluwag na cable o sirang port, naka-disable na adapter, maling IP/DNS, o problema sa switch/router/ISP.",
+        },
+        "steps": [
+            ("Check that the Ethernet cable is firmly plugged in and the port lights blink, or that Wi-Fi is on and Airplane mode is off.",
+             "Does the network icon show connected, or a red X / globe?",
+             "Tiyaking nakasaksak nang maayos ang Ethernet cable at kumikislap ang ilaw ng port, o naka-on ang Wi-Fi at naka-off ang Airplane mode.",
+             "Connected ba ang network icon, o may red X / globe?"),
+            ("Test whether other PCs in the lab have internet.",
+             "If all are down, it is a network-wide problem, so escalate. If only this PC, continue.",
+             "Subukan kung may internet ang ibang PC sa lab.",
+             "Kung lahat ay walang internet, network-wide ito kaya i-escalate. Kung isang PC lang, magpatuloy."),
+            ("Disable and re-enable the network adapter (Settings > Network & Internet > Advanced network settings), or reconnect to Wi-Fi.",
+             "Does the icon change to connected?",
+             "I-disable at i-enable ulit ang network adapter (Settings > Network & Internet > Advanced network settings), o mag-reconnect sa Wi-Fi.",
+             "Naging connected ba ang icon?"),
+            ("Open Command Prompt and run: ipconfig /release then ipconfig /renew.",
+             "Does it get a valid IP address (not 169.254.x.x)?",
+             "Buksan ang Command Prompt at i-run: ipconfig /release tapos ipconfig /renew.",
+             "Nakakuha ba ng valid na IP address (hindi 169.254.x.x)?"),
+            ("Run: ping 8.8.8.8, then ping google.com. If only the name fails, run ipconfig /flushdns.",
+             "IP works but name fails = DNS issue. Both fail = no connection to the network or internet.",
+             "I-run: ping 8.8.8.8, tapos ping google.com. Kung pangalan lang ang pumapalya, i-run ang ipconfig /flushdns.",
+             "Gumagana ang IP pero hindi ang pangalan = DNS issue. Parehong pumalya = walang koneksyon sa network o internet."),
+            ("Try a different Ethernet cable or wall port.",
+             "Does the link come up on the new cable or port?",
+             "Subukan ang ibang Ethernet cable o wall port.",
+             "Nag-connect ba sa bagong cable o port?"),
+        ],
+        "solution": {
+            "en": "Replace the bad cable/port, renew the IP address or flush DNS as needed.",
+            "tl": "Palitan ang sirang cable/port, i-renew ang IP address o i-flush ang DNS kung kailangan.",
+        },
+        "escalation": {
+            "en": "Escalate to the network admin if several PCs are down, the PC keeps a 169.254.x.x address, or the switch/router/ISP is suspected.",
+            "tl": "I-escalate sa network admin kung maraming PC ang apektado, 169.254.x.x ang IP, o may hinala sa switch/router/ISP.",
+        },
+    },
+    # ------------------------------------------------------------------ LOGIN
+    {
+        "id": "login_issue",
+        "title": {"en": "Can't log in / password problems", "tl": "Hindi maka-login / problema sa password"},
+        "category": "System",
         "priority": "Medium",
         "keywords": [
-            "internet", "no internet", "wifi", "wi-fi", "=lan", "ethernet", "network",
-            "offline", "no connection", "can't connect", "cannot connect",
-            "not connected", "limited connection", "=dns", "slow internet",
-            "website won't load", "page won't load", "site can't be reached",
-            "connection timed out", "disconnected",
-            "walang internet", "walang net", "walang wifi", "walang connection",
-            "mahina ang internet", "mahina net", "mahina ang wifi",
-            "mabagal ang internet", "mabagal internet", "mabagal ang net",
-            "di maka connect", "hindi maka connect", "hindi makaconnect",
-            "di makaconnect", "naputol ang internet", "nawala ang internet",
-            "nawalan ng internet", "walay internet", "walay net", "hinay ang internet",
-            "di ka connect",
+            "can't log in", "cant log in", "cannot login", "cannot log in", "login",
+            "log in", "password", "account locked", "wrong password", "user profile",
+            "temporary profile", "di maka login", "hindi maka login",
+            "nakalimutan ang password", "naka lock", "nakalock", "maling password",
+            "ayaw mag login", "ayaw mag-login", "forgot password", "sign in",
         ],
         "cause": {
-            "en": "Loose LAN cable, Wi-Fi switched off, a network setting problem on this PC, or an outage affecting the whole lab.",
-            "tl": "Maluwag ang LAN cable, naka-off ang Wi-Fi, problema sa network setting ng PC, o outage sa buong lab.",
+            "en": "Often a typing/keyboard-layout error, locked or expired account, no network connection to the login server, or a corrupted user profile.",
+            "tl": "Kadalasan maling type o keyboard layout, naka-lock o expired na account, walang koneksyon sa login server, o sira ang user profile.",
         },
         "steps": [
-            ("Check whether other PCs in the room have internet.",
-             "You know if it is only this PC or the whole room.",
-             "Tingnan kung may internet ang ibang PC sa room.",
-             "Alam na kung itong PC lang o buong room."),
-            ("Check the LAN cable at the back of the PC and at the wall/table port.",
-             "The cable clicks in and the port light blinks.",
-             "Tingnan ang LAN cable sa likod ng PC at sa port sa pader/mesa.",
-             "Naka-click ang cable at kumukurap ang ilaw ng port."),
-            ("For Wi-Fi, click the network icon on the taskbar, make sure Wi-Fi is on and Airplane mode is off, then connect to the lab network.",
-             "It shows 'Connected'.",
-             "Kung Wi-Fi, i-click ang network icon sa taskbar, siguraduhing naka-on ang Wi-Fi at naka-off ang Airplane mode, tapos kumonekta sa lab network.",
-             "Nakalagay na 'Connected'."),
-            ("Right-click the network icon > Troubleshoot problems (Network and Internet).",
-             "Windows reports it fixed the problem.",
-             "I-right-click ang network icon > Troubleshoot problems (Network and Internet).",
-             "Sinabi ng Windows na naayos na."),
-            ("Restart the PC.",
-             "Websites load after restarting.",
-             "I-restart ang PC.",
-             "Nagbubukas na ang mga website pagka-restart."),
+            ("Check Caps Lock/Num Lock and the keyboard language (ENG/FIL). Retype slowly using the 'show password' eye icon.",
+             "Is the typed password what the user intended?",
+             "Tingnan ang Caps Lock/Num Lock at ang keyboard language (ENG/FIL). I-type nang dahan-dahan gamit ang 'show password' na eye icon.",
+             "Tama ba ang na-type na password?"),
+            ("Confirm the exact username/domain format used by the lab (for example, ID number versus email).",
+             "Does the format match what the lab uses?",
+             "Kumpirmahin ang eksaktong format ng username/domain ng lab (hal. ID number o email).",
+             "Tugma ba ang format sa ginagamit ng lab?"),
+            ("If the lab uses a server/domain login, verify the PC is connected to the network.",
+             "Is the network icon connected?",
+             "Kung server/domain login ang gamit, tiyaking konektado ang PC sa network.",
+             "Connected ba ang network icon?"),
+            ("Read the error message carefully. Do not keep guessing passwords because that can lock the account.",
+             "Does it say locked, disabled, expired, or 'temporary profile'?",
+             "Basahin nang mabuti ang error message. Huwag paulit-ulit manghula ng password dahil maaaring ma-lock ang account.",
+             "Sinasabi bang locked, disabled, expired, o 'temporary profile'?"),
+            ("Restart the PC and try again, or try the same account on another PC.",
+             "Works elsewhere = problem is this PC/profile. Fails everywhere = account problem.",
+             "I-restart ang PC at subukan ulit, o subukan ang parehong account sa ibang PC.",
+             "Gumana sa iba = problema ng PC/profile na ito. Pumalya kahit saan = problema ng account."),
         ],
         "solution": {
-            "en": "Reconnect the cable or Wi-Fi on this PC. If every PC in the room is offline, it is a lab network outage, not a PC problem.",
-            "tl": "Ikabit muli ang cable o Wi-Fi sa PC. Kung lahat ng PC sa room ay walang internet, outage ito sa network ng lab, hindi sira ng PC.",
+            "en": "Have the admin unlock or reset the account, or rebuild the user profile. Never share or write down a user's password.",
+            "tl": "Ipa-unlock o ipa-reset sa admin ang account, o ipa-rebuild ang user profile. Huwag ibahagi o isulat ang password ng user.",
         },
         "escalation": {
-            "en": "Contact the technician or administrator if the whole room is offline or this PC still has no internet. Do not touch the network switch or router.",
-            "tl": "Tawagan ang technician o administrator kung buong room ang walang internet o wala pa rin sa PC na ito. Huwag galawin ang network switch o router.",
+            "en": "Escalate to the system admin for locked or expired accounts, password resets, or a corrupted or temporary profile.",
+            "tl": "I-escalate sa system admin para sa naka-lock o expired na account, password reset, o sira/temporary na profile.",
         },
     },
-    # --------------------------------------------------------------
-    {
-        "id": "browser_online_class",
-        "category": "Software",
-        "priority": "Low",
-        "keywords": [
-            "browser", "chrome", "google chrome", "=edge", "microsoft edge", "firefox",
-            "website", "=site", "webpage", "blocked site", "site is blocked",
-            "access denied", "=404", "=403", "cookies", "cache", "youtube",
-            "google classroom", "canvas", "moodle", "=lms", "teams",
-            "zoom", "google meet", "gmeet", "=meet", "portal",
-            "naka block", "naka-block", "blocked", "ayaw mag load", "hindi nag lo-load",
-            "di nag load", "hindi bumubukas ang site", "hindi bumubukas ang website",
-        ],
-        "cause": {
-            "en": "A browser cache or extension problem, a site blocked by the lab's filter, a wrong address, or the site itself is down.",
-            "tl": "Problema sa cache o extension ng browser, naka-block ang site sa filter ng lab, maling address, o down ang site mismo.",
-        },
-        "steps": [
-            ("Check that other websites open.",
-             "If none open, follow the internet steps instead.",
-             "Tingnan kung nagbubukas ang ibang website.",
-             "Kung walang nagbubukas, sundin ang steps para sa internet."),
-            ("Press Ctrl+F5 to reload the page fully.",
-             "The page loads.",
-             "Pindutin ang Ctrl+F5 para i-reload nang buo ang page.",
-             "Nag-load ang page."),
-            ("Open the same address in a private/incognito window (Ctrl+Shift+N) or another browser.",
-             "It works there, so the problem is the browser's cache or extensions.",
-             "Buksan ang address sa private/incognito window (Ctrl+Shift+N) o ibang browser.",
-             "Gumagana doon, kaya cache o extension ng browser ang problema."),
-            ("Clear browsing data: Ctrl+Shift+Delete > Cookies and Cached images > Clear.",
-             "The site loads normally.",
-             "I-clear ang browsing data: Ctrl+Shift+Delete > Cookies at Cached images > Clear.",
-             "Normal nang nagbubukas ang site."),
-        ],
-        "solution": {
-            "en": "Use a clean browser window or clear the cache. If the page says it is blocked, the lab's web filter needs an exception.",
-            "tl": "Gumamit ng malinis na browser window o i-clear ang cache. Kung naka-block ang page, kailangan ng exception sa web filter ng lab.",
-        },
-        "escalation": {
-            "en": "Ask the administrator to unblock a site you need for class. Contact the technician if no browser works on this PC.",
-            "tl": "Hilingin sa administrator na i-unblock ang site na kailangan sa klase. Tawagan ang technician kung walang browser na gumagana sa PC.",
-        },
-    },
-    # --------------------------------------------------------------
-    {
-        "id": "keyboard_mouse",
-        "category": "Hardware",
-        "priority": "Low",
-        "keywords": [
-            "keyboard", "keybaord", "mouse", "cursor", "pointer", "keys not working",
-            "key not working", "stuck key", "can't type", "cannot type",
-            "typing wrong letters", "num lock", "numlock", "caps lock", "touchpad",
-            "wireless mouse", "double click", "scroll wheel",
-            "sira ang keyboard", "sira keyboard", "sira ang mouse", "sira mouse",
-            "ayaw gumana ng mouse", "ayaw gumana ng keyboard", "hindi makapag type",
-            "di makatype", "walang cursor", "hindi gumagalaw ang cursor",
-            "di gumagalaw ang mouse", "guba ang mouse", "guba ang keyboard",
-        ],
-        "cause": {
-            "en": "A loose USB plug, a bad USB port, dead batteries (wireless), Num Lock off, or a worn-out keyboard or mouse.",
-            "tl": "Maluwag na USB, sirang USB port, lowbat (kung wireless), naka-off ang Num Lock, o luma na ang keyboard o mouse.",
-        },
-        "steps": [
-            ("Unplug the keyboard or mouse and plug it into a different USB port, preferably at the back of the PC.",
-             "Its light turns on or Windows makes a connect sound.",
-             "Tanggalin ang keyboard o mouse at isaksak sa ibang USB port, mas maganda sa likod ng PC.",
-             "Umiilaw ito o may tunog ng pagkakonekta."),
-            ("For wireless devices, check the batteries and the small USB receiver.",
-             "The device responds.",
-             "Kung wireless, tingnan ang baterya at ang maliit na USB receiver.",
-             "Gumagana na ang device."),
-            ("If numbers don't type, press Num Lock; if letters are all capitals, press Caps Lock.",
-             "Typing is correct.",
-             "Kung ayaw lumabas ng numbers, pindutin ang Num Lock; kung puro capital, pindutin ang Caps Lock.",
-             "Tama na ang na-ta-type."),
-            ("Restart the PC.",
-             "The device works after restarting.",
-             "I-restart ang PC.",
-             "Gumagana na pagka-restart."),
-        ],
-        "solution": {
-            "en": "Reconnect to a working port. If it fails on every port, the keyboard or mouse needs replacing; ask the technician for a spare.",
-            "tl": "Ikabit sa gumaganang port. Kung ayaw sa lahat ng port, kailangang palitan ang keyboard o mouse; humingi ng spare sa technician.",
-        },
-        "escalation": {
-            "en": "Report it to the technician if the device does not work on any port or on another PC.",
-            "tl": "I-report sa technician kung hindi gumagana sa kahit anong port o sa ibang PC.",
-        },
-    },
-    # --------------------------------------------------------------
-    {
-        "id": "audio",
-        "category": "Hardware",
-        "priority": "Low",
-        "keywords": [
-            "sound", "audio", "speaker", "speakers", "headset", "headphone",
-            "headphones", "earphone", "earphones", "=mic", "microphone", "no sound",
-            "can't hear", "cannot hear", "volume", "muted", "=mute", "echo",
-            "static noise",
-            "walang sound", "walang tunog", "walang audio", "hindi marinig",
-            "di marinig", "mahina ang sound", "mahina ang tunog", "walang boses",
-            "ayaw ng mic", "hindi gumagana ang mic", "walay tingog", "walay sound",
-            "dili madungog",
-        ],
-        "cause": {
-            "en": "Volume muted, the wrong playback or recording device selected, a loose plug, or microphone access blocked.",
-            "tl": "Naka-mute, maling playback o recording device ang napili, maluwag ang saksak, o naka-block ang access ng mic.",
-        },
-        "steps": [
-            ("Click the speaker icon on the taskbar and make sure it is not muted and the volume is up.",
-             "The slider is above zero with no X on the icon.",
-             "I-click ang speaker icon sa taskbar at siguraduhing hindi naka-mute at malakas ang volume.",
-             "Mas mataas sa zero ang slider at walang X sa icon."),
-            ("In the same panel, choose the correct output device (headset or speakers).",
-             "Sound plays from the right device.",
-             "Sa parehong panel, piliin ang tamang output device (headset o speakers).",
-             "Lumalabas ang tunog sa tamang device."),
-            ("Re-plug the headset: green jack = sound, pink jack = mic; or try another USB port.",
-             "Windows detects the headset.",
-             "Isaksak muli ang headset: green na jack = tunog, pink na jack = mic; o subukan sa ibang USB port.",
-             "Na-detect ng Windows ang headset."),
-            ("For the mic, open Settings > Privacy > Microphone and allow access; check the app isn't muting you.",
-             "The mic level moves when you speak.",
-             "Para sa mic, buksan ang Settings > Privacy > Microphone at i-allow; tingnan kung hindi ka naka-mute sa app.",
-             "Gumagalaw ang mic level kapag nagsasalita."),
-        ],
-        "solution": {
-            "en": "Unmute and select the right device. If there's still no sound with a known-good headset, the audio port or driver needs checking.",
-            "tl": "I-unmute at piliin ang tamang device. Kung wala pa ring tunog kahit maayos ang headset, kailangang tingnan ang audio port o driver.",
-        },
-        "escalation": {
-            "en": "Report it to the technician if no device produces sound after these steps.",
-            "tl": "I-report sa technician kung walang tunog sa kahit anong device pagkatapos ng mga hakbang.",
-        },
-    },
-    # --------------------------------------------------------------
+    # ---------------------------------------------------------------- PRINTER
     {
         "id": "printer",
+        "title": {"en": "Printer problems", "tl": "Problema sa printer"},
         "category": "Hardware",
-        "priority": "Medium",
+        "priority": "Low",
         "keywords": [
-            "print", "printer", "printing", "paper jam", "=jam", "jammed", "=ink",
-            "toner", "printer offline", "print queue", "faded print",
-            "naipit ang papel", "naipit papel", "naipit ang bond paper",
-            "ayaw mag print", "hindi mag print", "di maka print", "di makaprint",
-            "hindi makaprint", "walang lumalabas sa printer", "malabo ang print",
-            "ubos ang ink", "dili mo print",
+            "printer", "print", "printing", "paper jam", "toner", "ink", "spooler",
+            "di nagpi print", "hindi nagpi print", "ayaw mag print", "ayaw mag-print",
+            "walang lumalabas na print", "naipit", "nakapila", "offline ang printer",
         ],
         "cause": {
-            "en": "Printer off or offline, the wrong printer selected, a stuck print queue, a paper jam, or low ink/toner.",
-            "tl": "Naka-off o offline ang printer, maling printer ang napili, stuck ang print queue, may naipit na papel, o paubos ang ink/toner.",
+            "en": "Commonly an out-of-paper/ink condition, a paper jam, a stuck print queue, the printer set to offline, or a loose cable/network link.",
+            "tl": "Karaniwang kulang sa papel/tinta, paper jam, nakabara ang print queue, naka-offline ang printer, o maluwag ang cable/network.",
         },
         "steps": [
-            ("Check the printer is on, has paper, and shows no blinking error light.",
-             "The ready light is steady.",
-             "Tingnan kung naka-on ang printer, may papel, at walang kumukurap na error light.",
-             "Steady ang ready light."),
-            ("In the Print window, make sure the lab's printer is selected, not 'Microsoft Print to PDF'.",
-             "The correct printer name is shown.",
-             "Sa Print window, siguraduhing ang printer ng lab ang napili, hindi 'Microsoft Print to PDF'.",
-             "Tamang printer ang nakalagay."),
-            ("Open Settings > Printers & scanners > the printer > Open print queue, and cancel all stuck jobs.",
-             "The queue is empty.",
-             "Buksan ang Settings > Printers & scanners > ang printer > Open print queue, at i-cancel ang mga naka-stuck.",
-             "Wala nang laman ang queue."),
-            ("Turn the printer off for 30 seconds, then on, and print again.",
-             "The page prints.",
-             "I-off ang printer nang 30 segundo, i-on muli, at mag-print ulit.",
-             "Nag-print na."),
-            ("For a paper jam: turn the printer off, open the doors shown on its panel, and pull the paper out slowly in the direction it travels. Never use sharp objects.",
-             "No paper remains inside and the jam light is off.",
-             "Kung may naipit: i-off ang printer, buksan ang pinto na nakaturo sa panel, at dahan-dahang hilahin ang papel pasunod sa daan nito. Huwag gumamit ng matulis na bagay.",
-             "Wala nang papel sa loob at patay na ang jam light."),
+            ("Check printer power, paper, ink/toner and any error lights or display messages.",
+             "Are there blinking lights or error messages?",
+             "Tingnan ang power ng printer, papel, tinta/toner at anumang error light o mensahe sa display.",
+             "May kumikislap na ilaw o error message ba?"),
+            ("If there is a paper jam, switch the printer off and gently remove the paper following the printer manual.",
+             "Are all paper pieces removed with nothing torn inside?",
+             "Kung may paper jam, patayin ang printer at dahan-dahang alisin ang papel ayon sa manual.",
+             "Naalis ba lahat ng papel at walang napunit sa loob?"),
+            ("Check the USB or network connection and that the printer shows Ready/Online.",
+             "Is the printer reachable and showing Ready?",
+             "Tingnan ang USB o network connection at kung 'Ready/Online' ang printer.",
+             "Naaabot ba ang printer at 'Ready' ang status?"),
+            ("On the PC open Settings > Printers & scanners > your printer > Open print queue. Cancel stuck jobs and make sure 'Use Printer Offline' is unchecked.",
+             "Is the queue empty and the status Ready?",
+             "Sa PC, buksan ang Settings > Printers & scanners > ang printer > Open print queue. I-cancel ang mga nakabarang job at siguraduhing naka-uncheck ang 'Use Printer Offline'.",
+             "Walang laman ang queue at 'Ready' ba ang status?"),
+            ("Restart the printer and the PC, then print a test page.",
+             "Does the test page print?",
+             "I-restart ang printer at PC, saka mag-print ng test page.",
+             "Nag-print ba ang test page?"),
         ],
         "solution": {
-            "en": "Clear the queue or the jam and print again. Faded prints or an ink/toner warning mean the cartridge needs replacing by the technician.",
-            "tl": "I-clear ang queue o ang naipit na papel at mag-print ulit. Kung malabo o may babala sa ink/toner, kailangang palitan ng technician ang cartridge.",
+            "en": "Clear the jam or stuck queue, set the correct default printer, or reinstall the driver.",
+            "tl": "Alisin ang jam o nakabarang queue, itakda ang tamang default printer, o i-reinstall ang driver.",
         },
         "escalation": {
-            "en": "Contact the technician for ink/toner, paper torn inside the printer, or error codes that stay after a restart.",
-            "tl": "Tawagan ang technician para sa ink/toner, papel na napunit sa loob, o error code na nananatili kahit na-restart.",
+            "en": "Escalate for repeated jams, streaks, grinding noises, or when cartridges or the fuser need replacement.",
+            "tl": "I-escalate kung paulit-ulit ang jam, may guhit sa print, may kakaibang ingay, o kailangang palitan ang cartridge o fuser.",
         },
     },
-    # --------------------------------------------------------------
+    # ------------------------------------------------------------ PERIPHERALS
+    {
+        "id": "peripherals",
+        "title": {"en": "Keyboard, mouse or USB not working", "tl": "Hindi gumagana ang keyboard, mouse o USB"},
+        "category": "Hardware",
+        "priority": "Low",
+        "keywords": [
+            "keyboard", "mouse", "usb", "flash drive", "not detected", "not recognized",
+            "cursor", "ayaw gumana ang mouse", "ayaw gumana ang keyboard",
+            "sira ang mouse", "sira ang keyboard", "di ma detect", "hindi ma detect",
+            "usb port", "di nababasa", "hindi nababasa", "walang response",
+            "hindi gumagalaw ang cursor",
+        ],
+        "cause": {
+            "en": "Usually a loose connection, a dead USB port, low batteries or receiver problems (wireless), or a driver glitch.",
+            "tl": "Kadalasan maluwag ang koneksyon, sirang USB port, mahina ang baterya o problema sa receiver (wireless), o glitch sa driver.",
+        },
+        "steps": [
+            ("Unplug the device and plug it back firmly into the same port.",
+             "Does Windows make a connect sound or does the device light up?",
+             "I-unplug ang device at isaksak ulit nang mahigpit sa parehong port.",
+             "May tunog ng connect ba ang Windows o umiilaw ba ang device?"),
+            ("Try a different USB port (use the back ports on a desktop).",
+             "Does it work on another port?",
+             "Subukan ang ibang USB port (gamitin ang mga port sa likod ng desktop).",
+             "Gumana ba sa ibang port?"),
+            ("Test the device on another PC, or test a known-good device on this PC.",
+             "Works elsewhere = the device is fine and the PC port/driver is suspect. Fails elsewhere = the device is faulty.",
+             "Subukan ang device sa ibang PC, o subukan ang gumaganang device sa PC na ito.",
+             "Gumana sa iba = ayos ang device at ang port/driver ng PC ang suspek. Pumalya = sira ang device."),
+            ("For wireless devices, check the batteries and the USB receiver. Then restart the PC.",
+             "Does the device work after fresh batteries or a restart?",
+             "Para sa wireless, tingnan ang baterya at USB receiver. Pagkatapos ay i-restart ang PC.",
+             "Gumana ba pagkatapos ng bagong baterya o restart?"),
+            ("Open Device Manager (Win+X). Look for a yellow warning, right-click the device > Uninstall device, then choose Action > Scan for hardware changes.",
+             "Does the device reinstall and work?",
+             "Buksan ang Device Manager (Win+X). Hanapin ang yellow warning, right-click ang device > Uninstall device, tapos Action > Scan for hardware changes.",
+             "Na-reinstall ba ang device at gumana?"),
+        ],
+        "solution": {
+            "en": "Replace the faulty device or use a working port. Reinstall the driver if it was a driver glitch.",
+            "tl": "Palitan ang sirang device o gumamit ng gumaganang port. I-reinstall ang driver kung glitch ito.",
+        },
+        "escalation": {
+            "en": "Escalate if several USB ports are dead or the device works nowhere after the steps above.",
+            "tl": "I-escalate kung maraming USB port ang hindi gumagana o hindi gumagana ang device kahit saan matapos ang mga hakbang.",
+        },
+    },
+    # ---------------------------------------------------------- CRASH / FREEZE
+    {
+        "id": "crash_freeze",
+        "title": {"en": "Freezing, crashing or blue screen", "tl": "Nag-freeze, nag-crash o blue screen"},
+        "category": "Software",
+        "priority": "Medium",
+        "keywords": [
+            "freeze", "frozen", "not responding", "hang", "hanging", "crash", "crashes",
+            "blue screen", "bsod", "restarts by itself", "keeps restarting",
+            "stopped working", "error message", "nag freeze", "nag-freeze", "nag hang",
+            "nag-hang", "hindi tumutugon", "biglang nag restart", "biglang namatay",
+            "nag crash", "ayaw mag open", "ayaw mag-open", "hindi bumubukas ang program",
+            "may error", "asul na screen",
+        ],
+        "cause": {
+            "en": "Commonly a misbehaving program, pending updates, a bad driver, overheating, or failing RAM/disk if it happens repeatedly.",
+            "tl": "Karaniwang may sumpong na program, pending update, sirang driver, overheating, o bumibigay na RAM/disk kung paulit-ulit.",
+        },
+        "steps": [
+            ("Write down or photograph the exact error message or stop code (for example CRITICAL_PROCESS_DIED) and the app name.",
+             "Do you have the exact wording recorded?",
+             "Isulat o kunan ng litrato ang eksaktong error message o stop code (hal. CRITICAL_PROCESS_DIED) at pangalan ng app.",
+             "Naitala mo ba ang eksaktong teksto?"),
+            ("Wait 1 to 2 minutes. If one app is not responding, press Ctrl+Shift+Esc and 'End task' for that app only.",
+             "Does the PC recover once the app is closed?",
+             "Maghintay ng 1 hanggang 2 minuto. Kung isang app lang ang hindi tumutugon, pindutin ang Ctrl+Shift+Esc at 'End task' sa app na iyon lang.",
+             "Bumalik ba sa normal ang PC pagkatapos isara ang app?"),
+            ("Restart the PC and open the program again.",
+             "Does it happen again, and only in one program or in all of them?",
+             "I-restart ang PC at buksan ulit ang program.",
+             "Nangyari ba ulit, at sa isang program lang o sa lahat?"),
+            ("Check Windows Update. Repair or reinstall the problem program (Settings > Apps > Installed apps > Modify/Repair).",
+             "Does the program run after the update or repair?",
+             "Tingnan ang Windows Update. I-repair o i-reinstall ang problemang program (Settings > Apps > Installed apps > Modify/Repair).",
+             "Gumana ba ang program pagkatapos ng update o repair?"),
+            ("Disconnect newly attached USB devices and check for overheating: hot case, loud fans or blocked vents.",
+             "Does the problem stop without the device, and are the vents clear and the case not hot?",
+             "Tanggalin ang mga bagong ikinabit na USB device at tingnan kung overheating: mainit ang case, malakas ang fan o barado ang bentilasyon.",
+             "Tumigil ba ang problema nang wala ang device, at malinis ba ang bentilasyon at hindi mainit ang case?"),
+        ],
+        "solution": {
+            "en": "Update or repair the problem software, remove the faulty device or driver, and clear blocked vents.",
+            "tl": "I-update o i-repair ang problemang software, alisin ang sirang device o driver, at linisin ang barado na bentilasyon.",
+        },
+        "escalation": {
+            "en": "Escalate for repeated blue screens, random restarts, or if disk or RAM failure is suspected. Bring the recorded error text.",
+            "tl": "I-escalate kung paulit-ulit ang blue screen, random restart, o may hinala ng sirang disk o RAM. Dalhin ang naitalang error text.",
+        },
+    },
+    # ------------------------------------------------------------------ SOUND
+    {
+        "id": "no_sound",
+        "title": {"en": "No sound / audio problems", "tl": "Walang tunog / problema sa audio"},
+        "category": "Hardware",
+        "priority": "Low",
+        "keywords": [
+            "no sound", "audio", "speaker", "speakers", "volume", "headset", "headphones",
+            "microphone", "mic", "walang tunog", "walang sound", "di marinig",
+            "hindi marinig", "walang boses", "ayaw mag sound", "ayaw mag-sound",
+        ],
+        "cause": {
+            "en": "Usually muted volume, wrong output device, a loose audio jack, or an unpowered speaker. Occasionally a driver issue.",
+            "tl": "Kadalasan naka-mute, maling output device, maluwag na audio jack, o walang power ang speaker. Paminsan-minsan driver issue.",
+        },
+        "steps": [
+            ("Check the volume and mute in the taskbar, and the speaker's own power and volume knob.",
+             "Is the volume up, unmuted, and the speaker powered on?",
+             "Tingnan ang volume at mute sa taskbar, at ang power at volume knob ng speaker.",
+             "Malakas ba, hindi naka-mute, at naka-on ang speaker?"),
+            ("Check the plug is in the right jack (green is output, pink is microphone) or the USB port.",
+             "Is the plug seated firmly in the correct jack?",
+             "Tiyaking tama ang jack na pinagsasaksakan (green ay output, pink ay mic) o ang USB port.",
+             "Mahigpit ba ang saksak sa tamang jack?"),
+            ("Right-click the speaker icon > Sound settings and choose the correct output device.",
+             "Does the volume bar move when audio plays?",
+             "Right-click ang speaker icon > Sound settings at piliin ang tamang output device.",
+             "Gumagalaw ba ang volume bar kapag may tunog?"),
+            ("Play the Windows test sound, or try another app or website.",
+             "Is there sound in any app?",
+             "I-play ang Windows test sound, o subukan ang ibang app o website.",
+             "May tunog ba sa kahit anong app?"),
+            ("Restart the PC. If still silent, open Device Manager > Sound, video and game controllers and update or reinstall the audio driver.",
+             "Is the audio device listed with no yellow warning?",
+             "I-restart ang PC. Kung wala pa ring tunog, buksan ang Device Manager > Sound, video and game controllers at i-update o i-reinstall ang audio driver.",
+             "Nakalista ba ang audio device at walang yellow warning?"),
+        ],
+        "solution": {
+            "en": "Select the correct output device, fix the connection, or reinstall the audio driver.",
+            "tl": "Piliin ang tamang output device, ayusin ang koneksyon, o i-reinstall ang audio driver.",
+        },
+        "escalation": {
+            "en": "Escalate if no audio device appears in Device Manager or the speaker/headset fails on another PC.",
+            "tl": "I-escalate kung walang audio device sa Device Manager o pumapalya ang speaker/headset sa ibang PC.",
+        },
+    },
+    # -------------------------------------------------------------- PROJECTOR
     {
         "id": "projector",
+        "title": {"en": "Projector or second screen not showing", "tl": "Hindi lumalabas sa projector o second screen"},
         "category": "Hardware",
         "priority": "Medium",
         "keywords": [
-            "projector", "projecter", "=hdmi", "=vga", "screen mirroring", "mirror",
-            "duplicate screen", "extend screen", "second screen", "external display",
-            "smart tv", "=tv", "win+p", "presentation screen",
-            "walang lumalabas sa projector", "ayaw lumabas sa projector",
-            "hindi lumalabas sa projector", "ayaw ng projector", "sira ang projector",
-            "walay gawas sa projector",
+            "projector", "proyektor", "hdmi", "projector no signal",
+            "not showing on projector", "walang display sa projector",
+            "walang lumalabas sa projector", "di lumalabas sa projector",
+            "hindi lumalabas sa projector", "extend display", "duplicate screen",
+            "second screen", "screen mirroring", "presentation screen",
         ],
         "cause": {
-            "en": "Wrong input source on the projector, a loose HDMI/VGA cable, or the PC not set to show on a second screen.",
-            "tl": "Maling input source sa projector, maluwag ang HDMI/VGA cable, o hindi naka-set ang PC na mag-display sa pangalawang screen.",
+            "en": "Usually the display mode (Duplicate/Extend), the wrong projector input, or a loose or faulty HDMI/VGA cable or adapter.",
+            "tl": "Kadalasan ang display mode (Duplicate/Extend), maling input ng projector, o maluwag o sirang HDMI/VGA cable o adapter.",
         },
         "steps": [
-            ("Turn the projector on and wait about a minute for the lamp to warm up.",
-             "The projector shows its logo or a 'No signal' message.",
-             "I-on ang projector at maghintay ng mga isang minuto para uminit ang lamp.",
-             "Lumalabas ang logo o 'No signal' sa projector."),
-            ("Press Source/Input on the projector or remote and choose the port the cable uses (e.g. HDMI 1).",
-             "The computer screen appears.",
-             "Pindutin ang Source/Input sa projector o remote at piliin ang port na gamit ng cable (hal. HDMI 1).",
-             "Lumabas ang screen ng computer."),
-            ("Check the cable is firmly connected at both ends.",
-             "Both ends are tight.",
-             "Tingnan kung mahigpit ang cable sa dalawang dulo.",
-             "Mahigpit ang dalawang dulo."),
-            ("On the PC press Windows + P and choose Duplicate.",
-             "The same screen shows on the PC and projector.",
-             "Sa PC, pindutin ang Windows + P at piliin ang Duplicate.",
-             "Parehong screen ang nasa PC at projector."),
-            ("Unplug and re-plug the cable while the PC is on, or try another cable.",
-             "The picture appears.",
-             "Tanggalin at isaksak muli ang cable habang naka-on ang PC, o subukan ang ibang cable.",
-             "Lumabas ang larawan."),
+            ("Check that the projector is on, the lamp has warmed up, and the lens cap is off.",
+             "Does the projector show its own start screen or 'No Signal'?",
+             "Tiyaking naka-on ang projector, uminit na ang lamp, at tanggal ang lens cap.",
+             "Lumalabas ba ang sariling start screen ng projector o 'No Signal'?"),
+            ("Use the projector's Source/Input button (or remote) and select the matching input (HDMI or VGA).",
+             "Does the message change or a picture appear?",
+             "Gamitin ang Source/Input button (o remote) ng projector at piliin ang tamang input (HDMI o VGA).",
+             "Nagbago ba ang mensahe o lumabas ba ang larawan?"),
+            ("Reseat the video cable on both the PC and the projector. If you use an adapter, check it is firmly attached.",
+             "Is every plug firm and the adapter secure?",
+             "Tanggalin at isaksak ulit ang video cable sa PC at projector. Kung may adapter, tiyaking mahigpit ito.",
+             "Mahigpit ba ang bawat saksak at ligtas ang adapter?"),
+            ("On the PC press Win+P and choose 'Duplicate' (same picture) or 'Extend'.",
+             "Does the picture now appear on the projector?",
+             "Sa PC, pindutin ang Win+P at piliin ang 'Duplicate' (parehong larawan) o 'Extend'.",
+             "Lumabas na ba ang larawan sa projector?"),
+            ("Try another known-good cable or another PC port, then restart the PC with the projector already connected.",
+             "Does it work with the other cable, port or after the restart?",
+             "Subukan ang ibang gumaganang cable o ibang port ng PC, saka i-restart ang PC habang nakakabit na ang projector.",
+             "Gumana ba sa ibang cable, port, o pagkatapos ng restart?"),
         ],
         "solution": {
-            "en": "Select the right input and use Windows + P > Duplicate. If nothing works with a known-good cable, the projector or its port needs checking.",
-            "tl": "Piliin ang tamang input at gamitin ang Windows + P > Duplicate. Kung wala pa rin kahit maayos ang cable, kailangang tingnan ang projector o ang port nito.",
+            "en": "Select the correct input and display mode, or replace the faulty cable or adapter.",
+            "tl": "Piliin ang tamang input at display mode, o palitan ang sirang cable o adapter.",
         },
         "escalation": {
-            "en": "Contact the technician if the projector will not turn on, its lamp light blinks red, or no image appears after these steps.",
-            "tl": "Tawagan ang technician kung hindi nag-o-on ang projector, kumukurap na pula ang lamp light, o walang lumalabas pagkatapos ng mga hakbang.",
+            "en": "Escalate if the cable and PC are confirmed good but the projector shows nothing, or if the lamp warning light is on. Do not open the projector.",
+            "tl": "I-escalate kung tiyak na gumagana ang cable at PC pero wala pa ring lumalabas sa projector, o kung may warning light ang lamp. Huwag buksan ang projector.",
         },
     },
-    # --------------------------------------------------------------
+    # --------------------------------------------------------------- SOFTWARE
     {
-        "id": "camera",
-        "category": "Hardware",
-        "priority": "Low",
-        "keywords": [
-            "camera", "webcam", "=cam", "video call", "no video", "camera not detected",
-            "walang camera", "ayaw ng camera", "itim ang camera", "hindi makita sa camera",
-        ],
-        "cause": {
-            "en": "Camera access turned off in Windows, another app using the camera, a closed privacy shutter, or a loose USB camera.",
-            "tl": "Naka-off ang camera access sa Windows, may ibang app na gumagamit ng camera, nakasara ang takip, o maluwag ang USB camera.",
-        },
-        "steps": [
-            ("Check the camera's privacy cover or shutter is open.",
-             "The lens is uncovered.",
-             "Tingnan kung bukas ang takip o shutter ng camera.",
-             "Walang nakatakip sa lente."),
-            ("Close other apps that may be using the camera (Zoom, Meet, Teams, Camera app).",
-             "Only one app uses the camera.",
-             "Isara ang ibang app na maaaring gumagamit ng camera (Zoom, Meet, Teams, Camera app).",
-             "Isang app lang ang gumagamit ng camera."),
-            ("Open Settings > Privacy > Camera and allow camera access for apps and the browser.",
-             "Access is On.",
-             "Buksan ang Settings > Privacy > Camera at i-allow ang access para sa apps at browser.",
-             "Naka-On ang access."),
-            ("In the meeting app's settings, select the correct camera; re-plug a USB camera if needed.",
-             "Your video appears.",
-             "Sa settings ng meeting app, piliin ang tamang camera; isaksak muli ang USB camera kung kailangan.",
-             "Lumabas na ang video mo."),
-        ],
-        "solution": {
-            "en": "Allow camera access and select the right device. If no app can see the camera, it or its driver needs checking.",
-            "tl": "I-allow ang camera access at piliin ang tamang device. Kung walang app na nakakakita sa camera, kailangang tingnan ito o ang driver.",
-        },
-        "escalation": {
-            "en": "Report it to the technician if the camera is not detected in any app.",
-            "tl": "I-report sa technician kung hindi na-de-detect ang camera sa kahit anong app.",
-        },
-    },
-    # --------------------------------------------------------------
-    {
-        "id": "app_problem",
+        "id": "software_install",
+        "title": {"en": "Installing or activating software", "tl": "Pag-install o pag-activate ng software"},
         "category": "Software",
-        "priority": "Medium",
-        "keywords": [
-            "application", "=app", "=apps", "=program", "=programs", "software", "won't open",
-            "wont open", "doesn't open", "not opening", "can't open", "crash",
-            "crashes", "crashing", "closes by itself", "error message", "not installed",
-            "missing program", "ms word", "microsoft word", "excel", "powerpoint",
-            "ms office", "microsoft office", "activate", "activation", "unlicensed",
-            "product key", "visual studio", "vs code", "vscode", "netbeans", "python",
-            "=java", "eclipse", "android studio", "autocad", "photoshop", "packet tracer",
-            "xampp", "mysql", "=dll", "runtime error",
-            "ayaw bumukas ng app", "ayaw bumukas ang app", "ayaw bumukas ng program",
-            "hindi bumubukas ang app", "nagsasara mag-isa", "nag crash", "nagka-crash",
-            "walang naka-install", "hindi naka install", "wala ang app", "may error",
-            "nag error", "nag-eerror",
-        ],
-        "cause": {
-            "en": "The program crashed, is not installed or licensed on this PC, or has a corrupted setting or update.",
-            "tl": "Nag-crash ang program, hindi naka-install o walang lisensya sa PC na ito, o may sirang setting o update.",
-        },
-        "steps": [
-            ("Close the program completely (check Task Manager) and open it again.",
-             "It opens normally.",
-             "Isara nang buo ang program (tingnan sa Task Manager) at buksan muli.",
-             "Normal na bumukas."),
-            ("Write down or photograph the exact error message.",
-             "You have the exact text.",
-             "Isulat o kunan ng litrato ang eksaktong error message.",
-             "Nakuha ang eksaktong text."),
-            ("Restart the PC and try again.",
-             "The program works after restarting.",
-             "I-restart ang PC at subukan ulit.",
-             "Gumagana na pagka-restart."),
-            ("Check whether the same program opens on another lab PC.",
-             "You know if it is only this PC.",
-             "Tingnan kung bumubukas ang parehong program sa ibang PC sa lab.",
-             "Alam na kung itong PC lang."),
-        ],
-        "solution": {
-            "en": "Reopening or restarting fixes most crashes. Missing, unlicensed or broken programs must be installed or repaired by the technician; do not install software yourself.",
-            "tl": "Kadalasan naaayos sa pag-reopen o pag-restart. Ang wala, walang lisensya o sirang program ay dapat i-install o ayusin ng technician; huwag mag-install ng software mag-isa.",
-        },
-        "escalation": {
-            "en": "Request installation or repair from the technician, with the program name, PC number and error message.",
-            "tl": "Humiling ng installation o repair sa technician, kasama ang pangalan ng program, PC number at error message.",
-        },
-    },
-    # --------------------------------------------------------------
-    {
-        "id": "login",
-        "category": "System",
-        "priority": "Medium",
-        "keywords": [
-            "password", "pasword", "forgot password", "forgot my password", "login",
-            "log in", "sign in", "signin", "can't log in", "cannot log in",
-            "locked out", "account locked", "username", "wrong password",
-            "incorrect password", "temporary profile", "=pin", "user profile",
-            "nakalimutan ang password", "nakalimutan password", "nakalimutan ko",
-            "hindi maka login", "di maka login", "di makalogin", "hindi makalogin",
-            "ayaw mag login", "mali ang password", "na-lock", "nalock", "naka lock",
-            "nalimtan ang password", "dili maka login",
-        ],
-        "cause": {
-            "en": "A mistyped password (Caps Lock or wrong keyboard language), a locked account after too many tries, or a profile problem.",
-            "tl": "Mali ang pagkaka-type ng password (Caps Lock o maling keyboard language), na-lock ang account dahil sa daming subok, o problema sa profile.",
-        },
-        "steps": [
-            ("Check Caps Lock and Num Lock, and that the keyboard language shows ENG.",
-             "The keyboard lights and language are correct.",
-             "Tingnan ang Caps Lock at Num Lock, at na ENG ang keyboard language.",
-             "Tama ang ilaw ng keyboard at ang language."),
-            ("Click the eye icon to show the password while typing it.",
-             "The password shows exactly as intended.",
-             "I-click ang eye icon para makita ang password habang tina-type.",
-             "Tama ang lumalabas na password."),
-            ("Use the exact username format the lab gave you.",
-             "The username is accepted.",
-             "Gamitin ang eksaktong format ng username na ibinigay ng lab.",
-             "Tinanggap ang username."),
-            ("If the account is locked, wait 15-30 minutes before trying again; do not keep guessing.",
-             "Login works after waiting.",
-             "Kung naka-lock, maghintay ng 15-30 minuto bago sumubok ulit; huwag manghula nang paulit-ulit.",
-             "Naka-login na pagkatapos maghintay."),
-            ("If Windows says you're signed in with a temporary profile, sign out and restart.",
-             "Your normal desktop and files return.",
-             "Kung sinabi ng Windows na temporary profile ang gamit, mag-sign out at i-restart.",
-             "Bumalik ang normal na desktop at files."),
-        ],
-        "solution": {
-            "en": "Retype carefully with the right keyboard settings. Forgotten passwords can only be reset by the administrator. Never share your password.",
-            "tl": "I-type muli nang maingat gamit ang tamang keyboard settings. Ang administrator lang ang makakapag-reset ng nakalimutang password. Huwag ibigay ang password sa iba.",
-        },
-        "escalation": {
-            "en": "Ask the administrator for a password reset or unlock (bring your ID).",
-            "tl": "Humingi ng password reset o unlock sa administrator (dalhin ang ID).",
-        },
-    },
-    # --------------------------------------------------------------
-    {
-        "id": "usb_storage",
-        "category": "Hardware",
         "priority": "Low",
         "keywords": [
-            "usb", "flash drive", "flashdrive", "flash disk", "thumb drive",
-            "pendrive", "pen drive", "external drive", "external hard drive",
-            "=sd card", "memory card", "not detected", "not recognized",
-            "need to format", "format the disk",
-            "hindi ma-detect", "hindi ma detect", "di ma detect", "di madetect",
-            "hindi nababasa", "ayaw mabasa", "hindi lumalabas ang flash drive",
-            "dili ma detect",
+            "install", "installation", "installer", "uninstall", "setup",
+            "cannot install", "can't install", "cant install", "install software",
+            "license", "activation", "not activated", "product key",
+            "need admin", "administrator permission", "software request",
+            "paano mag install", "mag install", "hindi ma install", "di ma install",
+            "walang software", "kulang na software",
         ],
         "cause": {
-            "en": "A bad USB port, a damaged or unsafely removed drive, or USB storage restricted by lab policy.",
-            "tl": "Sirang USB port, sira o hindi maayos na natanggal na drive, o naka-restrict ang USB sa patakaran ng lab.",
+            "en": "Lab computers are usually locked so only the administrator can install software. Other causes: the program is already installed, the license or activation is missing, or the installer is damaged.",
+            "tl": "Kadalasan naka-lock ang mga computer ng lab kaya ang administrator lang ang puwedeng mag-install. Iba pang sanhi: naka-install na ang program, kulang ang license o activation, o sira ang installer.",
         },
         "steps": [
-            ("Plug the drive into a different USB port, preferably at the back of the PC.",
-             "Windows makes a connect sound.",
-             "Isaksak ang drive sa ibang USB port, mas maganda sa likod ng PC.",
-             "May tunog ng pagkakonekta."),
-            ("Open File Explorer > This PC.",
-             "The drive appears with a letter (e.g. E:).",
-             "Buksan ang File Explorer > This PC.",
-             "Lumabas ang drive na may letter (hal. E:)."),
-            ("If Windows asks to format the drive, click Cancel. Formatting erases everything.",
-             "Your files are untouched.",
-             "Kung pinapa-format ng Windows ang drive, i-click ang Cancel. Mabubura lahat kapag na-format.",
-             "Buo pa ang files mo."),
-            ("Try the drive on another PC.",
-             "You know if the drive or this PC is the problem.",
-             "Subukan ang drive sa ibang PC.",
-             "Alam na kung ang drive o ang PC ang may problema."),
+            ("Check whether the program is already installed: open the Start menu and search for its name.",
+             "Does it appear in the search results?",
+             "Tingnan kung naka-install na ang program: buksan ang Start menu at hanapin ang pangalan nito.",
+             "Lumabas ba ito sa resulta ng paghahanap?"),
+            ("Write down the exact program name, version, why it is needed, and any error message shown.",
+             "Do you have all four details?",
+             "Isulat ang eksaktong pangalan ng program, version, dahilan kung bakit kailangan, at anumang error message.",
+             "Kumpleto ba ang apat na detalye?"),
+            ("If a prompt asks for an administrator password, stop. Do not try to guess it or bypass the lock.",
+             "Is it an admin permission prompt?",
+             "Kung humihingi ng password ng administrator, huminto. Huwag manghula o lampasan ang lock.",
+             "Admin permission prompt ba ito?"),
+            ("Only use installers from the official website or the school's approved source. Never use cracked or unknown installers.",
+             "Does the installer come from an approved source?",
+             "Gumamit lang ng installer mula sa opisyal na website o aprubadong source ng paaralan. Huwag gumamit ng crack o hindi kilalang installer.",
+             "Galing ba sa aprubadong source ang installer?"),
+            ("Send the details from step 2 to the laboratory technician or administrator as a software request.",
+             "Was the request sent with the program name, version and reason?",
+             "Ipadala ang mga detalye sa hakbang 2 sa laboratory technician o administrator bilang software request.",
+             "Naipadala ba ang request kasama ang pangalan, version at dahilan?"),
         ],
         "solution": {
-            "en": "Use a working port and always use 'Safely remove' before unplugging. A drive that asks to be formatted everywhere is damaged; get help before formatting if the files matter.",
-            "tl": "Gumamit ng gumaganang port at laging i-'Safely remove' bago tanggalin. Kung pinapa-format kahit saan, sira ang drive; magpatulong muna bago i-format kung mahalaga ang files.",
+            "en": "Have the technician or administrator install or activate the program on the lab computers.",
+            "tl": "Ipa-install o ipa-activate sa technician o administrator ang program sa mga computer ng lab.",
         },
         "escalation": {
-            "en": "Contact the technician if no USB drive works on this PC (ports may be disabled by policy) or to try recovering important files.",
-            "tl": "Tawagan ang technician kung walang USB na gumagana sa PC (maaaring naka-disable ang ports) o para subukang i-recover ang mahahalagang files.",
-        },
-    },
-    # --------------------------------------------------------------
-    {
-        "id": "virus_malware",
-        "category": "Software",
-        "priority": "High",
-        "keywords": [
-            "virus", "malware", "popup", "pop-up", "pop up", "pop ups", "=ads",
-            "adware", "ransomware", "hacked", "suspicious", "files encrypted",
-            "shortcut virus", "files became shortcuts", "antivirus",
-            "windows defender", "defender", "trojan", "spyware", "scam",
-            "may virus", "na-virus", "navirus", "nagka virus", "naging shortcut",
-            "naging shortcut ang files", "kakaibang ads", "na hack", "nahack",
-            "naay virus",
-        ],
-        "cause": {
-            "en": "Malicious software, often from an infected flash drive, a fake download, or a harmful website.",
-            "tl": "Malisyosong software, kadalasan galing sa may virus na flash drive, pekeng download, o masamang website.",
-        },
-        "steps": [
-            ("Do not click pop-ups or enter any password or personal information.",
-             "Nothing is clicked or typed.",
-             "Huwag i-click ang pop-up at huwag maglagay ng password o personal na impormasyon.",
-             "Walang na-click o na-type."),
-            ("If a message says your files are encrypted or demands payment, unplug the LAN cable (or turn off Wi-Fi) immediately.",
-             "The PC is disconnected from the network.",
-             "Kung may mensaheng naka-encrypt ang files o humihingi ng bayad, tanggalin agad ang LAN cable (o i-off ang Wi-Fi).",
-             "Naka-disconnect na sa network ang PC."),
-            ("Remove your flash drive and do not use it on other PCs until it is scanned.",
-             "The drive is set aside.",
-             "Tanggalin ang flash drive at huwag gamitin sa ibang PC hanggang ma-scan.",
-             "Naitabi ang drive."),
-            ("If allowed, open Windows Security > Virus & threat protection > Quick scan.",
-             "The scan finishes and lists any threats.",
-             "Kung pinapayagan, buksan ang Windows Security > Virus & threat protection > Quick scan.",
-             "Natapos ang scan at nakalista ang threats."),
-        ],
-        "solution": {
-            "en": "Stop using the PC and let the technician clean or restore it. Scan your flash drive before using it anywhere else.",
-            "tl": "Itigil ang paggamit ng PC at hayaang linisin o i-restore ng technician. I-scan muna ang flash drive bago gamitin sa iba.",
-        },
-        "escalation": {
-            "en": "Report it to the technician immediately with the PC number, especially for encrypted files or ransom messages.",
-            "tl": "I-report agad sa technician kasama ang PC number, lalo na kung naka-encrypt ang files o may ransom message.",
-        },
-    },
-    # --------------------------------------------------------------
-    {
-        "id": "storage_full",
-        "category": "System",
-        "priority": "Medium",
-        "keywords": [
-            "disk full", "storage full", "low disk space", "no space", "not enough space",
-            "out of space", "c drive full", "drive is full", "drive full", "disk space",
-            "puno na ang storage", "puno ang storage", "puno na ang disk",
-            "walang space", "kulang ang space", "kulang space", "wala nang space",
-            "puno na ang c",
-        ],
-        "cause": {
-            "en": "The drive is filled by downloads, saved files, temporary files or a pending update.",
-            "tl": "Napuno ang drive ng downloads, naka-save na files, temporary files o update.",
-        },
-        "steps": [
-            ("Move your own files from Desktop, Downloads and Documents to your flash drive or cloud storage.",
-             "Your files are safely copied elsewhere.",
-             "Ilipat ang sarili mong files mula Desktop, Downloads at Documents sa flash drive o cloud.",
-             "Ligtas nang nakopya ang files mo."),
-            ("Delete only your own files from this PC after copying them.",
-             "Free space increases (check This PC).",
-             "Burahin lang ang sarili mong files sa PC pagkatapos makopya.",
-             "Lumaki ang free space (tingnan sa This PC)."),
-            ("Search for Disk Cleanup, select drive C:, tick Temporary files, and run it.",
-             "More free space appears.",
-             "I-search ang Disk Cleanup, piliin ang drive C:, i-check ang Temporary files, at i-run.",
-             "Mas lumaki ang free space."),
-        ],
-        "solution": {
-            "en": "Keep personal files on a flash drive or cloud, not on lab PCs. Never delete system files or other users' files.",
-            "tl": "Itabi ang personal na files sa flash drive o cloud, hindi sa lab PC. Huwag burahin ang system files o files ng ibang user.",
-        },
-        "escalation": {
-            "en": "Report it to the technician if the drive is still almost full after cleanup.",
-            "tl": "I-report sa technician kung halos puno pa rin pagkatapos ng cleanup.",
-        },
-    },
-    # --------------------------------------------------------------
-    {
-        "id": "lost_file",
-        "category": "Software",
-        "priority": "Medium",
-        "keywords": [
-            "lost file", "lost my file", "deleted", "accidentally deleted",
-            "missing file", "file is gone", "file disappeared", "unsaved",
-            "not saved", "didn't save", "recover", "recycle bin", "corrupted",
-            "corrupt", "file won't open", "can't open file", "deep freeze",
-            "files gone after restart",
-            "nawala ang file", "nawala file", "nawala ang files", "na-delete",
-            "nadelete", "nabura", "burado", "hindi na-save", "di na save",
-            "hindi nasave", "nawala ang ginawa ko", "nawala ang project",
-            "nawala akong file",
-        ],
-        "cause": {
-            "en": "The file was deleted, saved somewhere else, never saved, or erased because lab PCs reset themselves on restart.",
-            "tl": "Nabura ang file, na-save sa ibang lugar, hindi na-save, o nabura dahil nagre-reset ang lab PC tuwing nire-restart.",
-        },
-        "steps": [
-            ("Do not restart the PC yet. Many lab PCs erase new files on restart.",
-             "The PC stays on.",
-             "Huwag munang i-restart ang PC. Maraming lab PC ang nagbubura ng bagong files kapag nire-restart.",
-             "Naka-on pa rin ang PC."),
-            ("Open the Recycle Bin, right-click the file and choose Restore.",
-             "The file is back in its folder.",
-             "Buksan ang Recycle Bin, i-right-click ang file at piliin ang Restore.",
-             "Bumalik na ang file sa folder."),
-            ("Search for the file name in File Explorer and check Quick access > Recent files.",
-             "You find where it was saved.",
-             "I-search ang pangalan ng file sa File Explorer at tingnan ang Quick access > Recent files.",
-             "Nakita kung saan ito na-save."),
-            ("For Word/Excel/PowerPoint: File > Info > Manage Document > Recover Unsaved Documents.",
-             "An autosaved copy appears.",
-             "Para sa Word/Excel/PowerPoint: File > Info > Manage Document > Recover Unsaved Documents.",
-             "May lumabas na autosaved na kopya."),
-            ("If you used OneDrive or Google Drive, check its Trash or Version history.",
-             "An earlier version is available.",
-             "Kung gumamit ng OneDrive o Google Drive, tingnan ang Trash o Version history.",
-             "May mas naunang bersyon."),
-        ],
-        "solution": {
-            "en": "Restore from the Recycle Bin, autosave or cloud history. Always save work to a flash drive or cloud, not only on the lab PC.",
-            "tl": "I-restore mula sa Recycle Bin, autosave o cloud history. Laging i-save ang gawa sa flash drive o cloud, hindi lang sa lab PC.",
-        },
-        "escalation": {
-            "en": "Ask the technician quickly, before the PC is restarted, if the file is important and not found.",
-            "tl": "Magtanong agad sa technician bago i-restart ang PC kung mahalaga ang file at hindi makita.",
-        },
-    },
-    # --------------------------------------------------------------
-    {
-        "id": "windows_update",
-        "category": "System",
-        "priority": "Low",
-        "keywords": [
-            "windows update", "working on updates", "configuring updates",
-            "installing updates", "don't turn off your computer",
-            "do not turn off your computer", "update stuck", "stuck on update",
-            "stuck updating", "restart to update", "updating windows",
-            "nag-a-update ang windows", "nag update ang windows", "stuck sa update",
-            "naka stuck sa update",
-        ],
-        "cause": {
-            "en": "Windows is installing updates, which can take a while and must not be interrupted.",
-            "tl": "Nag-i-install ng updates ang Windows; maaaring matagal at hindi dapat putulin.",
-        },
-        "steps": [
-            ("Do not turn off or unplug the PC.",
-             "The PC stays on.",
-             "Huwag i-off o tanggalin sa saksakan ang PC.",
-             "Naka-on pa rin ang PC."),
-            ("Wait 30-60 minutes; use another PC in the meantime.",
-             "The percentage keeps increasing.",
-             "Maghintay ng 30-60 minuto; gumamit muna ng ibang PC.",
-             "Tumataas ang porsyento."),
-            ("If the percentage has not changed for over 2 hours, note it and report it.",
-             "You have the stuck percentage and time.",
-             "Kung hindi gumagalaw ang porsyento nang higit 2 oras, tandaan at i-report.",
-             "Alam ang naka-stuck na porsyento at oras."),
-        ],
-        "solution": {
-            "en": "Let updates finish. Turning the PC off mid-update can damage Windows.",
-            "tl": "Hayaang matapos ang update. Maaaring masira ang Windows kapag in-off habang nag-a-update.",
-        },
-        "escalation": {
-            "en": "Report it to the technician if it is stuck for more than 2 hours or fails repeatedly.",
-            "tl": "I-report sa technician kung naka-stuck nang higit 2 oras o paulit-ulit na pumapalya.",
-        },
-    },
-    # --------------------------------------------------------------
-    {
-        "id": "clock_wrong",
-        "category": "System",
-        "priority": "Low",
-        "keywords": [
-            "wrong time", "wrong date", "time is wrong", "date is wrong",
-            "clock is wrong", "clock is ahead", "clock is behind",
-            "your clock is ahead", "your clock is behind", "err_cert_date_invalid",
-            "certificate error", "cmos", "time resets",
-            "mali ang oras", "mali oras", "mali ang date", "mali ang petsa",
-            "bumabalik ang oras", "sayop ang oras",
-        ],
-        "cause": {
-            "en": "Automatic time sync is off, or the motherboard's small CMOS battery is weak so the clock resets.",
-            "tl": "Naka-off ang automatic time sync, o mahina na ang maliit na CMOS battery ng motherboard kaya nagre-reset ang oras.",
-        },
-        "steps": [
-            ("Open Settings > Time & language > Date & time, turn on 'Set time automatically', and click Sync now.",
-             "The clock shows the correct time.",
-             "Buksan ang Settings > Time & language > Date & time, i-on ang 'Set time automatically', at i-click ang Sync now.",
-             "Tama na ang oras."),
-            ("Check the time zone is (UTC+08:00) Manila.",
-             "The time zone is correct.",
-             "Tingnan kung (UTC+08:00) Manila ang time zone.",
-             "Tama ang time zone."),
-            ("Reload the website that showed a certificate or clock error.",
-             "The site opens normally.",
-             "I-reload ang website na nagpakita ng certificate o clock error.",
-             "Normal nang bumukas ang site."),
-        ],
-        "solution": {
-            "en": "Turn on automatic time. If the time is wrong again after every shutdown, the CMOS battery must be replaced by the technician.",
-            "tl": "I-on ang automatic time. Kung mali ulit ang oras tuwing pinapatay, kailangang palitan ng technician ang CMOS battery.",
-        },
-        "escalation": {
-            "en": "Report it if the settings are locked (needs admin rights) or the time keeps resetting.",
-            "tl": "I-report kung naka-lock ang settings (kailangan ng admin) o paulit-ulit na nagre-reset ang oras.",
-        },
-    },
-    # --------------------------------------------------------------
-    {
-        "id": "overheating_noise",
-        "category": "Hardware",
-        "priority": "High",
-        "keywords": [
-            "overheat", "overheating", "=hot", "very hot", "too hot", "loud fan",
-            "fan noise", "noisy", "grinding noise", "clicking noise", "beep", "beeps",
-            "beeping", "weird noise", "strange noise",
-            "mainit", "sobrang init", "umiinit", "maingay", "ang ingay", "maingay ang fan",
-            "tumutunog", "nagbe-beep", "nagbibeep", "nag beep", "kakaibang tunog",
-            "init kaayo", "saba",
-        ],
-        "cause": {
-            "en": "Blocked air vents, dust build-up, a failing fan, or (for beeps at startup) a hardware fault the PC is signalling.",
-            "tl": "Natatakpang butas ng hangin, maalikabok, nasisirang fan, o (kung nagbe-beep sa pag-start) may hardware fault na sinasabi ang PC.",
-        },
-        "steps": [
-            ("Make sure nothing blocks the vents and there's space behind and beside the PC.",
-             "Air flows freely around the case.",
-             "Siguraduhing walang nakaharang sa butas ng hangin at may espasyo sa likod at gilid ng PC.",
-             "Malayang dumadaloy ang hangin."),
-            ("Close heavy programs and let the PC rest a few minutes.",
-             "The fan quiets down and the case cools.",
-             "Isara ang mabibigat na program at ipahinga ang PC ng ilang minuto.",
-             "Humina ang fan at lumamig ang case."),
-            ("If the PC beeps when starting, count the pattern (e.g. 1 long, 2 short).",
-             "You have the beep pattern.",
-             "Kung nagbe-beep pag-start, bilangin ang pattern (hal. 1 mahaba, 2 maikli).",
-             "Nakuha ang beep pattern."),
-            ("If it is very hot, makes grinding noises, or shuts down by itself, shut it down and stop using it. Do not open the case.",
-             "The PC is off.",
-             "Kung sobrang init, may gumagasgas na tunog, o kusang namamatay, i-shut down at huwag nang gamitin. Huwag buksan ang case.",
-             "Naka-off na ang PC."),
-        ],
-        "solution": {
-            "en": "Improve airflow. Persistent heat, loud or grinding fans, or startup beeps need cleaning or part replacement by the technician.",
-            "tl": "Ayusin ang daloy ng hangin. Kung tuloy ang init, maingay o gumagasgas na fan, o beep pag-start, kailangang linisin o palitan ng technician ang piyesa.",
-        },
-        "escalation": {
-            "en": "Report it with the beep pattern or noise description. Stop immediately and report if you smell burning.",
-            "tl": "I-report kasama ang beep pattern o paglalarawan ng tunog. Itigil agad at i-report kung may amoy sunog.",
+            "en": "Always escalate to the technician or administrator for installs, licenses and activation, since lab software is managed centrally.",
+            "tl": "Laging i-escalate sa technician o administrator ang install, license at activation dahil sentralisadong pinamamahalaan ang software ng lab.",
         },
     },
 ]
 
-
-GENERAL_ENTRY: dict = {
+# Used when nothing in the knowledge base matches (offline general triage).
+GENERAL_ENTRY = {
     "id": "general",
+    "title": {"en": "General checks", "tl": "Mga pangkalahatang check"},
     "category": "Other",
     "priority": "Medium",
     "keywords": [],
     "cause": {
-        "en": "Not enough details yet to identify the exact cause.",
-        "tl": "Kulang pa ang detalye para matukoy ang eksaktong sanhi.",
+        "en": "The description is not specific enough to pinpoint a cause. Start with the common basics: connections, restart, and what changed recently.",
+        "tl": "Hindi pa sapat ang detalye para matukoy ang sanhi. Magsimula sa mga karaniwang basic: koneksyon, restart, at kung ano ang nagbago kamakailan.",
     },
     "steps": [
-        ("Save your work, then close and reopen the program you were using.",
-         "The problem is gone.",
-         "I-save ang ginagawa, tapos isara at buksan muli ang program na gamit.",
-         "Nawala ang problema."),
-        ("Restart the PC.",
-         "It works normally after restarting.",
-         "I-restart ang PC.",
-         "Normal na pagka-restart."),
-        ("Check that all cables (power, monitor, keyboard, mouse, LAN) are firmly connected.",
-         "Nothing is loose.",
-         "Tingnan kung mahigpit ang lahat ng cable (power, monitor, keyboard, mouse, LAN).",
-         "Walang maluwag."),
-        ("Write down or photograph any error message, and check if other PCs have the same problem.",
-         "You know the exact message and whether it is one PC or many.",
-         "Isulat o kunan ng litrato ang error message, at tingnan kung may parehong problema ang ibang PC.",
-         "Alam ang eksaktong mensahe at kung isang PC o marami."),
+        ("Write down exactly what is wrong, when it started, and any error message.",
+         "Can you describe the symptom in one clear sentence?",
+         "Isulat kung ano mismo ang problema, kailan nagsimula, at anumang error message.",
+         "Kaya mo bang ilarawan ang sintomas sa isang malinaw na pangungusap?"),
+        ("Check that all cables (power, video, network, USB) are firmly connected.",
+         "Is every plug seated firmly with no damaged cable?",
+         "Tiyaking mahigpit ang lahat ng cable (power, video, network, USB).",
+         "Mahigpit ba ang bawat saksak at walang sirang cable?"),
+        ("Save work and restart the PC.",
+         "Is the problem still there after the restart?",
+         "I-save ang trabaho at i-restart ang PC.",
+         "Nandiyan pa rin ba ang problema pagkatapos mag-restart?"),
+        ("Ask what changed recently (new software, update, moved cables, new device) and undo it if safe.",
+         "Did the problem start right after a specific change?",
+         "Alamin kung ano ang nagbago kamakailan (bagong software, update, nilipat na cable, bagong device) at i-undo kung ligtas.",
+         "Nagsimula ba ang problema pagkatapos ng partikular na pagbabago?"),
+        ("Try the same task on another lab PC.",
+         "Same problem elsewhere = account/network/software issue. Only here = this PC.",
+         "Subukan ang parehong gawain sa ibang PC sa lab.",
+         "Pareho sa iba = account/network/software issue. Dito lang = problema ng PC na ito."),
     ],
     "solution": {
-        "en": "Restarting fixes many temporary problems. Describe the problem in more detail (what you see, the error text, which PC) for a more specific answer.",
-        "tl": "Maraming pansamantalang problema ang naaayos sa pag-restart. Ilarawan pa ang problema (ano ang nakikita, ang error, aling PC) para sa mas tiyak na sagot.",
+        "en": "Apply the fix for whichever cause the checks above point to. Record what worked.",
+        "tl": "Ilapat ang ayos para sa sanhi na itinuro ng mga check sa itaas. Itala kung ano ang gumana.",
     },
     "escalation": {
-        "en": "Submit a report with the PC number and error message if the problem continues.",
-        "tl": "Mag-submit ng report kasama ang PC number at error message kung tuloy pa rin ang problema.",
+        "en": "Escalate if the cause cannot be found after these steps, or if there is any smell of burning, smoke, or sparks (power off and unplug only if safe).",
+        "tl": "I-escalate kung hindi pa rin matukoy ang sanhi, o kung may amoy ng sunog, usok, o spark (patayin at i-unplug lamang kung ligtas).",
     },
 }
 
 
-# ============================================================
-# LOADING (built-in + kb_custom.json)
-# ============================================================
-
-_LEVELS = {"low": "Low", "medium": "Medium", "high": "High"}
+# =========================================================
+# LOADING + CHECKING
+# =========================================================
 
 
-def _text_field(value) -> dict | None:
-    """Accept "text" or {"en": ..., "tl": ...}; return {"en", "tl"} or None."""
-    if isinstance(value, str) and value.strip():
-        return {"en": value.strip(), "tl": value.strip()}
+def _text_ok(value) -> bool:
+    """A non-empty string, or a dict with a non-empty 'en' (or 'tl') text."""
     if isinstance(value, dict):
-        en = str(value.get("en") or "").strip()
-        tl = str(value.get("tl") or "").strip()
-        if en or tl:
-            return {"en": en or tl, "tl": tl or en}
-    return None
+        return any(str(v or "").strip() for v in value.values())
+    return bool(str(value or "").strip())
 
 
-def _step(value) -> tuple | None:
-    """Accept a list/tuple (en, check_en[, tl, check_tl]) or a dict."""
-    if isinstance(value, dict):
-        action = str(value.get("action") or value.get("en") or "").strip()
-        if not action:
-            return None
-        check = str(value.get("check") or "").strip()
-        action_tl = str(value.get("action_tl") or value.get("tl") or action).strip()
-        check_tl = str(value.get("check_tl") or check).strip()
-        return (action, check, action_tl, check_tl)
-    if isinstance(value, str) and value.strip():
-        return (value.strip(), "", value.strip(), "")
-    if isinstance(value, (list, tuple)) and value:
-        parts = [str(p).strip() for p in value]
-        if len(parts) == 1:
-            return (parts[0], "", parts[0], "")
-        if len(parts) < 4:
-            return (parts[0], parts[1], parts[0], parts[1])
-        return tuple(parts[:4])
-    return None
+def _normalize_entry(raw) -> tuple[dict | None, list[str]]:
+    """
+    Clean one entry. Returns (entry or None, problems).
+    An entry with a fatal problem (no id, keywords or steps) is dropped.
+    """
+    problems: list[str] = []
+
+    if not isinstance(raw, dict):
+        return None, ["entry is not an object"]
+
+    entry_id = str(raw.get("id") or "").strip()
+    label = entry_id or "(no id)"
+
+    if not entry_id:
+        return None, [f"{label}: missing 'id'"]
+
+    keywords: list[str] = []
+    for k in raw.get("keywords") or []:
+        k = str(k).strip()
+        if k and k.lower() not in (x.lower() for x in keywords):
+            keywords.append(k)
+
+    steps: list[tuple] = []
+    for step in raw.get("steps") or []:
+        parts = [str(x).strip() for x in step] if isinstance(step, (list, tuple)) else [str(step).strip()]
+        if parts and parts[0]:
+            steps.append(tuple(parts))
+
+    if not keywords:
+        problems.append(f"{label}: no keywords, so it can never be matched")
+    if not steps:
+        return None, problems + [f"{label}: no steps"]
+
+    entry = dict(raw)
+    entry["id"] = entry_id
+    entry["keywords"] = keywords
+    entry["steps"] = steps
+
+    priority = str(entry.get("priority") or "Medium").strip().capitalize()
+    if priority not in PRIORITIES:
+        problems.append(f"{label}: priority '{entry.get('priority')}' is not Low/Medium/High (using Medium)")
+        priority = "Medium"
+    entry["priority"] = priority
+
+    entry["category"] = str(entry.get("category") or "Other").strip() or "Other"
+
+    if not _text_ok(entry.get("title")):
+        problems.append(f"{label}: no 'title' (the menu will show the id instead)")
+    for field in ("cause", "solution", "escalation"):
+        if not _text_ok(entry.get(field)):
+            problems.append(f"{label}: missing '{field}'")
+
+    for i, step in enumerate(steps, 1):
+        if len(step) not in (1, 2, 4):
+            problems.append(f"{label}: step {i} has {len(step)} parts (use 2 or 4: en action, en check, tl action, tl check)")
+
+    return entry, problems
 
 
-def _validate(raw) -> dict | None:
-    if not isinstance(raw, dict) or not str(raw.get("id") or "").strip():
-        return None
+def load_kb(custom_path: str = "kb_custom.json", problems: list[str] | None = None) -> list:
+    """
+    Built-in entries plus any entries from kb_custom.json (if present).
 
-    keywords = [str(k).strip() for k in raw.get("keywords", []) if str(k).strip()]
-    steps = [s for s in (_step(v) for v in raw.get("steps", [])) if s]
-    cause = _text_field(raw.get("cause"))
-    if not keywords or not steps or not cause:
-        return None
+    * A custom entry with the same id as a built-in one REPLACES it (same
+      position in the menu); a new id is added at the end.
+    * A bad entry is skipped and logged; a bad file never breaks the bot.
+    * `problems`: optional list that receives every problem found.
+    """
+    found = problems if problems is not None else []
+    merged: dict[str, dict] = {}
 
-    blank = {"en": "", "tl": ""}
-    return {
-        "id": str(raw["id"]).strip(),
-        "category": str(raw.get("category") or "Other").strip().title(),
-        "priority": _LEVELS.get(str(raw.get("priority", "")).strip().lower(), "Medium"),
-        "keywords": keywords,
-        "cause": cause,
-        "steps": steps,
-        "solution": _text_field(raw.get("solution")) or blank,
-        "escalation": _text_field(raw.get("escalation")) or blank,
-    }
-
-
-def _load_custom() -> list:
-    if not CUSTOM_KB_PATH.exists():
-        return []
-    try:
-        data = json.loads(CUSTOM_KB_PATH.read_text(encoding="utf-8"))
-    except Exception as e:  # noqa: BLE001
-        log.warning("Could not read %s: %s", CUSTOM_KB_PATH.name, e)
-        return []
-    if isinstance(data, dict):
-        data = data.get("entries", [])
-    return data if isinstance(data, list) else []
-
-
-def load_kb() -> list[dict]:
-    """Built-in entries, with kb_custom.json entries added or replacing them."""
-    entries: dict[str, dict] = {}
     for raw in BUILTIN_KB:
-        entry = _validate(raw)
+        entry, issues = _normalize_entry(raw)
+        found.extend(issues)
         if entry:
-            entries[entry["id"]] = entry
+            merged[entry["id"]] = entry
 
-    added = 0
-    for raw in _load_custom():
-        if isinstance(raw, dict) and raw.get("disabled") and raw.get("id"):
-            entries.pop(str(raw["id"]).strip(), None)
-            continue
-        entry = _validate(raw)
-        if entry is None:
-            log.warning(
-                "Skipped an invalid entry in %s (needs id, keywords, cause and steps): %r",
-                CUSTOM_KB_PATH.name,
-                (raw or {}).get("id") if isinstance(raw, dict) else raw,
-            )
-            continue
-        entries[entry["id"]] = entry
-        added += 1
+    path = Path(__file__).with_name(custom_path)
+    if path.exists():
+        try:
+            extra = json.loads(path.read_text(encoding="utf-8"))
+            if not isinstance(extra, list):
+                raise ValueError("the file must contain a list of entries")
+        except Exception as exc:  # a bad custom file must never break the bot
+            found.append(f"{custom_path}: could not be read ({exc})")
+            extra = []
 
-    if added:
-        log.info("Loaded %d custom knowledge base entries", added)
-    return list(entries.values())
+        for raw in extra:
+            entry, issues = _normalize_entry(raw)
+            found.extend(issues)
+            if entry:
+                merged[entry["id"]] = entry  # same id: replaces in place
+
+    for issue in found:
+        log.warning("[KB] %s", issue)
+
+    return list(merged.values())
 
 
-KB: list[dict] = load_kb()
+def validate_kb() -> list[str]:
+    """Every problem found while loading (empty list = all good)."""
+    issues: list[str] = []
+    load_kb(problems=issues)
+
+    entry, general_issues = _normalize_entry(GENERAL_ENTRY)
+    issues.extend(general_issues)
+    return issues
+
+
+KB = load_kb()
+
+
+if __name__ == "__main__":
+    logging.basicConfig(level=logging.WARNING, format="%(message)s")
+    problems_found = validate_kb()
+    print(f"{len(KB)} entries loaded (menu shows the first 12).")
+    for number, item in enumerate(KB, 1):
+        title = item.get("title", {})
+        title = title.get("en") if isinstance(title, dict) else title
+        print(f"  {number:>2}. {item['id']:<18} {title or '(no title)'}")
+    if problems_found:
+        print("\nProblems:")
+        for line in problems_found:
+            print(f"  - {line}")
+    else:
+        print("\nNo problems found.")
